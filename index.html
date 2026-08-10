@@ -520,8 +520,12 @@ function addQuoteItem(){
         '<option value="door">วงกบประตู (หัววงกบ + ขา 2 ข้าง)</option>'+
         '<option value="window">วงกบหน้าต่าง (มีไม้บน-ล่าง)</option></select></div>'+
       '<div><label>แบบวงกบ</label><select class="q_pat">'+patOpts()+'</select></div>'+
-      '<div style="flex:0 1 120px"><label>จำนวนช่องเปิด</label><input class="q_ch" type="number" min="1" value="1"></div>'+
+      '<div style="flex:0 1 110px"><label>จำนวนบาน</label><input class="q_leaves" type="number" min="1" value="1"></div>'+
+      '<div class="midwrap hide" style="flex:1 1 220px"><label>เสากั้นกลางระหว่างบาน</label><select class="q_mid">'+
+        '<option value="1">มีเสากั้นกลาง</option>'+
+        '<option value="0">ไม่มีเสากั้นกลาง</option></select></div>'+
     '</div>'+
+    '<div class="footnote midnote"></div>'+
 
     /* 🚪 บาน = ตัวตั้งต้นของทุกอย่าง (ช่องเปิดริมใน = ขนาดบานเป๊ะ) */
     '<div class="leafbox">'+
@@ -536,7 +540,7 @@ function addQuoteItem(){
           '<option value="slide">บานเลื่อนสไลด์ (วงกบไม่บังใบ)</option></select></div>'+
       '</div>'+
       '<div class="footnote instnote"></div>'+
-      '<div class="footnote">ช่องเปิด (ริมใน) = ขนาดบานพอดี · <b>หลายบานให้รวมกัน</b> เช่น 2 บาน บานละ 80 → กรอก 160 (ระบบบวกเสากลางให้เอง)</div>'+
+      '<div class="footnote">ช่องเปิด (ริมใน) = ขนาดบานพอดี · <b>หลายบานให้รวมกัน</b> เช่น 2 บาน บานละ 80 → กรอก 160<br>(ถ้าเป็นหน้าต่างที่มีเสากั้นกลาง ระบบบวกความหนาเสาให้เอง)</div>'+
     '</div>'+
 
     /* ถามว่าลูกค้าฟิกซ์อะไร — เฉพาะแบบที่มีช่องแสง เพราะช่องแสงคือตัวเดียวที่ปรับได้ */
@@ -589,7 +593,7 @@ function addQuoteItem(){
     '</div>';
   $('q_items').insertAdjacentHTML('beforeend', html);
   const box = $('qi'+i);
-  box.querySelectorAll('.q_kind,.q_pat,.q_ch,.q_basis,.q_w,.q_h,'+
+  box.querySelectorAll('.q_kind,.q_pat,.q_leaves,.q_mid,.q_basis,.q_w,.q_h,'+
                        '.q_ltc,.q_ltcm,.q_lsc,.q_lscm,.q_lfix,.q_qty,.q_lfw,.q_lfh,.q_inst').forEach(el=>{
     el.addEventListener('change', ()=>syncCard(box));
     el.addEventListener('input',  ()=>syncCard(box));
@@ -619,6 +623,16 @@ function frRules(){
 /* 🔒 ลูกค้าฟิกซ์ได้ทีละอย่าง: ระบุช่องแสงเอง (ริมใน) หรือ ฟิกซ์ช่องปูน (ริมนอก)
    ไม่มีช่องแสง = ไม่มีตัวปรับ → ไม่ต้องถาม ใช้ขนาดบานตรง ๆ */
 function syncBasisScope(box){
+  /* 🪟 เสากั้นกลางมีเฉพาะวงกบหน้าต่าง — วงกบประตูไม่มีเสากั้นกลาง (บานคู่ก็ยังเป็นช่องเดียว) */
+  const isWin = box.querySelector('.q_kind').value === 'window';
+  const leaves = Math.max(1, Math.round(Number(box.querySelector('.q_leaves').value)||1));
+  box.querySelector('.midwrap').classList.toggle('hide', !isWin);
+  const hasMid = isWin && box.querySelector('.q_mid').value === '1' && leaves > 1;
+  box.querySelector('.midnote').innerHTML = leaves < 2
+    ? ''
+    : (hasMid ? 'มีเสากั้นกลาง '+(leaves-1)+' ต้น → นับเป็น '+leaves+' ช่องเปิด (ค่าแรงคิดตามจำนวนช่อง)'
+              : '<b>ไม่มีเสากั้นกลาง</b> → บานทั้ง '+leaves+' บานอยู่ในช่องเปิดเดียวกัน นับเป็น 1 ช่องเปิด'+
+                (isWin?'':' (วงกบประตูไม่มีเสากั้นกลาง)'));
   const lk = patLightKind(box.querySelector('.q_pat').value);
   const hasLight = (lk!=='none');
   const isOuter  = hasLight && box.querySelector('.q_basis').value === 'outer';
@@ -667,7 +681,7 @@ function readItem(box){
   const o = {
     pat: pat, lk: lk, patLabel: patLabel(pat),
     kind: g('.q_kind').value,
-    ch: Math.max(1, Math.min(8, Math.round(Number(g('.q_ch').value)||1))),
+    leaves: Math.max(1, Math.min(8, Math.round(Number(g('.q_leaves').value)||1))),
     qty: Number(g('.q_qty').value)||1,
     topN: Number(g('.q_ltc').value)||0,
     sideN: Number(g('.q_lsc').value)||0,
@@ -676,6 +690,10 @@ function readItem(box){
     leafH: Number(g('.q_lfh').value)||0,
     inst:  g('.q_inst').value
   };
+  /* 🔑 เสากั้นกลาง = ตัวตัดสินว่ากี่ "ช่องเปิด" · ประตูไม่มีเสากั้นกลาง → 1 ช่องเสมอ */
+  o.isWin  = (o.kind === 'window');
+  o.hasMid = o.isWin && g('.q_mid').value === '1' && o.leaves > 1;
+  o.ch     = o.hasMid ? o.leaves : 1;
   o.hasTop  = (lk==='top'||lk==='ring');
   o.hasSide = (lk==='side'||lk==='ring');
   o.hasLight = (lk!=='none');
@@ -787,6 +805,15 @@ function frameSvg(o){
   // ── ช่องเปิด ──
   for(let k=0;k<o.ch;k++) s += rect(mainX0+k*(cellW+t), bodyY0, cellW, bodyH, '#ffffff');
   for(let k=1;k<o.ch;k++) s += rect(mainX0+k*(cellW+t)-t, bodyY0, t, bodyH, WOOD2);
+  /* หลายบานในช่องเดียว (ไม่มีเสากั้นกลาง) → เส้นประบอกรอยต่อบาน ไม่ใช่ไม้ */
+  const lvs = Math.max(1, Math.round(o.leaves||o.ch||1));
+  if(o.ch===1 && lvs>1){
+    for(let k=1;k<lvs;k++){
+      const lx = mainX0 + mainW*k/lvs;
+      s += '<line x1="'+lx+'" y1="'+bodyY0+'" x2="'+lx+'" y2="'+iy1+
+           '" stroke="#b9c2cc" stroke-width="1.2" stroke-dasharray="5 4"/>';
+    }
+  }
 
   // ── โครงวงกบ ──
   s += rect(x0, y0, x1-x0, t, WOOD);
@@ -871,7 +898,7 @@ function lightSummary(o){
 function leafSummary(o){
   const inst = o.inst==='slide' ? 'บานเลื่อนสไลด์ — <b>วงกบไม่บังใบ</b>' : 'บังใบใส่บานพับ — วงกบบังใบ';
   const sz = (o.leafW>0 && o.leafH>0)
-    ? 'บาน/ช่องเปิด <b>'+nf(o.leafW)+'×'+nf(o.leafH)+' ซม.</b>'+(o.ch>1?' (รวม '+o.ch+' บาน)':'')
+    ? 'บาน/ช่องเปิด <b>'+nf(o.leafW)+'×'+nf(o.leafH)+' ซม.</b>'+(o.leaves>1?' (รวม '+o.leaves+' บาน)':'')
     : '<span style="color:#8a5b00">ยังไม่ได้ระบุขนาดบาน</span>';
   return '<div style="margin-top:3px">🚪 '+sz+' · '+inst+'</div>';
 }
@@ -902,7 +929,8 @@ function drawPic(box){
     ? 'วงกบทั้งวง: ริมใน <b>'+nf(o.innerW)+'×'+nf(o.innerH)+'</b> · ริมนอก (ช่องปูน) <b>'+nf(o.outerW)+'×'+nf(o.outerH)+'</b> ซม.'
     : '<span style="color:#8a5b00">ยังกรอกไม่ครบ — ยังคิดขนาดวงกบไม่ได้</span>';
   box.querySelector('.pic').innerHTML = frameSvg(o) + warn +
-    '<div class="cap">'+esc(kindTxt)+(o.patLabel?' · '+esc(o.patLabel):'')+' · '+o.ch+' ช่องเปิด'+
+    '<div class="cap">'+esc(kindTxt)+(o.patLabel?' · '+esc(o.patLabel):'')+' · '+o.leaves+' บาน'+
+    (o.leaves>1 ? (o.hasMid ? ' (มีเสากั้นกลาง → '+o.ch+' ช่องเปิด)' : ' (ไม่มีเสากั้นกลาง → 1 ช่องเปิด)') : '')+
     ' <span class="fixtag">'+fixTxt+'</span><br>'+
     leafSummary(o)+ sizeTxt+ lightSummary(o)+
     '<div style="margin-top:3px;font-size:12px">เลขบนรูป (ซม.): '+
@@ -915,7 +943,7 @@ function fillModel(sel){
   const o = sel.selectedOptions[0], box = sel.closest('.itemcard');
   if(!o || !o.value) return;
   box.querySelector('.q_pat').value = o.dataset.p||'';
-  box.querySelector('.q_ch').value  = o.dataset.c||1;
+  box.querySelector('.q_leaves').value = o.dataset.c||1;
   /* ไซส์มาตรฐานในทะเบียนสินค้าเป็น "ริมใน" = ขนาดบานพอดี → เติมลงช่องขนาดบาน */
   box.querySelector('.q_lfw').value = o.dataset.w||'';
   box.querySelector('.q_lfh').value = o.dataset.h||'';
@@ -929,6 +957,7 @@ function quoteLines(){
       model_id: (b.querySelector('.q_model')||{}).value || '',
       pattern_code: o.pat,
       channels: o.ch,
+      leaf_count: o.leaves,
       frame_kind: o.kind,
       size_basis: o.basis,          // inner = ยึดบาน+ช่องแสง · outer = ยึดช่องปูน
       size_scope: 'total',          // ขนาดบานกรอกรวมทุกบานเสมอ
@@ -968,7 +997,7 @@ function validateQuoteItems(){
     const pat=b.querySelector('.q_pat');
     if(!pat.value){ markBad(pat,1); errs.push('รายการที่ '+n+': ยังไม่ได้เลือกแบบวงกบ'); }
     else markBad(pat,0);
-    need('.q_ch','ยังไม่ได้กรอกจำนวนช่องเปิด',1);
+    need('.q_leaves','ยังไม่ได้กรอกจำนวนบาน',1);
     need('.q_lfw','ยังไม่ได้กรอกขนาดบาน กว้างรวมทุกบาน (ซม.)');
     need('.q_lfh','ยังไม่ได้กรอกขนาดบาน สูง (ซม.)');
     need('.q_qty','ยังไม่ได้กรอกจำนวนชุด',1);
@@ -1289,6 +1318,7 @@ function lineGeom(l){
            topUse:Number(l.light_top_cm)||0,  sideUse:Number(l.light_side_cm)||0,
            innerW:innerW, innerH:innerH, wOne:wOne, noLabels:true,
            hasLight:(lk!=='none'),
+           leaves: Math.max(1, Math.round(Number(l.leaf_count)||ch)),
            leafW:Number(l.leaf_w_cm)||0, leafH:Number(l.leaf_h_cm)||0,
            outerW: basis==='outer' ? w : (innerW>0 ? innerW + R.ow : 0),
            outerH: basis==='outer' ? h : (innerH>0 ? innerH + R.oh : 0) };
@@ -1325,11 +1355,12 @@ function itemDetailHtml(l){
   const inst = l.install_type||'';
   const instTxt = inst==='slide' ? 'บานเลื่อนสไลด์ (วงกบไม่บังใบ)'
                 : inst==='rebate' ? 'บังใบใส่บานพับ' : '';
-  let h = '<div class="t1">'+esc(kindTxt)+(g.ch>1?' '+g.ch+' ช่อง':'')+'</div>';
+  let h = '<div class="t1">'+esc(kindTxt)+(g.leaves>1?' '+g.leaves+' บาน':'')+
+          (g.leaves>1 && g.ch===1 ? ' <span class="dimb">(ไม่มีเสากั้นกลาง)</span>' : '')+'</div>';
   /* 🚪 บาน = ตัวตั้งต้น ลูกค้าสั่งมาแล้ว ยึดเสมอ */
   if(g.leafW>0 && g.leafH>0)
     h += '<div class="t2">– บาน / ช่องเปิด <b>'+nf(g.leafW)+'×'+nf(g.leafH)+' ซม.</b>'+
-         (g.ch>1?' (รวม '+g.ch+' บาน)':'')+' <span class="fix sm">FIX</span>'+
+         (g.leaves>1?' (รวม '+g.leaves+' บาน)':'')+' <span class="fix sm">FIX</span>'+
          (instTxt?'<br><span style="margin-left:10px">'+esc(instTxt)+'</span>':'')+'</div>';
   else if(instTxt) h += '<div class="t2">– '+esc(instTxt)+'</div>';
   if(g.hasTop || g.hasSide){
