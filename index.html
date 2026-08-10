@@ -519,7 +519,7 @@ function addQuoteItem(){
   const i = 'q'+(++UID);
   const mdl = (LK.models||[]).length
     ? '<div><label>แบบมาตรฐาน</label><select class="q_model" onchange="fillModel(this)"><option value="">— กรอกขนาดเอง —</option>'+
-      LK.models.map(m=>'<option value="'+m.id+'" data-p="'+esc(m.pattern_code||'')+'" data-c="'+(m.channels||1)+'" data-w="'+(m.width_cm||'')+'" data-h="'+(m.height_cm||'')+'" data-k="'+esc(m.frame_kind||'')+'" data-b="'+esc(m.size_basis||'')+'">'+esc(m.name)+'</option>').join('')+
+      LK.models.map(m=>'<option value="'+m.id+'" data-p="'+esc(m.pattern_code||'')+'" data-c="'+(m.channels||1)+'" data-w="'+(m.width_cm||'')+'" data-h="'+(m.height_cm||'')+'" data-k="'+esc(m.frame_kind||'')+'" data-b="'+esc(m.size_basis||'')+'" data-lt="'+(m.light_top_count||'')+'" data-ltcm="'+(m.light_top_cm||'')+'">'+esc(m.name)+'</option>').join('')+
       '</select></div>' : '';
   const html = '<div class="itemcard" id="qi'+i+'">'+
     '<div class="hd"><b>รายการ</b><button class="btn del" onclick="document.getElementById(\'qi'+i+'\').remove()">ลบ</button></div>'+
@@ -961,9 +961,14 @@ function fillModel(sel){
   if(ch > 1){ const mid = box.querySelector('.q_mid'); if(mid) mid.value = '1'; }
   /* 📏 ทะเบียนสินค้าเก็บ "ริมในรวมทั้งวง" → ช่องขนาดบานต้องหักเสากั้นกลางออกก่อน
      เช่น หน้าต่าง 2 ช่อง ช่องละ 60 → ริมในรวม 125 → ขนาดบานรวม 120 */
-  const totW = Number(o.dataset.w)||0;
+  const totW = Number(o.dataset.w)||0, totH = Number(o.dataset.h)||0;
+  const ltcm = Number(o.dataset.ltcm)||0;                 /* ความสูงช่องแสงบนของไซส์ป้าย */
   box.querySelector('.q_lfw').value = totW>0 ? Math.round((totW - (ch-1)*R.mu)*10)/10 : '';
-  box.querySelector('.q_lfh').value = o.dataset.h||'';
+  /* ไซส์ป้ายที่มีช่องแสงบน (เช่น บาน 60×100 +แสงบน 40) เก็บความสูง "รวมทั้งวง"
+     → ต้องหักช่องแสง + คานขวางออก ให้เหลือขนาดบานจริง */
+  box.querySelector('.q_lfh').value = totH>0 ? Math.round((totH - (ltcm>0 ? ltcm + R.mu : 0))*10)/10 : '';
+  if(o.dataset.lt)   box.querySelector('.q_ltc').value  = o.dataset.lt;
+  if(ltcm>0)         box.querySelector('.q_ltcm').value = ltcm;
   syncCard(box);
 }
 function quoteLines(){
