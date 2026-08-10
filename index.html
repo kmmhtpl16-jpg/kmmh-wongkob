@@ -554,12 +554,12 @@ function addQuoteItem(){
 
     /* ช่องปูน — โผล่เฉพาะตอนฟิกซ์ริมนอก */
     '<div class="outerbox hide">'+
-      '<div class="lb-hd">ช่องปูนที่ก่อไว้ (ริมนอก) — ขนาดทั้งวง</div>'+
+      '<div class="lb-hd">ช่องปูนที่ก่อไว้ (ริมนอก)</div>'+
       '<div class="row">'+
-        '<div><label>กว้างช่องปูน (ซม.) *</label><input class="q_w" type="number" step="0.5" inputmode="decimal"></div>'+
-        '<div><label>สูงช่องปูน (ซม.) *</label><input class="q_h" type="number" step="0.5" inputmode="decimal"></div>'+
+        '<div class="owwrap hide"><label>กว้างช่องปูน (ซม.) *</label><input class="q_w" type="number" step="0.5" inputmode="decimal"></div>'+
+        '<div class="ohwrap hide"><label>สูงช่องปูน (ซม.) *</label><input class="q_h" type="number" step="0.5" inputmode="decimal"></div>'+
       '</div>'+
-      '<div class="footnote">ระบบจะเอาช่องปูน − บาน = ระยะช่องแสงที่ทำได้ แล้วเติมให้ข้างล่างเอง</div>'+
+      '<div class="footnote outernote"></div>'+
     '</div>'+
 
     '<div class="lightbox hide">'+
@@ -623,6 +623,7 @@ function frRules(){
 /* 🔒 ลูกค้าฟิกซ์ได้ทีละอย่าง: ระบุช่องแสงเอง (ริมใน) หรือ ฟิกซ์ช่องปูน (ริมนอก)
    ไม่มีช่องแสง = ไม่มีตัวปรับ → ไม่ต้องถาม ใช้ขนาดบานตรง ๆ */
 function syncBasisScope(box){
+  const lk0 = patLightKind(box.querySelector('.q_pat').value);
   /* 🪟 เสากั้นกลางมีเฉพาะวงกบหน้าต่าง — วงกบประตูไม่มีเสากั้นกลาง (บานคู่ก็ยังเป็นช่องเดียว) */
   const isWin = box.querySelector('.q_kind').value === 'window';
   const leaves = Math.max(1, Math.round(Number(box.querySelector('.q_leaves').value)||1));
@@ -633,11 +634,22 @@ function syncBasisScope(box){
     : (hasMid ? 'มีเสากั้นกลาง '+(leaves-1)+' ต้น → นับเป็น '+leaves+' ช่องเปิด (ค่าแรงคิดตามจำนวนช่อง)'
               : '<b>ไม่มีเสากั้นกลาง</b> → บานทั้ง '+leaves+' บานอยู่ในช่องเปิดเดียวกัน นับเป็น 1 ช่องเปิด'+
                 (isWin?'':' (วงกบประตูไม่มีเสากั้นกลาง)'));
-  const lk = patLightKind(box.querySelector('.q_pat').value);
+  const lk = lk0;
   const hasLight = (lk!=='none');
   const isOuter  = hasLight && box.querySelector('.q_basis').value === 'outer';
   box.querySelector('.basisrow').classList.toggle('hide', !hasLight);
   box.querySelector('.outerbox').classList.toggle('hide', !isOuter);
+  /* 🔑 ถามช่องปูนเฉพาะด้านที่มีช่องแสงให้ปรับ — อีกด้านฟิกซ์จากขนาดบานอยู่แล้ว ถามไปก็ขัดกัน */
+  const hasT_ = (lk0==='top'||lk0==='ring'), hasS_ = (lk0==='side'||lk0==='ring');
+  box.querySelector('.owwrap').classList.toggle('hide', !(isOuter && hasS_));
+  box.querySelector('.ohwrap').classList.toggle('hide', !(isOuter && hasT_));
+  if(!(isOuter && hasS_)) box.querySelector('.q_w').value='';
+  if(!(isOuter && hasT_)) box.querySelector('.q_h').value='';
+  const onote = box.querySelector('.outernote');
+  if(onote) onote.innerHTML = !isOuter ? '' :
+    (hasS_ && hasT_ ? 'ระบบจะเอาช่องปูน − บาน = ระยะช่องแสงที่ทำได้ แล้วเติมให้ข้างล่างเอง'
+     : hasS_ ? 'ถามเฉพาะ<b>ด้านกว้าง</b> เพราะช่องแสงข้างคือตัวปรับ — <b>ด้านสูงฟิกซ์จากขนาดบานแล้ว</b>'
+             : 'ถามเฉพาะ<b>ด้านสูง</b> เพราะช่องแสงบนคือตัวปรับ — <b>ด้านกว้างฟิกซ์จากขนาดบานแล้ว</b>');
   box.querySelector('.lightbox .lfixrow').classList.toggle('hide', isOuter);
   if(!hasLight){ box.querySelector('.q_w').value=''; box.querySelector('.q_h').value=''; }
   if(isOuter) box.querySelector('.q_lfix').checked = false;
@@ -705,9 +717,14 @@ function readItem(box){
   const midPosts  = (o.ch-1)*R.mu;                   // เสากลางระหว่างช่องเปิด
 
   if(o.basis === 'outer'){
-    /* ลูกค้าฟิกซ์ช่องปูน + บาน → ช่องแสงคือส่วนที่เหลือ */
-    o.outerW = Number(g('.q_w').value)||0;
-    o.outerH = Number(g('.q_h').value)||0;
+    /* ลูกค้าฟิกซ์ช่องปูน + บาน → ช่องแสงคือส่วนที่เหลือ
+       🔑 ด้านที่ไม่มีช่องแสง ไม่มีอะไรให้ปรับ → ขนาดช่องปูนด้านนั้นมาจากบานตรง ๆ ไม่ต้องถาม */
+    o.fixOuterW = o.hasSide;   // มีช่องแสงข้าง → ลูกค้าฟิกซ์ความกว้างช่องปูนได้
+    o.fixOuterH = o.hasTop;    // มีช่องแสงบน  → ลูกค้าฟิกซ์ความสูงช่องปูนได้
+    o.outerW = o.fixOuterW ? (Number(g('.q_w').value)||0)
+                           : (o.leafW>0 ? o.leafW + midPosts + R.ow : 0);
+    o.outerH = o.fixOuterH ? (Number(g('.q_h').value)||0)
+                           : (o.leafH>0 ? o.leafH + R.oh : 0);
     o.innerW = o.outerW>0 ? o.outerW - R.ow : 0;
     o.innerH = o.outerH>0 ? o.outerH - R.oh : 0;
     o.topUse  = (o.hasTop  && o.innerH>0 && o.leafH>0) ? Math.round((o.innerH - o.leafH - R.mu)*10)/10 : 0;
@@ -723,6 +740,7 @@ function readItem(box){
     o.outerW = o.innerW>0 ? o.innerW + R.ow : 0;
     o.outerH = o.innerH>0 ? o.innerH + R.oh : 0;
     o.autoLight = false;
+    o.fixOuterW = false; o.fixOuterH = false;
   }
   o.w = o.basis==='outer' ? o.outerW : o.innerW;     // ตัวเลขที่ส่งเข้า RPC ตามฐานที่ยึด
   o.h = o.basis==='outer' ? o.outerH : o.innerH;
@@ -733,15 +751,6 @@ function readItem(box){
   /* ช่องแสงที่คำนวณได้ต้องเป็นบวกและใหญ่พอจะทำจริง */
   o.badTop  = o.hasTop  && o.basis==='outer' && o.leafH>0 && o.outerH>0 && o.topUse  < 5;
   o.badSide = o.hasSide && o.basis==='outer' && o.leafW>0 && o.outerW>0 && o.sideUse < 5;
-  /* 🔑 ด้านที่ไม่มีช่องแสง = ไม่มีตัวปรับ → ช่องปูนกับบานต้องลงตัวพอดี ไม่งั้นทำไม่ได้จริง */
-  o.needW = o.leafW>0 ? Math.round((o.leafW + midPosts + R.ow)*10)/10 : 0;   // ช่องปูนที่กว้างพอดี
-  o.needH = o.leafH>0 ? Math.round((o.leafH + R.oh)*10)/10 : 0;              // ช่องปูนที่สูงพอดี (ไม่มีช่องแสงบน)
-  o.diffW = (o.basis==='outer' && !o.hasSide && o.outerW>0 && o.needW>0)
-              ? Math.round((o.outerW - o.needW)*10)/10 : 0;
-  o.diffH = (o.basis==='outer' && !o.hasTop  && o.outerH>0 && o.needH>0)
-              ? Math.round((o.outerH - o.needH)*10)/10 : 0;
-  o.badW = Math.abs(o.diffW) > 0.5;
-  o.badH = Math.abs(o.diffH) > 0.5;
   return o;
 }
 
@@ -849,18 +858,18 @@ function frameSvg(o){
   if(lH>0) dimS += dimV(bodyY0, iy1, mainX0 + 12, nf(lH)+' FIX', C_FIX, 11);
   /* ช่องปูน (ริมนอก) — วาดเฉพาะตอนลูกค้าฟิกซ์มาเท่านั้น
      ถ้าเป็นขนาดที่ระบบคิดให้ ไม่ต้องขึ้นบนรูป (เลขนอกกรอบทำให้สับสนกับขนาดที่ต้องยึด) */
-  if(isOuterFix){
-    if(oW>0) dimS += dimH(x0, x1, y0-15, nf(oW)+' FIX', C_FIX, 10);
-    if(oH>0) dimS += dimV(y0, y1, x1+21, nf(oH)+' FIX', C_FIX, 10);
-  }
+  const showOW = isOuterFix && (o.fixOuterW !== false) && oW>0;
+  const showOH = isOuterFix && (o.fixOuterH !== false) && oH>0;
+  if(showOW) dimS += dimH(x0, x1, y0-15, nf(oW)+' FIX', C_FIX, 10);
+  if(showOH) dimS += dimV(y0, y1, x1+21, nf(oH)+' FIX', C_FIX, 10);
   // ช่องแสง — ตัวที่ปรับได้ (ถ้าฟิกซ์ริมนอก ตัวนี้คือผลลัพธ์ที่ระบบคิดให้)
   if(o.hasTop && o.topUse>0)   dimS += dimV(iy0, iy0+topH, x0-13, nf(o.topUse)+tagLt, C_LT, 10);
   if(o.hasSide && o.sideUse>0) dimS += dimH(ix0, ix0+sideW, bodyY0+16, nf(o.sideUse)+tagLt, C_LT, 10);
 
   // ── ป้ายกำกับ (ใบเสนอราคาที่พิมพ์ให้ลูกค้าไม่ต้องมีป้ายชิ้นส่วน) ──
   if(o.noLabels)
-    return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="'+(x0-30)+' '+(y0-(isOuterFix?24:8))+' '+
-           (x1-x0+(isOuterFix?70:44))+' '+(y1-y0+(isOuterFix?48:30))+'" '+
+    return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="'+(x0-30)+' '+(y0-(showOW?24:8))+' '+
+           (x1-x0+(showOH?70:44))+' '+(y1-y0+(showOW?48:30))+'" '+
            'width="'+W+'" font-family="Noto Sans Thai,Sarabun,sans-serif">'+s+dimS+'</svg>';
   s += txt((x0+x1)/2, y0+t-2, 'หัววงกบ', 10);
   s += '<text x="'+(x0-6)+'" y="'+((y0+y1)/2)+'" font-size="11" fill="#4a2f14" text-anchor="middle" transform="rotate(-90 '+(x0-6)+','+((y0+y1)/2)+')">ขา</text>';
@@ -877,8 +886,8 @@ function frameSvg(o){
   s += txt((mainX0+mainX1)/2, bodyY0+bodyH/2, 'ช่องเปิด '+o.ch+' ช่อง', 10, '#6b7785');
   if(o.ch>1) s += txt(mainX0+cellW+t/2, bodyY0+13, 'เสากลาง', 9, '#4a2f14');
 
-  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 '+(isOuterFix?-9:0)+' '+W+' '+
-         (y1+(isOuterFix?43:36))+'" width="'+W+'" '+
+  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 '+(showOW?-9:0)+' '+W+' '+
+         (y1+(showOW?43:36))+'" width="'+W+'" '+
          'font-family="Noto Sans Thai,Sarabun,sans-serif">'+s+dimS+'</svg>';
 }
 
@@ -917,14 +926,6 @@ function drawPic(box){
   if(o.badSide)
     warn += '<div class="msg err" style="margin:6px 0 0;text-align:left">ช่องปูนกว้าง '+nf(o.outerW)+' ซม. เหลือให้ช่องแสงข้างละแค่ <b>'+
             nf(o.sideUse)+' ซม.</b> — เล็กเกินไป/ติดลบ ให้เช็คขนาดบานหรือขนาดช่องปูนอีกที</div>';
-  if(o.badW)
-    warn += '<div class="msg err" style="margin:6px 0 0;text-align:left">แบบนี้<b>ไม่มีช่องแสงข้าง</b> จึงไม่มีตัวปรับด้านกว้าง — '+
-            'บาน '+nf(o.leafW)+' ซม. ต้องใช้ช่องปูนกว้าง <b>'+nf(o.needW)+' ซม.</b> แต่กรอกมา '+nf(o.outerW)+
-            ' ซม. (ต่าง '+(o.diffW>0?'+':'')+nf(o.diffW)+')</div>';
-  if(o.badH)
-    warn += '<div class="msg err" style="margin:6px 0 0;text-align:left">แบบนี้<b>ไม่มีช่องแสงบน</b> จึงไม่มีตัวปรับด้านสูง — '+
-            'บานสูง '+nf(o.leafH)+' ซม. ต้องใช้ช่องปูนสูง <b>'+nf(o.needH)+' ซม.</b> แต่กรอกมา '+nf(o.outerH)+
-            ' ซม. (ต่าง '+(o.diffH>0?'+':'')+nf(o.diffH)+')</div>';
 
   const fixTxt = !o.hasLight ? 'ยึดขนาดบาน'
                : (o.basis==='outer' ? 'ยึดบาน + ช่องปูน (ริมนอก)' : 'ยึดบาน + ระยะช่องแสง');
@@ -1014,16 +1015,12 @@ function validateQuoteItems(){
       }
     }
     if(o.basis==='outer'){
-      need('.q_w','ยังไม่ได้กรอกความกว้างช่องปูน (ริมนอก)');
-      need('.q_h','ยังไม่ได้กรอกความสูงช่องปูน (ริมนอก)');
+      if(o.hasSide) need('.q_w','ยังไม่ได้กรอกความกว้างช่องปูน (ริมนอก)');
+      if(o.hasTop)  need('.q_h','ยังไม่ได้กรอกความสูงช่องปูน (ริมนอก)');
       if(o.badTop){  markBad(b.querySelector('.q_h'),1);
         errs.push('รายการที่ '+n+': ช่องปูนสูงไม่พอ — เหลือให้ช่องแสงบนแค่ '+nf(o.topUse)+' ซม.'); }
       if(o.badSide){ markBad(b.querySelector('.q_w'),1);
         errs.push('รายการที่ '+n+': ช่องปูนกว้างไม่พอ — เหลือให้ช่องแสงข้างละแค่ '+nf(o.sideUse)+' ซม.'); }
-      if(o.badW){ markBad(b.querySelector('.q_w'),1);
-        errs.push('รายการที่ '+n+': ไม่มีช่องแสงข้างให้ปรับ — บาน '+nf(o.leafW)+' ต้องใช้ช่องปูนกว้าง '+nf(o.needW)+' ซม. (กรอกมา '+nf(o.outerW)+')'); }
-      if(o.badH){ markBad(b.querySelector('.q_h'),1);
-        errs.push('รายการที่ '+n+': ไม่มีช่องแสงบนให้ปรับ — บานสูง '+nf(o.leafH)+' ต้องใช้ช่องปูนสูง '+nf(o.needH)+' ซม. (กรอกมา '+nf(o.outerH)+')'); }
     } else {
       if(o.hasTop)  need('.q_ltcm','ยังไม่ได้กรอกความสูงช่องแสงบน (ซม.)');
       if(o.hasSide) need('.q_lscm','ยังไม่ได้กรอกความกว้างช่องแสงข้าง (ซม.)');
@@ -1320,6 +1317,8 @@ function lineGeom(l){
            topUse:Number(l.light_top_cm)||0,  sideUse:Number(l.light_side_cm)||0,
            innerW:innerW, innerH:innerH, wOne:wOne, noLabels:true,
            hasLight:(lk!=='none'),
+           fixOuterW: basis==='outer' && (lk==='side'||lk==='ring'),
+           fixOuterH: basis==='outer' && (lk==='top' ||lk==='ring'),
            leaves: Math.max(1, Math.round(Number(l.leaf_count)||ch)),
            leafW:Number(l.leaf_w_cm)||0, leafH:Number(l.leaf_h_cm)||0,
            outerW: basis==='outer' ? w : (innerW>0 ? innerW + R.ow : 0),
