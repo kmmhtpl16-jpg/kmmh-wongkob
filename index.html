@@ -954,12 +954,16 @@ function drawPic(box){
 function fillModel(sel){
   const o = sel.selectedOptions[0], box = sel.closest('.itemcard');
   if(!o || !o.value) return;
-  box.querySelector('.q_pat').value = o.dataset.p||'';
-  box.querySelector('.q_leaves').value = o.dataset.c||1;
-  /* ไซส์มาตรฐานในทะเบียนสินค้าเป็น "ริมใน" = ขนาดบานพอดี → เติมลงช่องขนาดบาน */
-  box.querySelector('.q_lfw').value = o.dataset.w||'';
-  box.querySelector('.q_lfh').value = o.dataset.h||'';
+  const R = frRules(), ch = Math.max(Number(o.dataset.c)||1, 1);
   if(o.dataset.k) box.querySelector('.q_kind').value = o.dataset.k;
+  box.querySelector('.q_pat').value = o.dataset.p||'';
+  box.querySelector('.q_leaves').value = ch;
+  if(ch > 1){ const mid = box.querySelector('.q_mid'); if(mid) mid.value = '1'; }
+  /* 📏 ทะเบียนสินค้าเก็บ "ริมในรวมทั้งวง" → ช่องขนาดบานต้องหักเสากั้นกลางออกก่อน
+     เช่น หน้าต่าง 2 ช่อง ช่องละ 60 → ริมในรวม 125 → ขนาดบานรวม 120 */
+  const totW = Number(o.dataset.w)||0;
+  box.querySelector('.q_lfw').value = totW>0 ? Math.round((totW - (ch-1)*R.mu)*10)/10 : '';
+  box.querySelector('.q_lfh').value = o.dataset.h||'';
   syncCard(box);
 }
 function quoteLines(){
