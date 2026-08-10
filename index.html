@@ -1,0 +1,1951 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>วงกบไม้ · กิจมั่งมีโฮม</title>
+<style>
+:root{
+  --bg:#f4f6f8; --card:#fff; --line:#dfe4ea; --ink:#1f2933; --dim:#6b7785;
+  --brand:#8a5a2b; --brand-d:#6d451f; --ok:#0f9d58; --warn:#e8a33d; --bad:#d64545;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:"Noto Sans Thai","Sarabun","Segoe UI",system-ui,sans-serif;font-size:16px;line-height:1.5}
+.wrap{max-width:900px;margin:0 auto;padding:12px 12px 60px}
+header{background:var(--brand);color:#fff;padding:12px 14px;position:sticky;top:0;z-index:20;
+  display:flex;align-items:center;gap:10px}
+header h1{font-size:17px;margin:0;flex:1;font-weight:600}
+header .who{font-size:12px;opacity:.85}
+nav{display:flex;gap:6px;overflow-x:auto;padding:10px 0 0}
+nav button{flex:0 0 auto;border:1px solid var(--line);background:#fff;color:var(--dim);
+  padding:8px 14px;border-radius:999px;font-size:14px;font-family:inherit;cursor:pointer}
+nav button.on{background:var(--brand);color:#fff;border-color:var(--brand)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;margin-top:12px}
+.card h2{font-size:15px;margin:0 0 10px;font-weight:600}
+label{display:block;font-size:13px;color:var(--dim);margin-bottom:3px}
+input,select,textarea{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:8px;
+  font-size:16px;font-family:inherit;background:#fff;color:var(--ink)}
+input:focus,select:focus{outline:2px solid #c9a882;border-color:#c9a882}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+.row>div{flex:1 1 120px;min-width:0}
+.btn{display:inline-block;border:0;background:var(--brand);color:#fff;padding:11px 18px;border-radius:9px;
+  font-size:15px;font-family:inherit;cursor:pointer;font-weight:600}
+.btn:active{background:var(--brand-d)}
+.btn.sec{background:#fff;color:var(--brand);border:1px solid var(--brand)}
+.btn.sm{padding:6px 11px;font-size:13px}
+.btn.del{background:#fff;color:var(--bad);border:1px solid #f0c7c7;padding:6px 10px;font-size:13px}
+.btn:disabled{opacity:.5}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{padding:7px 6px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}
+th{font-size:12px;color:var(--dim);font-weight:600}
+.num{text-align:right;font-variant-numeric:tabular-nums}
+.msg{padding:10px 12px;border-radius:9px;font-size:14px;margin-top:10px}
+.msg.err{background:#fdecec;color:#a32020;border:1px solid #f6c9c9}
+.msg.ok{background:#e8f6ee;color:#0b7a44;border:1px solid #bfe6cf}
+.msg.warn{background:#fff6e5;color:#8a5b00;border:1px solid #f3dcae}
+.big{font-size:30px;font-weight:700;color:var(--brand-d);font-variant-numeric:tabular-nums}
+.dim{color:var(--dim);font-size:13px}
+.pill{display:inline-block;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:600}
+.pill.ok{background:#e8f6ee;color:#0b7a44}
+.pill.bad{background:#fdecec;color:#a32020}
+.pill.warn{background:#fff6e5;color:#8a5b00}
+.pill.dim{background:#eef1f4;color:#6b7785}
+.hide{display:none!important}
+.itemcard{border:1px solid var(--line);border-radius:10px;padding:10px;margin-bottom:10px;background:#fbfcfd}
+.itemcard .hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.itemcard .hd b{font-size:13px;color:var(--dim)}
+#login{max-width:340px;margin:60px auto;text-align:center}
+#login .logo{font-size:44px}
+.pad{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px}
+.pad button{padding:16px 0;font-size:20px;border:1px solid var(--line);background:#fff;border-radius:10px;
+  font-family:inherit;cursor:pointer}
+.pin{letter-spacing:10px;font-size:26px;text-align:center}
+.footnote{font-size:12px;color:var(--dim);margin-top:6px}
+.pic{background:#fff;border:1px solid var(--line);border-radius:10px;padding:6px;margin-top:10px;text-align:center}
+.pic svg{max-width:100%;height:auto}
+.pic .cap{font-size:12px;color:var(--dim);margin-top:2px}
+.sizeline{font-size:13px;margin-top:2px}
+.sizeline b{color:var(--brand-d)}
+.badfield{border-color:var(--bad)!important;background:#fff3f3!important;outline:2px solid #f0b4b4!important}
+.fixtag{display:inline-block;border:1.5px solid var(--bad);color:#c02626;background:#fff2f2;
+  border-radius:5px;padding:0 7px;font-size:12px;font-weight:700;white-space:nowrap}
+.lightbox{border:1px dashed #9ec9d8;background:#f6fbfd;border-radius:10px;padding:9px;margin-top:8px}
+.lightbox .lb-hd{font-size:13px;font-weight:600;color:#2b6b85;margin-bottom:6px}
+#printhint{display:none}
+.card.out{border-left:6px solid var(--bad);background:#fffafa}
+.card.in {border-left:6px solid var(--ok); background:#f8fdfa}
+.card.out h2{color:#a32020}
+.card.in  h2{color:#0b7a44}
+.itemcard.out{border-color:#f3d2d2;background:#fffbfb}
+.itemcard.in {border-color:#c8e8d6;background:#fafffc}
+.sug{border:1px dashed #c9a882;border-radius:10px;padding:10px;margin-bottom:8px;background:#fffdf8}
+.sug .lab{font-size:14px;font-weight:600;color:var(--brand-d)}
+.sug .why{font-size:12px;color:var(--dim);margin:2px 0 8px}
+.sug .bt{display:flex;gap:6px;flex-wrap:wrap}
+@media print{header,nav,.noprint,.pg,#login{display:none!important}body{background:#fff}.card{border:0}
+  #printhint{display:block!important;padding:60px 20px;text-align:center;font-size:18px;line-height:2}}
+</style>
+</head>
+<body>
+
+<div id="login">
+  <div class="logo">🚪</div>
+  <h2 style="margin:6px 0 2px">วงกบไม้</h2>
+  <div class="dim">กิจมั่งมีโฮม</div>
+  <div class="card">
+    <input id="pin" class="pin" type="password" inputmode="numeric" autocomplete="off" placeholder="••••" autofocus>
+    <div class="pad">
+      <button onclick="pinKey('1')">1</button><button onclick="pinKey('2')">2</button><button onclick="pinKey('3')">3</button>
+      <button onclick="pinKey('4')">4</button><button onclick="pinKey('5')">5</button><button onclick="pinKey('6')">6</button>
+      <button onclick="pinKey('7')">7</button><button onclick="pinKey('8')">8</button><button onclick="pinKey('9')">9</button>
+      <button onclick="pinKey('c')">ล้าง</button><button onclick="pinKey('0')">0</button><button onclick="doLogin()">↵</button>
+    </div>
+    <button class="btn" style="width:100%;margin-top:12px" onclick="doLogin()">เข้าใช้งาน</button>
+    <div id="loginMsg"></div>
+  </div>
+</div>
+
+<div id="app" class="hide">
+  <header>
+    <h1>วงกบไม้ · กิจมั่งมีโฮม</h1>
+    <span class="who" id="whoami"></span>
+    <button class="btn sm sec" onclick="logout()">ออก</button>
+  </header>
+  <div id="printhint">🖨️ ใบเสนอราคาต้องสั่งพิมพ์จากปุ่ม<br><b>“พิมพ์ใบเสนอราคา ราคา 1”</b> หรือ <b>“ราคา 2”</b> ในหน้าเสนอราคา<br>
+<span style="font-size:15px;color:#6b7785">(กันพิมพ์ 2 ราคาออกไปให้ลูกค้าพร้อมกัน)</span></div>
+<div class="wrap">
+    <nav id="nav"></nav>
+    <div id="phWarn"></div>
+
+    <!-- ============ เสนอราคา ============ -->
+    <section id="pg-quote" class="pg hide">
+      <nav style="padding:0 0 4px">
+        <button id="qt_new"  class="on" onclick="quoteTab('new')">สร้างใบเสนอราคา</button>
+        <button id="qt_list" onclick="quoteTab('list')">📄 ใบที่บันทึกไว้</button>
+      </nav>
+
+      <div id="qsub-list" class="hide">
+        <div class="card">
+          <h2>ใบเสนอราคาที่บันทึกไว้</h2>
+          <div class="row">
+            <div><label>ตั้งแต่</label><input id="ql_from" type="date"></div>
+            <div><label>ถึง</label><input id="ql_to" type="date"></div>
+            <div><label>ค้นหา (เลขที่ / ชื่อลูกค้า)</label><input id="ql_q" placeholder="เช่น QF69- หรือ ชื่อร้าน"></div>
+            <div style="flex:0 0 auto;align-self:flex-end"><button class="btn" onclick="loadQuoteList()">ค้นหา</button></div>
+          </div>
+          <div id="ql_msg"></div>
+        </div>
+        <div id="ql_rows"></div>
+      </div>
+
+      <div id="qsub-new">
+      <div class="card">
+        <h2>ใบเสนอราคางานสั่ง</h2>
+        <div class="row">
+          <div style="flex:2 1 200px"><label>ชื่อลูกค้า / งาน</label><input id="q_cust"></div>
+        </div>
+        <div class="footnote">ระบบจะแสดงทั้ง <b>ราคา 1 (ลูกค้าทั่วไป)</b> และ <b>ราคา 2 (ราคาส่ง/UPK)</b> ให้เห็นพร้อมกัน</div>
+        <div style="margin-top:10px">
+          <label>รูปแบบงานที่ตกลงกับลูกค้า (ถ่ายรูปสเก็ตช์ / รูปจาก UPK)</label>
+          <input id="q_photo" type="file" accept="image/*" multiple onchange="uploadPhotos(this)">
+          <div id="q_photos" class="row" style="margin-top:8px"></div>
+          <div class="footnote">รูปนี้จะติดไปกับใบเสนอราคาและงานสั่งผลิตด้วย</div>
+        </div>
+      </div>
+
+      <div id="q_items"></div>
+      <button class="btn sec" style="width:100%;margin-top:10px" onclick="addQuoteItem()">+ เพิ่มรายการ</button>
+
+      <div class="card">
+        <button class="btn" style="width:100%" onclick="calcQuote()">คิดราคา</button>
+        <div id="q_msg"></div>
+      </div>
+
+      <div id="q_result" class="card hide">
+        <h2>ผลการคิดราคา</h2>
+        <table id="q_table"></table>
+        <div id="q_stock"></div>
+        <div id="q_back"></div>
+        <div class="row" style="margin-top:12px;text-align:right">
+          <div class="card" style="margin:0;flex:1 1 200px">
+            <div class="dim">ราคา 1 · ลูกค้าทั่วไป</div>
+            <div class="big" id="q_total1">0</div>
+          </div>
+          <div class="card" style="margin:0;flex:1 1 200px">
+            <div class="dim">ราคา 2 · ราคาส่ง / UPK</div>
+            <div class="big" id="q_total2" style="color:#0b7a44">0</div>
+            <div class="footnote">ราคา 2 = ราคาบนบิลตอนรับ-ส่งกับ UPK · ราคาจ่ายจริงของ UPK ยังไม่มีในระบบ</div>
+          </div>
+        </div>
+        <div class="msg warn" style="margin-top:12px">🖨️ <b>พิมพ์ได้ทีละราคาเดียว</b> — เลือกให้ตรงกับลูกค้ารายนี้ก่อนพิมพ์<br>
+          กดพิมพ์แล้วระบบ<b>บันทึกใบให้เองอัตโนมัติ</b> เพื่อให้มีเลขที่บนใบและบนชื่อไฟล์ PDF</div>
+        <div class="row noprint" style="margin-top:8px">
+          <button class="btn sec" onclick="this.disabled=true;printQuote(1).finally(()=>this.disabled=false)">🖨️ พิมพ์ใบเสนอราคา · ราคา 1 (ทั่วไป)</button>
+          <button class="btn sec" onclick="this.disabled=true;printQuote(2).finally(()=>this.disabled=false)">🖨️ พิมพ์ใบเสนอราคา · ราคา 2 (ส่ง/UPK)</button>
+        </div>
+        <div class="row noprint" style="margin-top:8px">
+          <button class="btn sec" onclick="saveQuote()">บันทึกใบเสนอราคา</button>
+          <button class="btn" onclick="sendToJobs()">📋 ส่งเข้ารายการผลิต</button>
+        </div>
+        <div id="q_saved"></div>
+      </div>
+      </div>
+    </section>
+
+    <!-- ============ งานสั่งผลิต ============ -->
+    <section id="pg-jobs" class="pg hide">
+      <div class="card">
+        <h2>คิวงานสั่งผลิต</h2>
+        <div class="row">
+          <div><label>ดูสถานะ</label><select id="j_filter" onchange="loadJobs()">
+            <option value="">ทั้งหมด</option>
+            <option value="waiting" selected>รอผลิต</option>
+            <option value="produced">ผลิตแล้ว</option>
+            <option value="delivered">ส่งมอบแล้ว</option>
+          </select></div>
+          <div style="flex:0 0 auto;align-self:flex-end"><button class="btn sec sm" onclick="loadJobs()">รีเฟรช</button></div>
+        </div>
+        <div class="footnote">ติ๊กเลือกได้หลายงาน แล้วส่งเข้าใบผลิตพร้อมกัน</div>
+        <div id="j_msg"></div>
+      </div>
+      <div id="j_list"></div>
+      <div class="card noprint">
+        <button class="btn" style="width:100%" onclick="pullJobs()">⬇️ ดึงงานที่เลือกเข้าใบสรุปรายการผลิตวงกบ</button>
+        <button class="btn sec" style="width:100%;margin-top:8px" onclick="markJobs('delivered')">✅ ทำเครื่องหมายว่าส่งมอบแล้ว</button>
+        <button class="btn sec" style="width:100%;margin-top:8px" onclick="markJobs('waiting')">↩︎ ย้อนกลับเป็นรอผลิต</button>
+      </div>
+    </section>
+
+    <!-- ============ ใบตัด/ผลิต ============ -->
+    <section id="pg-sheet" class="pg hide">
+      <div class="card">
+        <h2>ใบสรุปรายการผลิตวงกบ</h2>
+        <div class="row">
+          <div><label>วันที่ (1 ใบ = 1 วัน)</label><input id="s_date" type="date"></div>
+          <div><label>เลขใบเบิก GS</label><input id="s_gs" placeholder="GS69-"></div>
+          <div><label>เลขใบรับ GR</label><input id="s_gr" placeholder="GR69-"></div>
+        </div>
+        <div class="row" style="margin-top:8px">
+          <div><label>ผู้บันทึกรายการไม้</label><input id="s_rec"></div>
+          <div><label>ผู้ตัดสต๊อก</label><input id="s_cut"></div>
+        </div>
+        <button class="btn sec sm" style="margin-top:10px" onclick="loadSheet()">เปิดใบของวันนี้</button>
+      </div>
+
+      <div id="s_jobs"></div>
+
+      <div class="card out">
+        <h2>🔻 ไม้ที่เบิกออก (ตัดสต๊อก)</h2>
+        <div id="s_cuts"></div>
+        <button class="btn sec sm" onclick="addCut()">+ เพิ่มแถว</button>
+      </div>
+
+      <div class="card in">
+        <h2>🔺 งานที่ผลิตได้ (รับเข้าสต๊อก)</h2>
+        <div id="s_outs"></div>
+        <button class="btn sec sm" onclick="addOut()">+ เพิ่มแถว</button>
+      </div>
+
+      <div class="card">
+        <h2>ไม้เหลือจากงาน</h2>
+        <div class="dim" style="margin-bottom:8px">ระบุให้ครบว่าไม้เหลือแต่ละกองไปอยู่ที่ไหน — ที่กด “เก็บเข้าสต๊อก” จะถูกบวกเข้ากองไม้ แล้วตรวจได้ตอนนับจริง</div>
+        <div id="s_sug"></div>
+        <div id="s_lefts"></div>
+        <button class="btn sec sm" onclick="addLeft()">+ เพิ่มรายการเอง</button>
+      </div>
+
+      <div class="card">
+        <label>หมายเหตุ</label><textarea id="s_note" rows="2"></textarea>
+        <button class="btn" style="width:100%;margin-top:10px" onclick="saveSheet()">บันทึกใบนี้</button>
+        <button class="btn sec" id="btnCost" style="width:100%;margin-top:8px" onclick="showCosting()">ดูต้นทุนของใบนี้</button>
+        <div id="s_msg"></div>
+      </div>
+      <div id="s_cost"></div>
+    </section>
+
+    <!-- ============ สต๊อกไม้โรงช่าง ============ -->
+    <section id="pg-stock" class="pg hide">
+      <div class="card">
+        <h2>ไม้ที่มีอยู่ในโรงช่างตอนนี้</h2>
+        <div class="dim" style="margin-bottom:8px">นับเฉพาะไม้ที่เบิกเข้ามาทำวงกบแล้ว (คนละกองกับสต๊อกขายหน้าร้านใน ACC-BILLING)<br>
+          ช่อง <b>“ในนั้นเป็นไม้เหลือจากงาน”</b> คือท่อนที่ช่างแจ้งว่าเก็บกลับ — กด <b>นับจริง</b> เพื่อตรวจว่าเก็บจริงหรือไม่</div>
+        <div style="overflow-x:auto"><table id="k_rows"></table></div>
+        <div id="k_msg"></div>
+      </div>
+      <div id="k_open"></div>
+      <div class="card in stock-edit hide">
+        <h2>➕ เพิ่มสต๊อกไม้ (รับไม้เข้าโรงช่าง)</h2>
+        <div class="row">
+          <div><label>วันที่รับเข้า</label><input id="k_date" type="date"></div>
+          <div><label>เลขที่บิล / ใบเบิก</label><input id="k_gs" placeholder="เช่น GS69-00123 หรือ เลขบิลซื้อ"></div>
+        </div>
+        <div id="k_recv" style="margin-top:10px"></div>
+        <button class="btn sec sm" onclick="addRecv()">+ เพิ่มไม้อีกชนิด</button>
+        <button class="btn" style="width:100%;margin-top:10px" onclick="saveRecv()">บันทึกเพิ่มสต๊อกไม้</button>
+      </div>
+      <div class="card stock-edit hide">
+        <h2>ความเคลื่อนไหวล่าสุด</h2>
+        <div style="overflow-x:auto"><table id="k_moves"></table></div>
+      </div>
+    </section>
+
+    <!-- ============ หน้าเจ้าของ ============ -->
+    <section id="pg-admin" class="pg hide">
+      <div class="card">
+        <h2>เทียบค่าแรงที่คำนวณ กับเงินสดย่อย (5211-20)</h2>
+        <div class="row">
+          <div><label>ตั้งแต่</label><input id="r_from" type="date"></div>
+          <div><label>ถึง</label><input id="r_to" type="date"></div>
+          <div style="flex:0 0 auto;align-self:flex-end"><button class="btn" onclick="loadRecon()">ดู</button></div>
+        </div>
+        <div class="footnote">คนลงข้อมูลกับคนจ่ายทำงานแยกกัน ระบบเทียบทีหลัง — คนจ่ายไม่เห็นยอดที่ระบบคำนวณ</div>
+      </div>
+      <div id="r_out"></div>
+
+      <div class="card">
+        <h2>ราคาไม้ (ซื้อจากมาโฮมพิบูลกิจ)</h2>
+        <div class="dim" style="margin-bottom:8px">ใส่ราคาใหม่แล้วกดบันทึก ระบบเก็บประวัติไว้ · ใบเก่าไม่เปลี่ยนตามราคาใหม่</div>
+        <div style="overflow-x:auto"><table id="a_wood"></table></div>
+        <div class="row" style="margin-top:10px">
+          <div><label>วันที่เริ่มใช้ราคาใหม่</label><input id="a_wood_from" type="date"></div>
+          <div style="flex:0 0 auto;align-self:flex-end"><button class="btn sec sm" onclick="addWoodRow()">+ เพิ่มสเปกไม้</button></div>
+        </div>
+        <button class="btn" style="width:100%;margin-top:10px" onclick="saveWood()">บันทึกราคาไม้</button>
+      </div>
+
+      <div class="card">
+        <h2>ค่าแรงช่าง (ต่อ 1 ชุด)</h2>
+        <div class="dim" style="margin-bottom:8px">สูตร = ค่าคงที่ + ต่อช่อง × (จำนวนช่อง − หักช่อง)</div>
+        <div style="overflow-x:auto"><table id="a_lab"></table></div>
+        <div class="row" style="margin-top:10px">
+          <div><label>วันที่เริ่มใช้</label><input id="a_lab_from" type="date"></div>
+        </div>
+        <button class="btn" style="width:100%;margin-top:10px" onclick="saveLabour()">บันทึกค่าแรง</button>
+      </div>
+
+      <div class="card">
+        <h2>เรตราคาขาย (% กำไร)</h2>
+        <div class="dim" style="margin-bottom:8px">ราคา = (ค่าไม้ × (1 + เผื่อเศษ%) + ค่าแรง) × (1 + กำไร%)</div>
+        <div style="overflow-x:auto"><table id="a_mar"></table></div>
+        <div class="row" style="margin-top:10px">
+          <div><label>วันที่เริ่มใช้</label><input id="a_mar_from" type="date"></div>
+        </div>
+        <button class="btn" style="width:100%;margin-top:10px" onclick="saveMargin()">บันทึกเรต</button>
+      </div>
+
+      <div class="card">
+        <h2>กติกาคำนวณไม้จากขนาด</h2>
+        <div class="dim" style="margin-bottom:8px">ใช้ตอนเสนอราคาขนาดที่ไม่มีในแบบมาตรฐาน · ระบบเลือกความยาวไม้ที่คุ้มที่สุดให้เอง</div>
+        <div class="row">
+          <div><label>ชนิดไม้ตั้งต้น</label><input id="a_rule_sp"></div>
+          <div><label>หนา (นิ้ว)</label><input id="a_rule_th" type="number" step="0.25"></div>
+          <div><label>กว้าง (นิ้ว)</label><input id="a_rule_wd" type="number" step="0.25"></div>
+        </div>
+        <div class="row" style="margin-top:8px">
+          <div><label>เผื่อทำมุม 45° ต่อ 1 ปลาย (ซม.)</label><input id="a_rule_mt" type="number" step="0.5"></div>
+          <div><label>เสา = จำนวนช่อง + …</label><input id="a_rule_ve" type="number"></div>
+        </div>
+        <div class="footnote" id="a_rule_demo"></div>
+        <div class="row" style="margin-top:8px">
+          <div><label>วงกบประตู — ไม้แนวขวางกี่ท่อน</label><input id="a_rule_hd" type="number"></div>
+          <div><label>วงกบหน้าต่าง — ไม้แนวขวางกี่ท่อน</label><input id="a_rule_hw" type="number"></div>
+        </div>
+        <div class="row" style="margin-top:8px">
+          <div><label>ริมนอก − ริมใน ด้านกว้าง (ซม.)</label><input id="a_rule_ow" type="number" step="0.5"></div>
+          <div><label>ริมนอก − ริมใน ด้านสูง (ซม.)</label><input id="a_rule_oh" type="number" step="0.5"></div>
+        </div>
+        <div class="row" style="margin-top:8px">
+          <div><label>เศษยาวตั้งแต่กี่ ซม. ควรเก็บใช้ต่อ<br><span style="font-size:11px">(แค่ข้อความแนะนำ ไม่มีผลกับต้นทุน)</span></label><input id="a_rule_sc" type="number" step="1"></div>
+          <div><label>เบิก 1 ท่อนต่อ 1 ชิ้น</label>
+            <select id="a_rule_op">
+              <option value="1">ใช่ — เบิกท่อนสั้นสุดที่ตัดได้ (ตรงกับที่ช่างทำ)</option>
+              <option value="0">ไม่ — ยอมให้ตัดหลายชิ้นจากท่อนเดียวถ้าถูกกว่า</option>
+            </select></div>
+        </div>
+        <div class="row" style="margin-top:8px">
+          <div><label>เผื่อเสียเพิ่ม (%)</label><input id="a_rule_ew" type="number" step="0.5"></div>
+          <div><label>ปัดราคาขึ้นเป็นทวีคูณของ (บาท)</label><input id="a_rule_rt" type="number" step="1"></div>
+        </div>
+        <button class="btn" style="width:100%;margin-top:10px" onclick="saveRule()">บันทึกกติกา</button>
+      </div>
+
+      <div class="card">
+        <h2>รหัสเข้าใช้งาน</h2>
+        <div class="row">
+          <div><label>รหัสพนักงานขาย</label><input id="a_pin_sales" inputmode="numeric" placeholder="4-8 หลัก"></div>
+          <div style="flex:0 0 auto;align-self:flex-end"><button class="btn sec sm" onclick="setPin('pin_frame_sales','a_pin_sales')">เปลี่ยน</button></div>
+        </div>
+        <div class="row" style="margin-top:8px">
+          <div><label>รหัสคนลงข้อมูล</label><input id="a_pin_entry" inputmode="numeric" placeholder="4-8 หลัก"></div>
+          <div style="flex:0 0 auto;align-self:flex-end"><button class="btn sec sm" onclick="setPin('pin_frame_entry','a_pin_entry')">เปลี่ยน</button></div>
+        </div>
+        <div class="footnote">รหัสเจ้าของเปลี่ยนที่โปรแกรมเดิม (app_config: pin_owner)</div>
+        <div id="a_msg"></div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<script>
+const SB = 'https://hfystbdqjhftrlelmkjm.supabase.co';
+const URL_ = SB + '/rest/v1/rpc';
+const KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhmeXN0YmRxamhmdHJsZWxta2ptIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkxNTc3MDUsImV4cCI6MjA5NDczMzcwNX0.cyRCwh0G6ArSevhsKa6kmPnYhLRRJYrxhlH0ED_JJaE';
+let PIN='', ROLE='', LK={}, SH={}, AD={};
+
+async function rpc(fn, body){
+  let r, t;
+  try{
+    r = await fetch(URL_+'/'+fn, {method:'POST',
+      headers:{'apikey':KEY,'Authorization':'Bearer '+KEY,'Content-Type':'application/json'},
+      body:JSON.stringify(body||{})});
+    t = await r.text();
+  }catch(e){ return {ok:false, error:'ต่อระบบไม่ได้ — เช็คสัญญาณอินเทอร์เน็ตแล้วลองใหม่'}; }
+  let j; try{ j = JSON.parse(t); }catch(e){ return {ok:false,error:'ระบบตอบกลับผิดรูปแบบ'}; }
+  if(!r.ok) return {ok:false, error:(j && (j.message||j.hint)) || 'ผิดพลาด'};
+  return j;
+}
+const $ = id => document.getElementById(id);
+const esc = s => (s==null?'':String(s)).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const nf = n => (Number(n)||0).toLocaleString('th-TH',{minimumFractionDigits:0,maximumFractionDigits:2});
+const today = () => new Date(Date.now()+7*3600e3).toISOString().slice(0,10);
+function say(el,txt,cls,raw){ $(el).innerHTML = txt ? '<div class="msg '+(cls||'err')+'">'+(raw?txt:esc(txt))+'</div>' : ''; }
+
+/* ---------- login ---------- */
+function pinKey(k){ const p=$('pin'); if(k==='c') p.value=''; else p.value+=k; p.focus(); }
+$('pin').addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); doLogin(); } });
+/* พิมพ์รหัสจากแป้นพิมพ์ได้เลย ไม่ต้องคลิกช่องก่อน · Enter = เข้าใช้งาน */
+document.addEventListener('keydown', e=>{
+  if($('login').classList.contains('hide')) return;   // อยู่ในแอปแล้ว ไม่ต้องดัก
+  const p = $('pin');
+  if(e.key==='Enter'){ e.preventDefault(); doLogin(); return; }
+  if(document.activeElement === p) return;            // โฟกัสอยู่ในช่องแล้ว ปล่อยให้พิมพ์ปกติ
+  if(/^[0-9]$/.test(e.key)){ p.value += e.key; p.focus(); e.preventDefault(); }
+  else if(e.key==='Backspace'){ p.value = p.value.slice(0,-1); p.focus(); e.preventDefault(); }
+  else if(e.key==='Escape'){ p.value=''; p.focus(); }
+});
+async function doLogin(){
+  const p = $('pin').value.trim();
+  if(!p){ say('loginMsg','กรุณาใส่รหัส'); return; }
+  say('loginMsg','');
+  const r = await rpc('fr_verify_pin',{p_pin:p});
+  if(!r.ok){
+    say('loginMsg', r.error||'รหัสไม่ถูกต้อง');
+    $('pin').value=''; sessionStorage.removeItem('fr_pin'); return;
+  }
+  if(!['owner','entry','sales'].includes(r.role)){
+    say('loginMsg','รหัสนี้ยังไม่ได้กำหนดหน้าที่ใช้งาน'); $('pin').value=''; return;
+  }
+  PIN=p; ROLE=r.role;
+  sessionStorage.setItem('fr_pin',p);
+  $('login').classList.add('hide'); $('app').classList.remove('hide');
+  $('whoami').textContent = {owner:'เจ้าของ',entry:'คนลงข้อมูล',sales:'พนักงานขาย'}[ROLE]||'';
+  buildNav();
+}
+/* ล้างทุกอย่างที่ค้างบนจอ — กันคนถัดไปเห็นตัวเลขของคนก่อน (เช่น ต้นทุนของเจ้าของ) */
+function wipeScreen(){
+  PIN=''; ROLE=''; LK={}; SH={}; AD={}; KS={}; LAST_Q=null; qLoaded=false;
+  SUG=[]; PULLED=[]; JOBS=[]; QPHOTOS=[];
+  ['q_items','q_table','q_stock','q_msg','q_saved','s_cuts','s_outs','s_lefts','s_sug','s_cost','s_msg',
+   'k_rows','k_moves','k_recv','k_msg','k_open','j_list','j_msg','s_jobs','q_back','q_photos','ql_rows','ql_msg','r_out','a_wood','a_lab','a_mar','a_msg','phWarn','nav']
+   .forEach(id=>{ const e=$(id); if(e) e.innerHTML=''; });
+  $('q_result').classList.add('hide');
+  ['q_cust','s_gs','s_gr','s_rec','s_cut','s_note','a_pin_sales','a_pin_entry'].forEach(id=>{ const e=$(id); if(e) e.value=''; });
+  document.querySelectorAll('.pg').forEach(e=>e.classList.add('hide'));
+}
+function logout(){ wipeScreen(); sessionStorage.removeItem('fr_pin');
+  $('app').classList.add('hide'); $('login').classList.remove('hide');
+  $('pin').value=''; $('loginMsg').innerHTML=''; $('pin').focus(); }
+
+/* ---------- nav ---------- */
+const PAGES = {
+  quote:{label:'เสนอราคา',              roles:['sales','entry','owner'], init:initQuote},
+  jobs: {label:'งานสั่งผลิต',            roles:['sales','entry','owner'], init:initJobs},
+  sheet:{label:'ใบสรุปรายการผลิตวงกบ',  roles:['sales','entry','owner'], init:initSheet},
+  stock:{label:'สต๊อกไม้',               roles:['sales','entry','owner'], init:initStock},
+  admin:{label:'⚙️ หน้าเจ้าของ',          roles:['owner'],                  init:initAdmin}
+};
+function buildNav(){
+  const keys = Object.keys(PAGES).filter(k=>PAGES[k].roles.includes(ROLE));
+  $('nav').innerHTML = keys.map(k=>'<button data-p="'+k+'" onclick="go(\''+k+'\')">'+PAGES[k].label+'</button>').join('');
+  if(!keys.length){ $('phWarn').innerHTML='<div class="msg err">รหัสนี้ยังไม่มีหน้าที่ใช้งาน</div>'; return; }
+  go(keys[0]);
+}
+function go(k){
+  document.querySelectorAll('.pg').forEach(e=>e.classList.add('hide'));
+  document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('on', b.dataset.p===k));
+  $('pg-'+k).classList.remove('hide');
+  PAGES[k].init();
+}
+
+/* ================= เสนอราคา ================= */
+let qLoaded=false;
+async function initQuote(){
+  if(qLoaded) return;
+  const r = await rpc('fr_quote_lookup',{p_pin:PIN});
+  if(!r.ok){ say('q_msg', r.error+' — กด “คิดราคา” เพื่อลองใหม่'); return false; }
+  LK = r; qLoaded=true;
+  if(r.has_placeholder) $('phWarn').innerHTML =
+    '<div class="msg warn">⚠️ ราคาไม้ในระบบยังเป็น <b>ราคาสมมุติสำหรับทดสอบ</b> — ราคาที่ได้ยังใช้เสนอลูกค้าจริงไม่ได้ '+
+    'ให้คุณหลิงใส่ราคาไม้จริงในหน้า “ตั้งค่า” ก่อน</div>';
+  if($('q_items').children.length===0) addQuoteItem();
+  else refreshPatSelects();
+  return true;
+}
+/* เติมรายการ "แบบวงกบ" ให้การ์ดที่สร้างไว้ตอนโหลดข้อมูลยังไม่มา */
+function refreshPatSelects(){
+  document.querySelectorAll('#q_items .q_pat').forEach(s=>{
+    const keep = s.value;
+    s.innerHTML = patOpts(keep);
+    if(keep) s.value = keep;
+  });
+}
+function patOpts(sel){
+  return (LK.patterns||[]).map(p=>'<option value="'+p.code+'"'+(p.code===sel?' selected':'')+'>'+esc(p.label)+'</option>').join('');
+}
+let UID=0;
+function addQuoteItem(){
+  const i = 'q'+(++UID);
+  const mdl = (LK.models||[]).length
+    ? '<div><label>แบบมาตรฐาน</label><select class="q_model" onchange="fillModel(this)"><option value="">— กรอกขนาดเอง —</option>'+
+      LK.models.map(m=>'<option value="'+m.id+'" data-p="'+esc(m.pattern_code||'')+'" data-c="'+(m.channels||1)+'" data-w="'+(m.width_cm||'')+'" data-h="'+(m.height_cm||'')+'" data-k="'+esc(m.frame_kind||'')+'" data-b="'+esc(m.size_basis||'')+'">'+esc(m.name)+'</option>').join('')+
+      '</select></div>' : '';
+  const html = '<div class="itemcard" id="qi'+i+'">'+
+    '<div class="hd"><b>รายการ</b><button class="btn del" onclick="document.getElementById(\'qi'+i+'\').remove()">ลบ</button></div>'+
+    mdl+
+    '<div class="row" style="margin-top:8px">'+
+      '<div><label>ชนิดงาน</label><select class="q_kind">'+
+        '<option value="door">วงกบประตู (หัววงกบ + ขา 2 ข้าง)</option>'+
+        '<option value="window">วงกบหน้าต่าง (มีไม้บน-ล่าง)</option></select></div>'+
+      '<div><label>แบบวงกบ</label><select class="q_pat">'+patOpts()+'</select></div>'+
+      '<div style="flex:0 1 120px"><label>จำนวนช่องเปิด</label><input class="q_ch" type="number" min="1" value="1"></div>'+
+    '</div>'+
+    '<div class="row" style="margin-top:8px">'+
+      '<div><label>ลูกค้าฟิกซ์ขนาดที่ (ยึดตอนทำจริง)</label><select class="q_basis">'+
+        '<option value="outer">ริมนอก (ช่องปูน) — ช่องที่ก่อไว้ วางวงกบทั้งวง</option>'+
+        '<option value="inner" selected>ริมใน — ขนาดประตู/ช่องเปิด</option></select></div>'+
+      '<div><label>ขนาดที่กรอกเป็นของ</label><select class="q_scope">'+
+        '<option value="total">ทั้งวง (กว้างรวมทุกช่อง)</option>'+
+        '<option value="per_channel">ต่อ 1 ช่อง (เช่น 2 ช่อง บานละ 60×100)</option></select>'+
+        '<div class="footnote scopehint hide">ริมนอก (ช่องปูน) = ขนาดทั้งวงเสมอ กรอกต่อช่องไม่ได้</div></div>'+
+    '</div>'+
+    '<div class="lightbox hide">'+
+      '<div class="lb-hd">ช่องแสง — กรอกแยกจากช่องเปิด</div>'+
+      '<div class="row lt hide">'+
+        '<div style="flex:0 1 150px"><label>จำนวนช่องแสงบน *</label>'+
+          '<input class="q_ltc" type="number" min="1" step="1" placeholder="เช่น 3"></div>'+
+        '<div style="flex:1 1 180px"><label>ความสูงช่องแสงบน (ซม.)</label>'+
+          '<input class="q_ltcm" type="number" step="0.5" placeholder="เว้นว่าง = เฉลี่ย 3 ช่อง"></div>'+
+      '</div>'+
+      '<div class="row ls hide" style="margin-top:6px">'+
+        '<div style="flex:0 1 190px"><label>จำนวนช่องแสงข้าง รวม 2 ข้าง *</label>'+
+          '<input class="q_lsc" type="number" min="2" step="2" placeholder="เช่น 6 = ข้างละ 3"></div>'+
+        '<div style="flex:1 1 200px"><label>ความกว้างช่องแสงข้าง ต่อ 1 ข้าง (ซม.)</label>'+
+          '<input class="q_lscm" type="number" step="0.5" placeholder="เว้นว่าง = เฉลี่ย 3 ช่อง"></div>'+
+      '</div>'+
+      '<div class="row" style="margin-top:6px"><div style="flex:1 1 100%">'+
+        '<label style="display:flex;align-items:center;gap:8px;cursor:pointer;color:var(--ink);font-size:14px">'+
+        '<input type="checkbox" class="q_lfix" style="width:20px;height:20px;flex:0 0 auto">'+
+        '<span>🔴 <b>ระยะช่องแสง FIX</b> — ลูกค้าสั่งมาตายตัว ต้องทำให้ได้ตามนี้ '+
+        '<span class="dim">(ไม่ติ๊ก = ระยะที่ตั้งไว้ ช่างปรับได้ตามหน้างาน)</span></span></label>'+
+      '</div></div>'+
+      '<div class="footnote">* ต้องกรอก · ช่อง “ขนาด” เว้นว่างได้ ระบบจะเฉลี่ยเป็น 3 ช่องเท่ากันให้ แล้วบอกตัวเลขที่ใช้จริงใต้รูป<br>'+
+        '📏 <b>ขนาดช่องแสง = ระยะกระจกที่เห็น (ริมใน) เสมอ</b> ไม่ว่าตัววงกบจะฟิกซ์ริมในหรือริมนอก</div>'+
+    '</div>'+
+
+    '<div class="row" style="margin-top:8px">'+
+      '<div><label>กว้าง (ซม.)</label><input class="q_w" type="number" step="0.5" inputmode="decimal"></div>'+
+      '<div><label>สูง (ซม.)</label><input class="q_h" type="number" step="0.5" inputmode="decimal"></div>'+
+      '<div style="flex:0 1 90px"><label>จำนวนชุด</label><input class="q_qty" type="number" min="1" value="1"></div>'+
+    '</div>'+
+    '<div class="pic"></div>'+
+    '<div class="footnote">ดูรูปว่าตรงกับที่ลูกค้าต้องการไหม ถ้าไม่ตรงให้เปลี่ยนชนิดงาน/แบบ/จำนวนช่อง — ถามช่างถ้าไม่แน่ใจ อย่าเดา</div>'+
+    '</div>';
+  $('q_items').insertAdjacentHTML('beforeend', html);
+  const box = $('qi'+i);
+  box.querySelectorAll('.q_kind,.q_pat,.q_ch,.q_basis,.q_scope,.q_w,.q_h,'+
+                       '.q_ltc,.q_ltcm,.q_lsc,.q_lscm,.q_lfix,.q_qty').forEach(el=>{
+    el.addEventListener('change', ()=>{ syncBasisScope(box); syncLightBox(box); drawPic(box); });
+    el.addEventListener('input',  ()=>{ syncBasisScope(box); syncLightBox(box); drawPic(box); });
+  });
+  syncBasisScope(box); syncLightBox(box); drawPic(box);
+}
+
+/* ---------- รูปประกอบ: ให้พนักงานเห็นว่าเลือกถูกแบบไหม ---------- */
+const WOOD='#c9a882', WOOD2='#dcc3a5', LINE_='#6d451f', GLASS='#dff0f7', GLASS_L='#9ec9d8';
+
+/* แบบวงกบ → มีช่องแสงแบบไหน: none / top / side / ring */
+function patLightKind(code){
+  const p = (LK.patterns||[]).filter(x=>x.code===code)[0];
+  return (p && p.light_kind) || 'none';
+}
+function patLabel(code){
+  const p = (LK.patterns||[]).filter(x=>x.code===code)[0];
+  return p ? p.label : '';
+}
+function frRules(){
+  const r = LK.rules || {};
+  return { ow: Number(r.outer_extra_w_cm)||10, oh: Number(r.outer_extra_h_cm)||10,
+           mu: Number(r.mullion_cm)||5 };
+}
+/* 🔒 ริมนอก = ช่องปูน วางวงกบทั้งวง → ห้ามกรอกขนาดต่อ 1 ช่อง */
+function syncBasisScope(box){
+  const isOuter = box.querySelector('.q_basis').value === 'outer';
+  const sc = box.querySelector('.q_scope');
+  const perCh = sc.querySelector('option[value="per_channel"]');
+  perCh.disabled = isOuter;
+  if(isOuter && sc.value === 'per_channel') sc.value = 'total';
+  sc.title = isOuter ? 'ริมนอก (ช่องปูน) เป็นขนาดของทั้งวงเสมอ' : '';
+  const hint = box.querySelector('.scopehint');
+  if(hint) hint.classList.toggle('hide', !isOuter);
+}
+/* ซ่อน/โชว์ช่องกรอกช่องแสงตามแบบที่เลือก */
+function syncLightBox(box){
+  const lk = patLightKind(box.querySelector('.q_pat').value);
+  const hasT = (lk==='top'||lk==='ring'), hasS = (lk==='side'||lk==='ring');
+  box.querySelector('.lightbox').classList.toggle('hide', !(hasT||hasS));
+  box.querySelector('.lightbox .lt').classList.toggle('hide', !hasT);
+  box.querySelector('.lightbox .ls').classList.toggle('hide', !hasS);
+  if(!hasT){ box.querySelector('.q_ltc').value=''; box.querySelector('.q_ltcm').value=''; }
+  if(!hasS){ box.querySelector('.q_lsc').value=''; box.querySelector('.q_lscm').value=''; }
+  if(!(hasT||hasS)) box.querySelector('.q_lfix').checked = false;
+}
+/* อ่านค่าทั้งการ์ด + คำนวณขนาดริมในไว้ใช้ทั้งวาดรูปและข้อความสรุป */
+function readItem(box){
+  const g = c => box.querySelector(c);
+  const pat = g('.q_pat').value, lk = patLightKind(pat);
+  const R = frRules();
+  const o = {
+    pat: pat, lk: lk, patLabel: patLabel(pat),
+    kind: g('.q_kind').value,
+    basis: g('.q_basis').value, scope: g('.q_scope').value,
+    ch: Math.max(1, Math.min(8, Math.round(Number(g('.q_ch').value)||1))),
+    w: Number(g('.q_w').value)||0, h: Number(g('.q_h').value)||0,
+    qty: Number(g('.q_qty').value)||1,
+    topN: Number(g('.q_ltc').value)||0,
+    sideN: Number(g('.q_lsc').value)||0,
+    topCm: Number(g('.q_ltcm').value)||0,
+    sideCm: Number(g('.q_lscm').value)||0,
+    lfix: g('.q_lfix').checked
+  };
+  o.lbasis = 'inner';              // 📏 ขนาดช่องแสง = ระยะกระจกที่เห็น (ริมใน) เสมอ
+  o.hasTop  = (lk==='top'||lk==='ring');
+  o.hasSide = (lk==='side'||lk==='ring');
+  // แปลงเป็นริมในเพื่อคำนวณ/แสดงผล (ตัวเลขจริงที่ใช้คิดเงินมาจากฝั่งเซิร์ฟเวอร์)
+  let wOne = o.basis==='outer' ? o.w - R.ow : o.w;
+  o.innerH = o.basis==='outer' ? o.h - R.oh : o.h;
+  o.innerW = o.scope==='per_channel' ? (o.ch*wOne + (o.ch-1)*R.mu) : wOne;
+  o.topUse  = o.hasTop  ? (o.topCm  > 0 ? o.topCm  : Math.round(o.innerH/3*10)/10) : 0;
+  o.sideUse = o.hasSide ? (o.sideCm > 0 ? o.sideCm : Math.round(o.innerW/3*10)/10) : 0;
+  o.topAuto  = o.hasTop  && !(o.topCm  > 0);
+  o.sideAuto = o.hasSide && !(o.sideCm > 0);
+  o.topShow  = o.topUse;
+  o.sideShow = o.sideUse;
+  o.labourCh = o.ch + (o.hasTop?o.topN:0) + (o.hasSide?o.sideN:0);
+  return o;
+}
+
+/* วาดวงกบ 4 แบบ: ไม่มีช่องแสง / ช่องแสงบน / ช่องแสงข้าง / ช่องแสงรอบ */
+function frameSvg(o){
+  const W=360, t=11;
+  const rw = o.innerW>0 ? o.innerW : 100, rh = o.innerH>0 ? o.innerH : 100;
+  const maxW=250, maxH=190;
+  const sc = Math.min(maxW/rw, maxH/rh);
+  const dw = Math.max(rw*sc, 5*t+40), dh = Math.max(rh*sc, 5*t+40);
+  const x0 = Math.round((W-dw)/2), x1 = Math.round((W+dw)/2);
+  const y0 = 24, y1 = Math.round(24+dh);
+  const hasBottom = (o.kind==='window');
+  const ix0=x0+t, ix1=x1-t, iy0=y0+t, iy1 = hasBottom ? y1-t : y1;
+  const IW=ix1-ix0, IH=iy1-iy0;
+  const rect=(x,y,w,h,f)=>'<rect x="'+x+'" y="'+y+'" width="'+Math.max(w,0)+'" height="'+Math.max(h,0)+
+      '" fill="'+f+'" stroke="'+LINE_+'" stroke-width="1.4"/>';
+  const txt=(x,y,tx,sz,col,anch)=>'<text x="'+x+'" y="'+y+'" font-size="'+(sz||11)+'" fill="'+(col||'#4a2f14')+
+      '" text-anchor="'+(anch||'middle')+'" stroke="#ffffff" stroke-width="3.2" stroke-linejoin="round" paint-order="stroke">'+tx+'</text>';
+  let s='';
+
+  const topN  = o.hasTop  ? Math.max(1, Math.min(10, Math.round(o.topN||3))) : 0;
+  const sideP = o.hasSide ? Math.max(1, Math.min(10, Math.round((o.sideN||6)/2))) : 0;  // ต่อ 1 ข้าง
+
+  // ความสูงแถบช่องแสงบน / ความกว้างแถบช่องแสงข้าง (สัดส่วนบนรูป)
+  let topH = 0, sideW = 0;
+  if(o.hasTop){
+    let f = (o.topUse>0 && rh>0) ? o.topUse/rh : 1/3;
+    f = Math.max(0.12, Math.min(0.55, f));
+    topH = Math.max(16, IH*f);
+  }
+  if(o.hasSide){
+    let f = (o.sideUse>0 && rw>0) ? o.sideUse/rw : 1/3;
+    f = Math.max(0.10, Math.min(0.38, f));
+    sideW = Math.max(16, IW*f);
+  }
+  const bodyY0 = iy0 + (o.hasTop ? topH + t : 0);
+  const bodyH  = Math.max(iy1 - bodyY0, 24);
+  const mainX0 = ix0 + (o.hasSide ? sideW + t : 0);
+  const mainX1 = ix1 - (o.hasSide ? sideW + t : 0);
+  const mainW  = Math.max(mainX1 - mainX0, 24);
+  const cellW  = (mainW - (o.ch-1)*t)/o.ch;
+
+  // ── ช่องแสงบน (พาดเต็มความกว้าง) ──
+  if(o.hasTop){
+    const pw=(IW-(topN-1)*t)/topN;
+    for(let k=0;k<topN;k++) s += rect(ix0+k*(pw+t), iy0, pw, topH, GLASS);
+    for(let k=1;k<topN;k++) s += rect(ix0+k*(pw+t)-t, iy0, t, topH, WOOD2);
+    s += rect(ix0, iy0+topH, IW, t, WOOD);           // คานขวางใต้ช่องแสงบน
+  }
+  // ── ช่องแสงข้าง (บานเล็กเรียงลงมา ซ้าย-ขวา) ──
+  if(o.hasSide){
+    [ix0, mainX1+t].forEach(sx=>{
+      const ph=(bodyH-(sideP-1)*t)/sideP;
+      for(let k=0;k<sideP;k++) s += rect(sx, bodyY0+k*(ph+t), sideW, ph, GLASS);
+      for(let k=1;k<sideP;k++) s += rect(sx, bodyY0+k*(ph+t)-t, sideW, t, WOOD2);
+    });
+    s += rect(mainX0-t, bodyY0, t, bodyH, WOOD2);    // เสากั้นซ้าย
+    s += rect(mainX1,   bodyY0, t, bodyH, WOOD2);    // เสากั้นขวา
+  }
+  // ── ช่องเปิด ──
+  for(let k=0;k<o.ch;k++) s += rect(mainX0+k*(cellW+t), bodyY0, cellW, bodyH, '#ffffff');
+  for(let k=1;k<o.ch;k++) s += rect(mainX0+k*(cellW+t)-t, bodyY0, t, bodyH, WOOD2);
+
+  // ── โครงวงกบ ──
+  s += rect(x0, y0, x1-x0, t, WOOD);
+  s += rect(x0, y0, t, y1-y0, WOOD2);
+  s += rect(x1-t, y0, t, y1-y0, WOOD2);
+  if(hasBottom) s += rect(x0, y1-t, x1-x0, t, WOOD);
+  if(!hasBottom) s += '<line x1="'+(x0-26)+'" y1="'+y1+'" x2="'+(x1+26)+'" y2="'+y1+
+      '" stroke="#8b96a3" stroke-width="2.5" stroke-dasharray="7 4"/>';
+
+  // ── ป้ายกำกับ (ใบเสนอราคาที่พิมพ์ให้ลูกค้าไม่ต้องมีป้ายชิ้นส่วน) ──
+  if(o.noLabels)
+    return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="'+(x0-4)+' '+(y0-4)+' '+(x1-x0+8)+' '+(y1-y0+8)+'" '+
+           'width="'+W+'" font-family="Noto Sans Thai,Sarabun,sans-serif">'+s+'</svg>';
+  s += txt((x0+x1)/2, y0-6, 'หัววงกบ', 11);
+  s += '<text x="'+(x0-6)+'" y="'+((y0+y1)/2)+'" font-size="11" fill="#4a2f14" text-anchor="middle" transform="rotate(-90 '+(x0-6)+','+((y0+y1)/2)+')">ขา</text>';
+  s += '<text x="'+(x1+9)+'" y="'+((y0+y1)/2)+'" font-size="11" fill="#4a2f14" text-anchor="middle" transform="rotate(-90 '+(x1+9)+','+((y0+y1)/2)+')">ขา</text>';
+  if(hasBottom) s += txt((x0+x1)/2, y1-t-4, 'ไม้ล่าง', 11);
+  else          s += txt((x0+x1)/2, y1+14, 'ติดพื้น (ไม่มีไม้ล่าง)', 11, '#6b7785');
+  if(o.hasTop)  s += txt((ix0+ix1)/2, iy0+Math.min(topH-4, topH/2+4), 'ช่องแสงบน '+topN+' ช่อง', 10, '#2b6b85');
+  if(o.hasSide){
+    const sideLbl=(cx)=>'<text x="'+cx+'" y="'+(bodyY0+bodyH/2)+'" font-size="9" fill="#2b6b85" text-anchor="middle"'+
+      ' stroke="#ffffff" stroke-width="3" stroke-linejoin="round" paint-order="stroke"'+
+      ' transform="rotate(-90 '+cx+','+(bodyY0+bodyH/2)+')">ช่องแสงข้าง</text>';
+    s += sideLbl(ix0+sideW/2) + sideLbl(mainX1+t+sideW/2);
+  }
+  s += txt((mainX0+mainX1)/2, bodyY0+bodyH/2, 'ช่องเปิด '+o.ch+' ช่อง', 10, '#6b7785');
+  if(o.ch>1) s += txt(mainX0+cellW+t/2, bodyY0+13, 'เสากลาง', 9, '#4a2f14');
+
+  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+W+' '+(y1+34)+'" width="'+W+'" '+
+         'font-family="Noto Sans Thai,Sarabun,sans-serif">'+s+'</svg>';
+}
+
+/* ข้อความสรุปใต้รูป (แบบที่คุณหลิงขอ: "1 ช่องบน ความสูงริมใน … ซม.") */
+function lightSummary(o){
+  if(!o.hasTop && !o.hasSide) return '';
+  const bt = 'ริมใน';
+  let out=[];
+  if(o.hasTop)
+    out.push('<b>'+(o.topN||'—')+' ช่องบน</b> ความสูง'+bt+' '+(o.topShow>0?nf(o.topShow):'—')+' ซม.'+
+             (o.topAuto?' <span style="color:#8a5b00">(เฉลี่ย 3 ช่อง — ยังไม่ได้ระบุ)</span>':''));
+  if(o.hasSide)
+    out.push('<b>'+(o.sideN||'—')+' ช่องข้าง</b> (ข้างละ '+(o.sideN?Math.round(o.sideN/2):'—')+') ความกว้าง'+bt+
+             'ข้างละ '+(o.sideShow>0?nf(o.sideShow):'—')+' ซม.'+
+             (o.sideAuto?' <span style="color:#8a5b00">(เฉลี่ย 3 ช่อง — ยังไม่ได้ระบุ)</span>':''));
+  return '<div style="margin-top:3px;color:#2b6b85">'+out.join('<br>')+'</div>'+
+         '<div>'+(o.lfix
+            ? '<span class="fixtag">ระยะช่องแสง FIX</span>'
+            : '<span class="dim">ระยะช่องแสง = ที่ตั้งไว้ ปรับได้ตามหน้างาน</span>')+'</div>'+
+         '<div class="dim">ค่าแรงนับ '+o.labourCh+' ช่อง (ช่องเปิด '+o.ch+' + ช่องแสง '+(o.labourCh-o.ch)+')</div>';
+}
+
+function drawPic(box){
+  const o = readItem(box);
+  const kindTxt = o.kind==='window' ? 'วงกบหน้าต่าง' : 'วงกบประตู';
+  const basisTxt = o.basis==='outer'
+      ? 'ขนาดที่กรอก = <b>ริมนอก (ช่องปูน)</b> — ช่องที่ก่อไว้ วางวงกบทั้งวง'
+      : 'ขนาดที่กรอก = <b>ริมใน</b> (ช่องใส่ประตู/หน้าต่าง)';
+  let warn='';
+  if(o.basis==='outer' && o.scope==='per_channel')
+    warn += '<div class="msg err" style="margin:6px 0 0;text-align:left">ริมนอก (ช่องปูน) เป็นขนาดของ<b>ทั้งวง</b> — กรอกขนาดต่อ 1 ช่องไม่ได้</div>';
+  if(o.hasSide && o.sideN && o.sideN%2!==0)
+    warn = '<div class="msg warn" style="margin:6px 0 0;text-align:left">จำนวนช่องแสงข้างต้องเป็น<b>เลขคู่</b> (ซ้าย-ขวาเท่ากัน) เช่น 6 = ข้างละ 3</div>';
+  const fixTxt = o.basis==='outer' ? 'ริมนอก (ช่องปูน)' : 'ริมใน';
+  box.querySelector('.pic').innerHTML = frameSvg(o) + warn +
+    '<div class="cap">'+esc(kindTxt)+(o.patLabel?' · '+esc(o.patLabel):'')+' · '+o.ch+' ช่องเปิด'+
+    (o.w&&o.h?' · '+nf(o.w)+'×'+nf(o.h)+' ซม.'+(o.scope==='per_channel'?' <b>ต่อ 1 ช่อง</b>':' (รวมทั้งวง)'):'')+
+    ' <span class="fixtag">FIX '+fixTxt+'</span><br>'+basisTxt+
+    lightSummary(o)+
+    '<span style="color:#9aa4b0">ภาพประกอบ ไม่ใช่สัดส่วนจริง</span></div>';
+}
+function fillModel(sel){
+  const o = sel.selectedOptions[0], box = sel.closest('.itemcard');
+  if(!o || !o.value) return;
+  box.querySelector('.q_pat').value = o.dataset.p||'';
+  box.querySelector('.q_ch').value  = o.dataset.c||1;
+  box.querySelector('.q_w').value   = o.dataset.w||'';
+  box.querySelector('.q_h').value   = o.dataset.h||'';
+  if(o.dataset.k) box.querySelector('.q_kind').value  = o.dataset.k;
+  if(o.dataset.b) box.querySelector('.q_basis').value = o.dataset.b;
+  syncBasisScope(box); syncLightBox(box); drawPic(box);
+}
+function quoteLines(){
+  return [...document.querySelectorAll('#q_items .itemcard')].map(b=>{
+    const lk = patLightKind(b.querySelector('.q_pat').value);
+    const hasT = (lk==='top'||lk==='ring'), hasS = (lk==='side'||lk==='ring');
+    return {
+      model_id: (b.querySelector('.q_model')||{}).value || '',
+      pattern_code: b.querySelector('.q_pat').value,
+      channels: b.querySelector('.q_ch').value,
+      frame_kind: b.querySelector('.q_kind').value,
+      size_basis: b.querySelector('.q_basis').value,
+      size_scope: b.querySelector('.q_scope').value,
+      width_cm: b.querySelector('.q_w').value,
+      height_cm: b.querySelector('.q_h').value,
+      qty: b.querySelector('.q_qty').value || 1,
+      light_top_count:  hasT ? b.querySelector('.q_ltc').value  : '',
+      light_side_count: hasS ? b.querySelector('.q_lsc').value  : '',
+      light_top_cm:     hasT ? b.querySelector('.q_ltcm').value : '',
+      light_side_cm:    hasS ? b.querySelector('.q_lscm').value : '',
+      light_basis: 'inner',                              // 📏 ช่องแสง = ระยะกระจกที่เห็นเสมอ
+      light_fixed: b.querySelector('.q_lfix').checked
+    };
+  });
+}
+
+/* ---------- กรอกไม่ครบ = ไฮไลท์แดง + ห้ามออกราคา ---------- */
+function markBad(el, bad){ if(el) el.classList.toggle('badfield', !!bad); }
+function clearBad(){ document.querySelectorAll('#q_items .badfield').forEach(e=>e.classList.remove('badfield')); }
+function validateQuoteItems(){
+  const errs=[];
+  const cards=[...document.querySelectorAll('#q_items .itemcard')];
+  if(!cards.length) return ['ยังไม่มีรายการ — กด “+ เพิ่มรายการ” ก่อน'];
+  cards.forEach((b,idx)=>{
+    const n=idx+1;
+    const need=(sel,label,min)=>{
+      const el=b.querySelector(sel); if(!el) return false;
+      const v=Number(el.value);
+      const bad = el.value==='' || !isFinite(v) || v < (min===undefined?0.1:min);
+      markBad(el,bad); if(bad) errs.push('รายการที่ '+n+': '+label);
+      return !bad;
+    };
+    const pat=b.querySelector('.q_pat');
+    if(!pat.value){ markBad(pat,1); errs.push('รายการที่ '+n+': ยังไม่ได้เลือกแบบวงกบ'); }
+    else markBad(pat,0);
+    need('.q_ch','ยังไม่ได้กรอกจำนวนช่องเปิด',1);
+    need('.q_w','ยังไม่ได้กรอกความกว้าง (ซม.)');
+    need('.q_h','ยังไม่ได้กรอกความสูง (ซม.)');
+    need('.q_qty','ยังไม่ได้กรอกจำนวนชุด',1);
+    const bs=b.querySelector('.q_basis'), sp=b.querySelector('.q_scope');
+    if(bs.value==='outer' && sp.value==='per_channel'){
+      markBad(sp,1); errs.push('รายการที่ '+n+': ริมนอก (ช่องปูน) เป็นขนาดของทั้งวง — เลือก “ทั้งวง” หรือเปลี่ยนไปฟิกซ์ริมใน');
+    } else markBad(sp,0);
+    const lk=patLightKind(pat.value);
+    if(lk==='top'||lk==='ring') need('.q_ltc','ยังไม่ได้กรอกจำนวนช่องแสงบน',1);
+    if(lk==='side'||lk==='ring'){
+      if(need('.q_lsc','ยังไม่ได้กรอกจำนวนช่องแสงข้าง (อย่างน้อย 2 = ข้างละ 1)',2)){
+        const el=b.querySelector('.q_lsc');
+        if(Number(el.value)%2!==0){ markBad(el,1);
+          errs.push('รายการที่ '+n+': จำนวนช่องแสงข้างต้องเป็นเลขคู่ (ซ้าย-ขวาเท่ากัน) เช่น 6 = ข้างละ 3'); }
+      }
+    }
+  });
+  return errs;
+}
+let LAST_Q=null, LAST_SAVED=null;
+/* แก้อะไรก็ตามหลังคิดราคา → ซ่อนผลเดิม กันบันทึกไม่ตรงกับที่เห็น */
+function invalidateQuote(){
+  if(!LAST_Q) return;
+  LAST_Q=null; LAST_SAVED=null; $('q_result').classList.add('hide'); $('q_saved').innerHTML='';
+  say('q_msg','แก้รายการแล้ว — กด “คิดราคา” ใหม่','warn');
+}
+document.addEventListener('input', e=>{ if(e.target.closest('#q_items')) invalidateQuote(); });
+async function calcQuote(){
+  say('q_msg',''); $('q_saved').innerHTML=''; LAST_Q=null;
+  if(!qLoaded){ if(await initQuote() !== true) return; }   // โหลดข้อมูลตั้งต้นไม่สำเร็จ → ลองใหม่ตรงนี้
+  clearBad();
+  const errs = validateQuoteItems();
+  if(errs.length){
+    $('q_result').classList.add('hide');
+    say('q_msg','<b>ยังกรอกไม่ครบ — ยังออกราคาไม่ได้</b> (ช่องที่ขาดขึ้นกรอบแดง)<br>• '+
+        errs.map(esc).join('<br>• '),'err',true);
+    const first = document.querySelector('#q_items .badfield');
+    if(first){ first.scrollIntoView({behavior:'smooth',block:'center'}); first.focus(); }
+    return;
+  }
+  const lines = quoteLines();
+  if(!lines.length){ say('q_msg','ยังไม่มีรายการ'); return; }
+  const type = 'general';
+  const r = await rpc('fr_quote_calc',{p_pin:PIN, p_customer_type:type, p_lines:lines});
+  if(!r.ok){ say('q_msg', r.error); $('q_result').classList.add('hide'); return; }
+  LAST_Q = {res:r, type:type, lines:lines}; renderQuote(r);
+}
+/* บอกให้ชัดว่า "งานสั่ง" ยึดขนาดไหน — อีกขนาดเป็นแค่ผลที่ตามมา */
+function sizeLine(l){
+  if(l.inner_w_cm==null || l.outer_w_cm==null) return '';
+  const inner = nf(l.inner_w_cm)+'×'+nf(l.inner_h_cm);
+  const outer = nf(l.outer_w_cm)+'×'+nf(l.outer_h_cm);
+  return l.size_basis==='outer'
+    ? '<div class="sizeline">สั่งตาม <b>ริมนอก '+outer+' ซม.</b></div>'+
+      '<div class="dim" style="font-size:12px">→ ช่องใส่ประตู/หน้าต่างจะได้ '+inner+' ซม.</div>'
+    : '<div class="sizeline">สั่งตาม <b>ริมใน '+inner+' ซม.</b> (ช่องใส่ประตู/หน้าต่าง)</div>'+
+      '<div class="dim" style="font-size:12px">→ ตัววงกบทั้งตัวจะได้ '+outer+' ซม.</div>';
+}
+/* อธิบายว่าเบิกไม้ท่อนยาวเท่าไหร่ แล้วตัดเป็นชิ้นยาวเท่าไหร่ (กันงงว่าทำไมหัววงกบใช้ไม้ 110) */
+function woodPlanHtml(l){
+  const p = l.wood_plan||[];
+  if(!p.length) return '';
+  const rows = p.map(x=>{
+    const scrap = Number(x.scrap_cm)||0;
+    const tail = scrap<=0 ? ' · ตัดพอดี ไม่เหลือเศษ'
+      : ' · เหลือท่อนละ '+nf(scrap)+' ซม.';
+    return '<div style="margin-top:3px">• <b>'+esc(x.role)+'</b> — ต้องได้ชิ้นยาว <b>'+nf(x.cut_len_cm)+' ซม.</b> × '+nf(x.cut_count)+' ชิ้น<br>'+
+      '<span style="margin-left:12px">เบิกไม้ '+esc(x.wood)+' ท่อนยาว <b>'+nf(x.stock_len_cm)+' ซม.</b> '+nf(x.pieces)+' ตัว'+tail+'</span></div>';
+  }).join('');
+  return '<details style="margin-top:6px"><summary class="dim" style="font-size:12px;cursor:pointer">ไม้ที่ใช้ (ต่อ 1 ชุด)</summary>'+
+         '<div style="font-size:12px;color:#4a5561">'+rows+
+         '<div class="dim" style="margin-top:4px">เบิกไม้ท่อนสั้นที่สุดที่ตัดชิ้นนั้นได้ (ของที่มีในโรงช่างมาก่อน)</div></div></details>';
+}
+function markBack(btn, ok){
+  const row = btn.closest('.sug');
+  row.style.background = ok ? '#e8f6ee' : '#fdecec';
+  row.style.borderColor = ok ? '#bfe6cf' : '#f6c9c9';
+  row.querySelectorAll('button').forEach(b=>b.disabled=true);
+  row.insertAdjacentHTML('beforeend','<span class="pill '+(ok?'ok':'bad')+'">'+(ok?'เก็บแล้ว':'ไม่ได้เก็บ')+'</span>');
+}
+function renderQuote(r){
+  const own = ROLE==='owner';
+  let h = '<tr><th>รายการ</th><th class="num">จำนวน</th>'+
+          '<th class="num">ราคา 1<br><span style="font-weight:400">ทั่วไป</span></th><th class="num">รวม</th>'+
+          '<th class="num">ราคา 2<br><span style="font-weight:400">ส่ง/UPK</span></th><th class="num">รวม</th>'+
+          (own?'<th class="num">ทุน/ชุด</th><th class="num">กำไร</th>':'')+'</tr>';
+  (r.lines||[]).forEach(l=>{
+    const srcTag = '<div class="dim" style="font-size:12px">'+esc(l.price_source_text||'')+'</div>';
+    h += '<tr><td>'+esc(l.descr)+ sizeLine(l) + srcTag + woodPlanHtml(l) +
+         '</td><td class="num">'+nf(l.qty)+'</td>'+
+         '<td class="num" style="font-weight:600">'+nf(l.price_general)+'</td><td class="num">'+nf(l.amount_general)+'</td>'+
+         '<td class="num" style="font-weight:600;color:#0b7a44">'+(l.price_upk==null?'—':nf(l.price_upk))+'</td>'+
+         '<td class="num">'+(l.amount_upk==null?'—':nf(l.amount_upk))+'</td>'+
+         (own?'<td class="num dim">'+nf(l.unit_cost)+'</td>'+
+              '<td class="num dim">+'+nf(l.margin_general_pct)+'%'+
+              (l.margin_upk_pct!=null?'<br>+'+nf(l.margin_upk_pct)+'%':'')+'</td>':'')+'</tr>';
+  });
+  $('q_table').innerHTML = h;
+  // เตือนว่าไม้ในโรงช่างไม่พอ ต้องสั่งเข้าก่อน
+  const short = (r.lines||[]).filter(l=>l.wood_ready===false);
+  $('q_stock').innerHTML = (LK.stock_started === false)
+    ? '<div class="msg"><b>ℹ️ ยังไม่ได้นับไม้ตั้งต้นในโรงช่าง</b> — ระบบเลยยังบอกไม่ได้ว่าไม้พอไหม '+
+      '<span class="dim">(ราคาข้างบนถูกต้องแล้ว ไม่เกี่ยวกับสต๊อก)</span>'+
+      '<div style="margin-top:4px">ให้คนลงข้อมูลไปที่หน้า <b>สต๊อกไม้โรงช่าง</b> → <b>📋 นับไม้ตั้งต้น</b> ครั้งเดียว</div></div>'
+    : short.length
+    ? '<div class="msg warn"><b>⚠️ ไม้ในโรงช่างไม่พอ ต้องสั่งเข้าก่อนถึงจะทำได้</b>'+
+      short.map(l=>'<div style="margin-top:4px">• '+esc(l.descr)+' — ต้องเบิกไม้ '+
+        (l.wood_needed||[]).map(n=>'<b>'+esc(n.wood)+' '+nf(n.need_pieces)+' ตัว</b> (มีอยู่ '+nf(n.on_hand)+')').join(' · ')+
+        '</div>').join('')+
+      '<div style="margin-top:6px">แจ้งลูกค้าเรื่องเวลารอไม้ด้วย ราคายังใช้ได้ตามนี้</div></div>'
+    : '<div class="msg ok">✅ ไม้ในโรงช่างมีพอทำได้เลย</div>';
+  // ไม้ที่ควรได้กลับเข้าสต๊อกหลังทำงานนี้ (เช็กลิสต์ให้ช่าง/หน้าร้าน)
+  const back={};
+  (r.lines||[]).forEach(l=>(l.wood_plan||[]).forEach(x=>{
+    if(!x.scrap_keep) return;
+    const k=x.wood+'|'+x.scrap_cm;
+    back[k]=(back[k]||0)+(Number(x.pieces_total)||Number(x.pieces)||0);
+  }));
+  const keys=Object.keys(back);
+  $('q_back').innerHTML = !keys.length ? '' :
+    '<div class="card" style="margin-top:10px"><h2>ไม้ที่ควรได้กลับเข้าสต๊อกจากงานนี้</h2>'+
+    '<div class="dim" style="margin-bottom:6px">ตัดเสร็จแล้วให้เช็กว่าเก็บกลับครบไหม</div>'+
+    keys.map((k,i)=>{
+      const [wd,len]=k.split('|');
+      return '<div class="sug" style="display:flex;align-items:center;gap:10px">'+
+        '<div style="flex:1"><div class="lab">'+esc(wd)+' ยาว '+nf(len)+' ซม. = '+nf(back[k])+' ท่อน</div></div>'+
+        '<button class="btn sm" onclick="markBack(this,1)">✓ เก็บแล้ว</button>'+
+        '<button class="btn del" onclick="markBack(this,0)">✗ ไม่ได้เก็บ</button></div>';
+    }).join('')+'</div>';
+  $('q_total1').textContent = nf(r.total_general)+' บาท';
+  $('q_total2').textContent = nf(r.total_upk)+' บาท';
+  $('q_result').classList.remove('hide');
+  $('q_result').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+async function saveQuote(){
+  if(!LAST_Q){ say('q_saved','กด “คิดราคา” ก่อนบันทึก'); return; }
+  const shown = Number(LAST_Q.res.total_general);
+  const r = await rpc('fr_quote_save',{p_pin:PIN, p_customer_type:LAST_Q.type,
+    p_customer_name:$('q_cust').value, p_lines:LAST_Q.lines, p_photos:QPHOTOS});
+  if(!r.ok){ say('q_saved', r.error); return; }
+  if(Math.abs(Number(r.total_general)-shown) > 0.01){
+    say('q_saved','⚠️ ราคาบนจอ ('+nf(shown)+') ไม่ตรงกับที่บันทึก ('+nf(r.total_general)+') — ราคาอาจเพิ่งถูกแก้ กด “คิดราคา” ใหม่');
+    return;
+  }
+  LAST_SAVED = {quote_no:r.quote_no, quote_date:r.quote_date};
+  say('q_saved','บันทึกแล้ว เลขที่ '+r.quote_no+' · ราคา 1 รวม '+nf(r.total_general)+
+      ' บาท · ราคา 2 รวม '+nf(r.total_upk)+' บาท — พิมพ์ใบเสนอราคาได้จากปุ่มด้านบน','ok');
+}
+
+/* ---------- แถบย่อยในหน้าเสนอราคา ---------- */
+function quoteTab(which){
+  $('qsub-new').classList.toggle('hide', which!=='new');
+  $('qsub-list').classList.toggle('hide', which!=='list');
+  $('qt_new').classList.toggle('on', which==='new');
+  $('qt_list').classList.toggle('on', which==='list');
+  if(which==='list'){
+    if(!$('ql_to').value){
+      const t=today(); $('ql_to').value=t;
+      const d=new Date(Date.now()+7*3600e3); d.setDate(d.getDate()-60);
+      $('ql_from').value=d.toISOString().slice(0,10);
+    }
+    loadQuoteList();
+  }
+}
+
+/* ---------- รูปแนบ (bucket fr-photos = private → ต้องใช้ signed URL) ---------- */
+let QPHOTOS = [];
+let PH_SEQ = 0;
+/* รับได้ทั้งค่าเก่า {path,url} / url เต็ม / path ล้วน → คืน path ใน bucket เสมอ */
+function phPath(p){
+  if(!p) return '';
+  if(typeof p === 'string') p = { url:p };
+  if(p.path) return String(p.path);
+  const u = String(p.url||'');
+  const i = u.indexOf('/fr-photos/');
+  if(i < 0) return u ? u : '';
+  return decodeURIComponent(u.slice(i + '/fr-photos/'.length).split('?')[0]);
+}
+/* ขอ signed URL อายุ 1 ชม. (bucket เป็น private แล้ว getPublicUrl จะได้ 404 Bucket not found) */
+async function signPhoto(path){
+  if(!path) return null;
+  try{
+    const r = await fetch(SB+'/storage/v1/object/sign/fr-photos/'+path, {method:'POST',
+      headers:{'apikey':KEY,'Authorization':'Bearer '+KEY,'Content-Type':'application/json'},
+      body: JSON.stringify({ expiresIn: 3600 })});
+    if(!r.ok) return null;
+    const j = await r.json();
+    let u = j.signedURL || j.signedUrl || '';
+    if(!u) return null;
+    if(/^https?:/i.test(u)) return u;
+    if(u[0] !== '/') u = '/' + u;
+    return SB + '/storage/v1' + u;
+  }catch(e){ return null; }
+}
+/* วาด <img> ว่างไว้ก่อน แล้วเติม src ทีหลัง (signed URL ต้อง await) */
+function photoImg(p, h){
+  const path = phPath(p); if(!path) return '';
+  const id = 'phimg'+(++PH_SEQ);
+  setTimeout(async ()=>{
+    const u = await signPhoto(path);
+    const el = document.getElementById(id);
+    if(!el) return;
+    if(u) el.src = u; else el.alt = 'เปิดรูปไม่ได้';
+  }, 0);
+  return '<img id="'+id+'" alt="กำลังโหลดรูป…" style="height:'+h+'px;border-radius:8px;border:1px solid var(--line);background:#f1f1f1;min-width:40px">';
+}
+/* เปิดรูปเต็ม — เปิดแท็บก่อน await เสมอ (กัน iOS บล็อก popup) */
+function openPhoto(path){
+  const w = window.open('', '_blank');
+  signPhoto(path).then(u=>{
+    if(u){ if(w) w.location = u; }
+    else { if(w) w.close(); alert('เปิดรูปไม่ได้ ลองใหม่อีกครั้ง'); }
+  });
+  return false;
+}
+async function uploadPhotos(input){
+  const files = [...(input.files||[])];
+  input.value='';
+  for(const f of files){
+    if(!/^image\//.test(f.type)){ say('q_saved','แนบได้เฉพาะรูปภาพ'); continue; }
+    if(f.size > 8*1024*1024){ say('q_saved','รูป '+f.name+' ใหญ่เกิน 8MB'); continue; }
+    const ext = (f.name.split('.').pop()||'jpg').toLowerCase().replace(/[^a-z0-9]/g,'') || 'jpg';
+    const path = 'q/'+Date.now()+'-'+Math.random().toString(36).slice(2,10)+'.'+ext;
+    let ok=false;
+    try{
+      const res = await fetch(SB+'/storage/v1/object/fr-photos/'+path, {method:'POST',
+        headers:{'apikey':KEY,'Authorization':'Bearer '+KEY,'Content-Type':f.type||'image/jpeg'}, body:f});
+      ok = res.ok;
+      if(!ok) say('q_saved','อัปรูปไม่สำเร็จ ('+res.status+') — ลองใหม่หรือเช็คสัญญาณ');
+    }catch(e){ say('q_saved','อัปรูปไม่สำเร็จ — เช็คสัญญาณอินเทอร์เน็ต'); }
+    if(ok) QPHOTOS.push({ path: path });   /* เก็บ path ล้วน ไม่เก็บ public URL อีกแล้ว */
+  }
+  renderPhotos();
+}
+function renderPhotos(){
+  $('q_photos').innerHTML = QPHOTOS.map((p,i)=>
+    '<div style="flex:0 0 auto;position:relative">'+
+    photoImg(p, 90)+
+    '<button class="btn del" style="position:absolute;top:2px;right:2px;padding:2px 7px" onclick="rmPhoto('+i+')">✕</button></div>').join('');
+}
+function rmPhoto(i){ QPHOTOS.splice(i,1); renderPhotos(); }
+function photoStrip(list){
+  if(!list || !list.length) return '';
+  return '<div class="row" style="margin-top:6px">'+list.map(p=>{
+    const path = phPath(p); if(!path) return '';
+    return '<a href="#" onclick="return openPhoto('+JSON.stringify(path).replace(/"/g,'&quot;')+')" '+
+           'style="flex:0 0 auto">'+photoImg(p, 70)+'</a>';
+  }).join('')+'</div>';
+}
+
+/* ---------- หน้ารวมใบเสนอราคา ---------- */
+let QLIST = [];
+async function loadQuoteList(){
+  if(!qLoaded) await initQuote();     // ต้องมีกติกาไม้ (LK.rules) ก่อน ไม่งั้นคำนวณขนาดช่องเปิดตอนพิมพ์เพี้ยน
+  const r = await rpc('fr_quote_list',{p_pin:PIN, p_from:$('ql_from').value||null,
+                                       p_to:$('ql_to').value||null, p_q:$('ql_q').value||null});
+  if(!r.ok){ say('ql_msg', r.error); return; }
+  const rows = r.rows||[];
+  QLIST = rows;
+  $('ql_rows').innerHTML = !rows.length ? '<div class="card"><div class="dim">ไม่พบใบเสนอราคาในช่วงนี้</div></div>'
+   : rows.map(q=>{
+      const st = q.job_no
+        ? '<span class="pill '+(J_ST[q.job_status]||['','dim'])[1]+'">'+esc(q.job_no)+' · '+(J_ST[q.job_status]||['—'])[0]+'</span>'
+        : '<span class="pill dim">ยังไม่ส่งผลิต</span>';
+      return '<div class="card">'+
+        '<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">'+
+          '<b>'+esc(q.quote_no||'')+'</b><span class="dim">'+esc(q.quote_date||'')+'</span>'+
+          (q.customer_name?'<span>· '+esc(q.customer_name)+'</span>':'')+st+'</div>'+
+        '<div style="font-size:13px;margin-top:6px">'+
+          (q.items||[]).map(x=>'• '+esc(x.descr||'วงกบ')+' × '+nf(x.qty)+
+            ' — ราคา 1 '+nf(x.price_general)+(x.price_upk!=null?' · ราคา 2 '+nf(x.price_upk):'')).join('<br>')+'</div>'+
+        '<div style="margin-top:6px">รวม ราคา 1 <b>'+nf(q.total_general)+'</b> บาท · ราคา 2 <b>'+nf(q.total_upk)+'</b> บาท'+
+          (q.total_cost!=null?' <span class="dim">· ทุน '+nf(q.total_cost)+'</span>':'')+'</div>'+
+        photoStrip(q.photos)+
+        '<div class="row noprint" style="margin-top:8px">'+
+          '<button class="btn sec sm" onclick="printSaved('+q.id+',1)">🖨️ พิมพ์ ราคา 1</button>'+
+          '<button class="btn sec sm" onclick="printSaved('+q.id+',2)">🖨️ พิมพ์ ราคา 2</button>'+
+          (q.job_no?'':'<button class="btn sm" onclick="quoteToJob('+q.id+')">📋 ส่งเข้ารายการผลิต</button>')+
+        '</div>'+
+        '</div>';
+     }).join('');
+}
+/* ================= พิมพ์ใบเสนอราคา (เลือกราคาเดียวเสมอ) ================= */
+function thaiDate(iso){
+  if(!iso) return '';
+  const p = String(iso).slice(0,10).split('-');
+  if(p.length<3) return String(iso);
+  return Number(p[2])+'/'+Number(p[1])+'/'+(Number(p[0])+543);
+}
+/* แปลงบรรทัดจากฐานข้อมูล → ข้อมูลที่ frameSvg ใช้วาด + ใช้เขียนรายละเอียดในใบ */
+function lineGeom(l){
+  const R = frRules();
+  const lk = l.light_kind || patLightKind(l.pattern_code);
+  const basis = l.size_basis || 'inner', scope = l.size_scope || 'total';
+  const ch = Math.max(1, Math.round(Number(l.channels)||1));
+  const w = Number(l.width_cm)||0, h = Number(l.height_cm)||0;
+  const wOne  = basis==='outer' ? w - R.ow : w;
+  const innerH= basis==='outer' ? h - R.oh : h;
+  const innerW= scope==='per_channel' ? (ch*wOne + (ch-1)*R.mu) : wOne;
+  const g = { lk:lk, kind:l.frame_kind||'door', ch:ch, basis:basis, scope:scope, w:w, h:h,
+           hasTop:(lk==='top'||lk==='ring'), hasSide:(lk==='side'||lk==='ring'),
+           topN:Number(l.light_top_count)||0, sideN:Number(l.light_side_count)||0,
+           topUse:Number(l.light_top_cm)||0,  sideUse:Number(l.light_side_cm)||0,
+           innerW:innerW, innerH:innerH, wOne:wOne, noLabels:true };
+  /* ขนาดช่องเปิด (ริมใน) = ขนาดทั้งวง หักช่องแสง + เสา/คานที่กั้น */
+  if(scope==='per_channel'){
+    g.openW = wOne;
+  } else {
+    g.openW = (innerW - (g.hasSide ? g.sideUse*2 + 2*R.mu : 0) - (ch-1)*R.mu) / ch;
+  }
+  g.openH = innerH - (g.hasTop ? g.topUse + R.mu : 0);
+  /* 📏 ขนาดช่องแสงเป็น "ริมใน" (ระยะกระจกที่เห็น) เสมอ ไม่ต้องแปลงฐาน */
+  g.topDisp  = g.topUse;
+  g.sideDisp = g.sideUse;
+  g.lfix     = !!l.light_fixed;
+  return g;
+}
+/* Chrome/Edge ใช้ <title> เป็นชื่อไฟล์ตอน "Save as PDF" → ใส่เลขที่ใบให้อัตโนมัติ */
+function quoteFileTitle(head, which){
+  const no   = head.quote_no || ('ร่าง '+thaiDate(head.quote_date||today()).replace(/\//g,'-'));
+  const cust = String(head.customer_name||'').trim().replace(/[\\\/:*?"<>|]/g,' ').replace(/\s+/g,' ').slice(0,40);
+  return 'ใบเสนอราคา '+no+(cust?' '+cust:'')+' (ราคา '+which+')';
+}
+function priceOf(l, which){
+  return which===2 ? (l.price_upk==null?null:Number(l.price_upk)) : Number(l.price_general);
+}
+/* รายละเอียดสินค้าในใบเสนอราคา — เขียนเป็นบรรทัด ๆ ให้อ่านง่าย
+   🔑 ตัวเลขที่ "ยึด" ตอนทำจริงติดป้าย FIX สีแดง · ตัวเลขที่คำนวณย้อนให้ขึ้นต้นด้วย ≈ (ประมาณ)
+      เพราะหน้าไม้จริงหลังไสอาจไม่เต็มตามระบุ ช่างต้องรู้ว่ายึดตัวไหน */
+function itemDetailHtml(l){
+  const g = lineGeom(l);
+  const kindTxt  = g.kind==='window' ? 'วงกบหน้าต่าง' : 'วงกบประตู';
+  const openTxt  = g.kind==='window' ? 'ช่องหน้าต่าง' : 'ช่องประตู';
+  const basisTxt = g.basis==='outer' ? 'ริมนอก (ช่องปูน)' : 'ริมใน';
+  let h = '<div class="t1">'+esc(kindTxt)+' '+nf(g.w)+'×'+nf(g.h)+' ซม.'+
+          (g.scope==='per_channel' ? ' (ต่อ 1 ช่อง)' : '')+
+          ' <span class="fix">FIX '+basisTxt+'</span></div>';
+  if(g.hasTop || g.hasSide){
+    h += '<div class="t1 sp">ช่องแสง <span class="dimb">(ระยะกระจกที่เห็น · ริมใน)</span> '+
+         (g.lfix ? '<span class="fix sm">FIX</span>'
+                 : '<span class="flex">ปรับได้ตามหน้างาน</span>')+'</div>';
+    if(g.hasTop)
+      h += '<div class="t2">– ช่องแสงบน '+g.topN+' ช่อง สูง '+nf(g.topDisp)+' ซม.</div>';
+    if(g.hasSide)
+      h += '<div class="t2">– ช่องแสงข้าง '+g.sideN+' ช่อง (ข้างละ '+Math.round(g.sideN/2)+
+           ') กว้างข้างละ '+nf(g.sideDisp)+' ซม.</div>';
+  }
+  const showOpen = (g.hasTop || g.hasSide || g.ch > 1);   // ไม่มีช่องแสง + ช่องเดียว = ขนาดช่องเปิด = ขนาดวงกบอยู่แล้ว ไม่ต้องเขียนซ้ำ
+  if(showOpen && g.openW > 0 && g.openH > 0)
+    h += '<div class="t3">≈ ช่องเปิด '+g.ch+' '+esc(openTxt)+' '+nf(Math.round(g.openW*10)/10)+'×'+
+         nf(Math.round(g.openH*10)/10)+' ซม. (ริมใน · <b>ประมาณ</b> ไม่ใช่ขนาดที่ยึด)</div>';
+  return h;
+}
+/* สร้างเอกสารพิมพ์ 1 ใบ — โชว์ราคาเดียวตามที่พนักงานเลือก */
+function buildQuoteDoc(head, lines, which){
+  const label = which===2 ? 'ราคา 2 (ราคาส่ง / UPK)' : 'ราคา 1 (ลูกค้าทั่วไป)';
+  const rows = lines.map((l,i)=>{
+    const p = priceOf(l, which), qty = Number(l.qty)||0;
+    const amt = (p==null? null : p*qty);
+    return '<tr>'+
+      '<td class="c">'+(i+1)+'</td>'+
+      '<td class="nm">'+itemDetailHtml(l)+'</td>'+
+      '<td class="pic">'+frameSvg(lineGeom(l))+'</td>'+
+      '<td class="c">'+nf(qty)+'</td>'+
+      '<td class="r">'+(p==null?'—':nf(p))+'</td>'+
+      '<td class="r">'+(amt==null?'—':nf(amt))+'</td></tr>';
+  }).join('');
+  return '<!DOCTYPE html><html lang="th"><head><meta charset="utf-8">'+
+  '<title>'+esc(quoteFileTitle(head, which))+'</title><style>'+
+  '@page{size:A4;margin:12mm 10mm}'+
+  'body{font-family:"Noto Sans Thai","Sarabun","Segoe UI",system-ui,sans-serif;color:#1f2933;font-size:14px;margin:0}'+
+  '.hd{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid #8a5a2b;padding-bottom:8px}'+
+  '.hd h1{font-size:22px;margin:0;color:#6d451f}'+
+  '.hd .rt{text-align:right;font-size:13px}'+
+  '.kmbox{border:2.5px solid #6d451f;border-radius:8px;padding:7px 14px;margin-bottom:7px;'+
+    'min-width:250px;text-align:left;background:#fdfaf6}'+
+  '.kmlab{font-size:12px;color:#6b7785;margin-bottom:2px}'+
+  '.kmno{font-size:22px;font-weight:700;color:#6d451f;letter-spacing:.5px;white-space:nowrap}'+
+  '.meta{display:flex;gap:20px;flex-wrap:wrap;margin:10px 0 6px;font-size:14px;align-items:center}'+
+  '.tag{display:inline-block;border:1px solid #8a5a2b;color:#6d451f;border-radius:6px;padding:2px 10px;font-weight:600}'+
+  'table{width:100%;border-collapse:collapse;margin-top:8px;table-layout:fixed}'+
+  'th,td{border:1px solid #c9ced6;padding:8px 9px;vertical-align:top}'+
+  'th{background:#f4f0ea;font-size:13px;text-align:center;vertical-align:middle}'+
+  'td.c{text-align:center;vertical-align:middle}td.r{text-align:right;vertical-align:middle;font-variant-numeric:tabular-nums}'+
+  'td.pic{text-align:center;vertical-align:middle}td.pic svg{height:120px;width:auto;max-width:100%}'+
+  'td.nm{font-size:14px;line-height:1.7}'+
+  '.t1{font-weight:700;color:#4a2f14}'+
+  '.t1.sp{margin-top:7px}'+
+  '.t2{padding-left:12px}'+
+  '.t3{padding-left:12px;margin-top:5px;color:#6b7785;font-size:13px}'+
+  '.fix{display:inline-block;border:1.5px solid #d64545;color:#c02626;background:#fff2f2;'+
+    'border-radius:5px;padding:0 7px;font-size:12px;font-weight:700;white-space:nowrap}'+
+  '.fix.sm{font-size:11px;padding:0 6px}'+
+  '.flex{display:inline-block;border:1px dashed #8a5b00;color:#8a5b00;background:#fff8ec;'+
+    'border-radius:5px;padding:0 7px;font-size:11px;font-weight:600;white-space:nowrap}'+
+  '.dimb{font-weight:400;color:#6b7785;font-size:12px}'+
+  '.note{margin-top:10px;font-size:12px;color:#6b7785}'+
+  '.sign{display:flex;justify-content:space-between;margin-top:46px;font-size:14px}'+
+  '.sign .b{width:46%;text-align:center;line-height:2}'+
+  '</style></head><body>'+
+  '<div class="hd"><div><h1>ใบเสนอราคา</h1><div>ร้านกิจมั่งมีโฮม · วงกบไม้</div></div>'+
+  '<div class="rt">'+
+    '<div class="kmbox"><div class="kmlab">เลขที่บิลขาย</div>'+
+    '<div class="kmno">KM ....................................</div></div>'+
+    '<div>เลขที่ <b>'+esc(head.quote_no||'— (ยังไม่ได้บันทึก)')+'</b></div>'+
+    '<div>วันที่ '+esc(thaiDate(head.quote_date||today()))+'</div>'+
+  '</div></div>'+
+  '<div class="meta"><div>ชื่อลูกค้า / งาน: <b>'+esc(head.customer_name||'—')+'</b></div>'+
+  '<div><span class="tag">'+label+'</span></div></div>'+
+  '<table><colgroup><col style="width:30px"><col><col style="width:150px">'+
+  '<col style="width:56px"><col style="width:88px"><col style="width:96px"></colgroup>'+
+  '<tr><th>#</th><th>รายละเอียดสินค้า</th><th>รูปสินค้า</th>'+
+  '<th>จำนวน</th><th>ราคา/ชิ้น</th><th>รวม</th></tr>'+
+  rows+'</table>'+
+  '<div class="note">• <b style="color:#c02626">ตัวเลขที่มีป้าย FIX คือขนาดที่ยึดตอนทำจริง</b> · '+
+  '<b>ริมนอก (ช่องปูน)</b> = ช่องที่ก่อไว้สำหรับวางวงกบทั้งวง · <b>ริมใน</b> = ช่องใส่บานประตู/หน้าต่าง<br>'+
+  '• ขนาดช่องแสงเป็นระยะกระจกที่เห็น (ริมใน) — ถ้าไม่มีป้าย FIX คือระยะที่ตั้งไว้ ช่างปรับได้ตามหน้างาน<br>'+
+  '• บรรทัดที่ขึ้นต้นด้วย ≈ เป็นค่าประมาณไว้ดูภาพรวมเท่านั้น ของจริงขึ้นกับหน้าไม้หลังไส ห้ามใช้เป็นขนาดสั่งงาน<br>'+
+  '• รูปเป็นภาพประกอบแบบวงกบ ไม่ใช่สัดส่วนจริง<br>'+
+  '• ราคานี้เป็นราคาเสนอ ยังไม่รวมค่าขนส่ง (ถ้ามี) — กรุณาตรวจแบบและขนาดให้ตรงก่อนลงชื่อ</div>'+
+  '<div class="sign"><div class="b">ลงชื่อ ...................................................... ผู้สั่ง<br>'+
+  '( ...................................................... )<br>วันที่ ......... / ......... / .........</div>'+
+  '<div class="b">ลงชื่อ ...................................................... ผู้ขาย<br>'+
+  '( ...................................................... )<br>วันที่ ......... / ......... / .........</div></div>'+
+  '<scr'+'ipt>window.onload=function(){setTimeout(function(){window.print()},250)}<\/scr'+'ipt>'+
+  '</body></html>';
+}
+function openPrintDoc(w, html){
+  if(!w){ alert('เบราว์เซอร์บล็อกหน้าต่างพิมพ์ — อนุญาต popup ของเว็บนี้แล้วลองใหม่'); return; }
+  w.document.open(); w.document.write(html); w.document.close();
+}
+/* พิมพ์จากผลการคิดราคาบนหน้าจอ */
+async function printQuote(which){
+  const w = window.open('', '_blank');            // เปิดหน้าต่างทันทีที่กด (กัน iOS บล็อก)
+  if(!LAST_Q){ if(w) w.close(); say('q_saved','กด “คิดราคา” ก่อนพิมพ์'); return; }
+  const lines = LAST_Q.res.lines||[];
+  if(which===2 && lines.some(l=>l.price_upk==null)){
+    if(w) w.close();
+    say('q_saved','มีรายการที่ยังไม่มีราคา 2 (ราคาส่ง/UPK) — พิมพ์ราคา 2 ไม่ได้ ให้ใช้ราคา 1 หรือใส่ราคาป้ายของไซส์นั้นก่อน');
+    return;
+  }
+  /* ใบเสนอราคาที่ให้ลูกค้าต้องมีเลขที่เสมอ → ยังไม่ได้บันทึกก็บันทึกให้เองตรงนี้
+     (บันทึกครั้งเดียว พิมพ์ราคา 1 แล้วพิมพ์ราคา 2 ต่อ จะไม่เกิดใบซ้ำ) */
+  if(!LAST_SAVED){
+    if(w) w.document.write('<div style="font-family:sans-serif;padding:40px;font-size:18px">กำลังบันทึกใบเสนอราคา…</div>');
+    const r = await rpc('fr_quote_save',{p_pin:PIN, p_customer_type:LAST_Q.type,
+      p_customer_name:$('q_cust').value, p_lines:LAST_Q.lines, p_photos:QPHOTOS});
+    if(r.ok){
+      LAST_SAVED = {quote_no:r.quote_no, quote_date:r.quote_date};
+      say('q_saved','บันทึกให้อัตโนมัติก่อนพิมพ์ เลขที่ '+r.quote_no+' — ชื่อไฟล์ PDF จะมีเลขที่นี้','ok');
+    } else {
+      say('q_saved','บันทึกอัตโนมัติไม่สำเร็จ ('+r.error+') — พิมพ์เป็น “ใบร่าง” ให้ก่อน ยังไม่มีเลขที่');
+    }
+  }
+  openPrintDoc(w, buildQuoteDoc({
+    quote_no:(LAST_SAVED&&LAST_SAVED.quote_no)||'',
+    quote_date:(LAST_SAVED&&LAST_SAVED.quote_date)||today(),
+    customer_name:$('q_cust').value}, lines, which));
+}
+/* พิมพ์จากใบที่บันทึกไว้ */
+function printSaved(id, which){
+  const w = window.open('', '_blank');
+  const q = (QLIST||[]).filter(x=>x.id===id)[0];
+  if(!q){ if(w) w.close(); say('ql_msg','ไม่พบใบนี้ กด “ค้นหา” ใหม่แล้วลองอีกครั้ง'); return; }
+  const lines = q.items||[];
+  if(which===2 && lines.some(l=>l.price_upk==null)){
+    if(w) w.close();
+    say('ql_msg','ใบนี้มีรายการที่ยังไม่มีราคา 2 (ราคาส่ง/UPK) — พิมพ์ราคา 2 ไม่ได้');
+    return;
+  }
+  openPrintDoc(w, buildQuoteDoc(q, lines, which));
+}
+
+async function quoteToJob(id){
+  const r = await rpc('fr_quote_to_job',{p_pin:PIN, p_quote_id:id});
+  say('ql_msg', r.ok? 'ส่งเข้ารายการผลิตแล้ว เลขงาน '+r.job_no : r.error, r.ok?'ok':'err');
+  if(r.ok) loadQuoteList();
+}
+
+/* ================= คิวงานสั่งผลิต ================= */
+let JOBS = [], PULLED = [];
+const J_ST = {waiting:['รอผลิต','warn'], produced:['ผลิตแล้ว','ok'], delivered:['ส่งมอบแล้ว','dim']};
+async function sendToJobs(){
+  if(!LAST_Q){ say('q_saved','กด “คิดราคา” ก่อน'); return; }
+  const q = await rpc('fr_quote_save',{p_pin:PIN, p_customer_type:LAST_Q.type,
+    p_customer_name:$('q_cust').value, p_lines:LAST_Q.lines, p_photos:QPHOTOS});
+  if(!q.ok){ say('q_saved', q.error); return; }
+  const j = await rpc('fr_quote_to_job',{p_pin:PIN, p_quote_id:q.quote_id});
+  if(!j.ok){ say('q_saved','บันทึกใบ '+q.quote_no+' แล้ว แต่ส่งเข้าผลิตไม่สำเร็จ: '+j.error); return; }
+  LAST_SAVED = {quote_no:q.quote_no, quote_date:q.quote_date};
+  say('q_saved','บันทึกใบ '+q.quote_no+' และส่งเข้ารายการผลิตแล้ว เลขงาน '+j.job_no,'ok');
+  QPHOTOS=[]; renderPhotos();
+}
+function initJobs(){ loadJobs(); }
+async function loadJobs(){
+  const r = await rpc('fr_job_list',{p_pin:PIN, p_status:$('j_filter').value||null});
+  if(!r.ok){ say('j_msg', r.error); return; }
+  JOBS = r.rows||[];
+  $('j_list').innerHTML = !JOBS.length
+    ? '<div class="card"><div class="dim">ยังไม่มีงานในสถานะนี้</div></div>'
+    : JOBS.map((j,i)=>{
+        const st = J_ST[j.status]||['?','dim'];
+        const items = (j.items||[]).map(x=>'• '+esc(x.descr||'วงกบ')+' × '+nf(x.qty)).join('<br>');
+        return '<div class="card" style="padding:12px">'+
+          '<div style="display:flex;align-items:flex-start;gap:10px">'+
+          '<input type="checkbox" class="j_sel" data-i="'+i+'" style="width:22px;height:22px;flex:0 0 auto;margin-top:2px">'+
+          '<div style="flex:1"><div><b>'+esc(j.job_no||'')+'</b> '+
+            (j.customer_name?'· '+esc(j.customer_name):'')+' <span class="pill '+st[1]+'">'+st[0]+'</span></div>'+
+          '<div style="font-size:13px;margin-top:4px">'+items+'</div>'+
+          (j.sheet_date?'<div class="dim" style="font-size:12px;margin-top:4px">ลงใบผลิตวันที่ '+esc(j.sheet_date)+'</div>':'')+
+          photoStrip(j.photos)+
+          '</div></div></div>';
+      }).join('');
+}
+function selectedJobs(){
+  return [...document.querySelectorAll('.j_sel:checked')].map(c=>JOBS[Number(c.dataset.i)]).filter(Boolean);
+}
+async function markJobs(status){
+  const sel = selectedJobs();
+  if(!sel.length){ say('j_msg','ยังไม่ได้เลือกงาน'); return; }
+  const r = await rpc('fr_job_mark',{p_pin:PIN, p_ids:sel.map(j=>j.id), p_status:status});
+  say('j_msg', r.ok?'อัปเดต '+r.updated+' งานแล้ว':r.error, r.ok?'ok':'err');
+  if(r.ok) loadJobs();
+}
+/* ดึงงานเข้าใบผลิต — เติมเฉพาะฝั่งงานที่ผลิตได้ ฝั่งไม้ให้กรอกของจริงเอง */
+async function pullJobs(){
+  const sel = selectedJobs().filter(j=>j.status==='waiting');
+  if(!sel.length){ say('j_msg','เลือกงานที่ยัง “รอผลิต” อย่างน้อย 1 งาน'); return; }
+  PULLED = sel.map((j,idx)=>({job_id:j.id, job_no:idx+1, label:j.job_no+(j.customer_name?' · '+j.customer_name:''),
+                              planned_wood:j.planned_wood||{}, items:j.items||[]}));
+  go('sheet');
+  await loadSheet();
+  $('s_outs').innerHTML='';
+  PULLED.forEach(p=>(p.items||[]).forEach(it=>addOut({id:0,
+    item_name:it.descr, model_id:it.model_id, pattern_code:it.pattern_code, channels:it.channels,
+    width_cm:it.width_cm, height_cm:it.height_cm, qty:it.qty, job_no:p.job_no, frame_kind:it.frame_kind,
+    light_top_count:it.light_top_count, light_side_count:it.light_side_count})));
+  if(!document.querySelectorAll('.outrow').length) addOut();
+  renderPulled();
+  say('s_msg','ดึงมา '+PULLED.length+' งาน — กรอกไม้ที่เบิกออก "ตามที่ช่างใช้จริง" แล้วกดบันทึก','ok');
+}
+function renderPulled(){
+  if(!PULLED.length){ $('s_jobs').innerHTML=''; return; }
+  const wood = {};
+  PULLED.forEach(p=>Object.keys(p.planned_wood||{}).forEach(k=>{
+    wood[k]=(wood[k]||0)+Number(p.planned_wood[k]||0); }));
+  const woodTxt = Object.keys(wood).map(k=>'ยาว '+k.split('|')[1]+' ซม. × '+nf(wood[k])+' ตัว').join(' · ');
+  $('s_jobs').innerHTML = '<div class="card" style="border-left:6px solid var(--brand)">'+
+    '<h2>งานที่ดึงมาลงใบนี้</h2>'+
+    PULLED.map(p=>'<div style="font-size:14px">งานที่ '+p.job_no+' — '+esc(p.label)+'</div>').join('')+
+    (woodTxt?'<div class="msg warn" style="margin-top:10px"><b>แผนคาดว่าจะใช้ไม้:</b> '+esc(woodTxt)+
+      '<br>ให้กรอกฝั่ง “ไม้ที่เบิกออก” ตามที่ช่างใช้จริง ไม่ต้องกรอกตามแผน — ระบบจะเทียบให้เอง</div>':'')+
+    '<button class="btn sec sm" style="margin-top:8px" onclick="PULLED=[];renderPulled()">ยกเลิกการดึงงาน</button></div>';
+}
+
+/* ================= ใบตัด/ผลิต ================= */
+function initSheet(){
+  if(!$('s_date').value) $('s_date').value = today();
+  $('btnCost').classList.toggle('hide', ROLE!=='owner');
+  if(!SH.wood) loadSheet();
+}
+const PURPOSE = {frame:'ทำวงกบ', sale:'ขาย', upk:'ส่งบริษัทในเครือ (UPK)', cut_size:'ตัดตามไซส์'};
+const LEFT_ST = {return_stock:'คืนสต๊อกใช้ต่อ', return_upk:'ส่งคืน UPK', sale_discount:'ขายลดราคา', scrap:'เศษทิ้ง'};
+function woodOpts(sel){
+  return '<option value="">— เลือกไม้ —</option>'+(SH.wood||[]).map(w=>
+    '<option value="'+w.id+'"'+(String(w.id)===String(sel)?' selected':'')+'>'+
+    esc(w.species)+' '+w.thick_in+'"×'+w.width_in+'" ยาว '+w.length_cm+' ซม.</option>').join('');
+}
+function selOpts(map, sel){
+  return Object.keys(map).map(k=>'<option value="'+k+'"'+(k===sel?' selected':'')+'>'+esc(map[k])+'</option>').join('');
+}
+/* จำงานที่เคยผลิต — เลือกแล้วเติมช่องให้อัตโนมัติ */
+function presetLabel(p){
+  const kind = p.frame_kind==='window' ? 'วงกบหน้าต่าง' : 'วงกบประตู';
+  const size = (p.width_cm&&p.height_cm) ? nf(p.width_cm)+'×'+nf(p.height_cm) : '';
+  const base = (p.item_name||'').trim() || kind;
+  const ch   = p.channels ? ' · '+p.channels+' ช่อง' : '';
+  return base + (size && base.indexOf(size)<0 ? ' '+size : '') + ch + ' · เคยทำ '+p.times+' ครั้ง';
+}
+function presetOpts(){
+  const ps = SH.presets||[];
+  return '<option value="">— งานใหม่ กรอกเอง —</option>'+
+    ps.map((p,i)=>'<option value="'+i+'">'+esc(presetLabel(p))+'</option>').join('');
+}
+function refreshPresetSelects(){
+  document.querySelectorAll('.o_preset').forEach(s=>{ s.innerHTML = presetOpts(); });
+}
+function fillPreset(sel){
+  const p = (SH.presets||[])[Number(sel.value)];
+  if(!p) return;
+  const b = sel.closest('.itemcard');
+  b.querySelector('.o_name').value = p.item_name || '';
+  b.querySelector('.o_kind').value = p.frame_kind || 'door';
+  b.querySelector('.o_pat').value  = p.pattern_code || '';
+  b.querySelector('.o_ch').value   = p.channels || '';
+  b.querySelector('.o_w').value    = p.width_cm  != null ? p.width_cm  : '';
+  b.querySelector('.o_h').value    = p.height_cm != null ? p.height_cm : '';
+  syncOutLight(b);
+  b.querySelector('.o_ltc').value  = p.light_top_count  != null ? p.light_top_count  : '';
+  b.querySelector('.o_lsc').value  = p.light_side_count != null ? p.light_side_count : '';
+  b.querySelector('.o_qty').focus();
+}
+function shPatOpts(sel){
+  return '<option value="">—</option>'+(SH.patterns||[]).map(p=>
+    '<option value="'+p.code+'"'+(p.code===sel?' selected':'')+'>'+esc(p.label)+'</option>').join('');
+}
+async function loadSheet(){
+  say('s_msg',''); $('s_cost').innerHTML='';
+  const d = $('s_date').value; if(!d) return;
+  const [r, pr] = await Promise.all([
+    rpc('fr_sheet_get',{p_pin:PIN, p_date:d}),
+    rpc('fr_output_presets',{p_pin:PIN})
+  ]);
+  if(!r.ok){ say('s_msg', r.error); return; }
+  SH = r; SH.presets = pr.ok ? (pr.rows||[]) : [];
+  $('s_gs').value = r.exists ? (r.sheet.gs_no||'') : '';
+  $('s_gr').value = r.exists ? (r.sheet.gr_no||'') : '';
+  $('s_rec').value= r.exists ? (r.sheet.recorder||'') : '';
+  $('s_cut').value= r.exists ? (r.sheet.cutter||'') : '';
+  $('s_note').value=r.exists ? (r.sheet.note||'') : '';
+  $('s_cuts').innerHTML=''; $('s_outs').innerHTML=''; $('s_lefts').innerHTML='';
+  $('s_sug').innerHTML=''; SUG=[];
+  (r.cuts||[]).forEach(addCut); (r.outputs||[]).forEach(addOut); (r.leftovers||[]).forEach(addLeft);
+  if(!(r.cuts||[]).length) addCut();
+  if(!(r.outputs||[]).length) addOut();
+  suggestLeftovers();
+  if(r.exists) say('s_msg','เปิดใบวันที่ '+d+' แล้ว','ok');
+}
+function addCut(d){
+  d = (d && typeof d==='object') ? d : {};
+  const i='c'+Math.random().toString(36).slice(2,8);
+  $('s_cuts').insertAdjacentHTML('beforeend',
+   '<div class="itemcard out cutrow" id="'+i+'">'+
+   '<div class="hd"><b style="color:#a32020">🔻 ไม้ที่เบิกออก</b><button class="btn del" onclick="document.getElementById(\''+i+'\').remove()">ลบ</button></div>'+
+   '<div class="row"><div style="flex:2 1 200px"><label>ชนิด/ขนาดไม้</label><select class="c_wood">'+woodOpts(d.wood_id)+'</select></div></div>'+
+   '<div class="row" style="margin-top:8px">'+
+     '<div><label>ตัดไปทำอะไร</label><select class="c_pur">'+selOpts(PURPOSE, d.purpose||'frame')+'</select></div>'+
+     '<div style="flex:0 1 90px"><label>จำนวน (ตัว)</label><input class="c_qty" type="number" step="1" value="'+(d.qty!=null?d.qty:'')+'"></div>'+
+     '<div style="flex:0 1 80px"><label>งานที่</label><input class="c_job" type="number" min="1" value="'+(d.job_no||1)+'"></div>'+
+   '</div>'+
+   '<div class="row" style="margin-top:8px">'+
+     '<div style="flex:0 1 150px"><label>ตัดเป็นชิ้นยาว (ซม.)</label>'+
+       '<input class="c_cut" type="number" step="0.5" value="'+(d.cut_len_cm!=null?d.cut_len_cm:'')+'" placeholder="เช่น 210"></div>'+
+     '<div style="flex:0 1 130px"><label>1 ท่อนได้กี่ชิ้น</label>'+
+       '<input class="c_per" type="number" step="1" value="'+(d.pieces_per_stick!=null?d.pieces_per_stick:'')+'" placeholder="อัตโนมัติ"></div>'+
+   '</div>'+
+   '<div class="footnote c_hint"></div>'+
+   '</div>');
+  const box = $(i);
+  box.querySelectorAll('.c_wood,.c_pur,.c_qty,.c_cut,.c_per').forEach(el=>{
+    el.addEventListener('input', ()=>{ cutHint(box); suggestLeftovers(); });
+    el.addEventListener('change',()=>{ cutHint(box); suggestLeftovers(); });
+  });
+  cutHint(box);
+}
+function woodById(id){ return (SH.wood||[]).filter(w=>String(w.id)===String(id))[0]; }
+function cutInfo(box){
+  const w = woodById(box.querySelector('.c_wood').value);
+  const cut = Number(box.querySelector('.c_cut').value)||0;
+  const sticks = Number(box.querySelector('.c_qty').value)||0;
+  if(!w || cut<=0) return null;
+  const auto = Math.floor(w.length_cm/cut);
+  let per = Number(box.querySelector('.c_per').value);
+  if(!per || per<1) per = auto;
+  const left = +(w.length_cm - per*cut).toFixed(1);
+  return {wood:w, cut, per, auto, sticks, left, purpose:box.querySelector('.c_pur').value,
+          job:Number(box.querySelector('.c_job').value)||1};
+}
+function cutHint(box){
+  const c = cutInfo(box);
+  box.querySelector('.c_hint').innerHTML = !c ? 'ใส่ความยาวชิ้นที่ตัด แล้วระบบจะคิดไม้เหลือให้เอง' :
+    (c.per<1 ? '⚠️ ไม้ท่อนนี้ยาว '+nf(c.wood.length_cm)+' ซม. สั้นกว่าชิ้นที่ต้องการ '+nf(c.cut)+' ซม.'
+     : 'ไม้ยาว '+nf(c.wood.length_cm)+' ซม. → ตัดได้ '+c.per+' ชิ้น ชิ้นละ '+nf(c.cut)+' ซม.'+
+       (c.left>0 ? ' · เหลือท่อนละ <b>'+nf(c.left)+' ซม.</b>' : ' · ไม่เหลือเศษ'));
+}
+function addOut(d){
+  d = (d && typeof d==='object') ? d : {};
+  const i='o'+Math.random().toString(36).slice(2,8);
+  $('s_outs').insertAdjacentHTML('beforeend',
+   '<div class="itemcard in outrow" id="'+i+'">'+
+   '<div class="hd"><b style="color:#0b7a44">🔺 งานที่ผลิตได้</b><button class="btn del" onclick="document.getElementById(\''+i+'\').remove()">ลบ</button></div>'+
+   '<div class="row"><div style="flex:2 1 200px"><label>เลือกจากงานที่เคยผลิต</label>'+
+     '<select class="o_preset" onchange="fillPreset(this)">'+presetOpts()+'</select></div></div>'+
+   '<div class="row" style="margin-top:8px"><div style="flex:2 1 200px"><label>รายการ</label>'+
+     '<input class="o_name" value="'+esc(d.item_name||'')+'" placeholder="เช่น วงกบประตู 80×200"></div></div>'+
+   '<div class="row" style="margin-top:8px">'+
+     '<div><label>ชนิดงาน</label><select class="o_kind">'+
+       '<option value="door"'+((d.frame_kind||'door')==='door'?' selected':'')+'>วงกบประตู</option>'+
+       '<option value="window"'+(d.frame_kind==='window'?' selected':'')+'>วงกบหน้าต่าง</option></select></div>'+
+     '<div><label>แบบวงกบ</label><select class="o_pat" onchange="syncOutLight(this.closest(\'.outrow\'))">'+shPatOpts(d.pattern_code)+'</select></div>'+
+     '<div style="flex:0 1 120px"><label>จำนวนช่องเปิด</label><input class="o_ch" type="number" min="1" value="'+(d.channels||'')+'"></div>'+
+   '</div>'+
+   '<div class="row olight hide" style="margin-top:8px">'+
+     '<div class="olt hide" style="flex:0 1 150px"><label>จำนวนช่องแสงบน</label>'+
+       '<input class="o_ltc" type="number" min="1" step="1" value="'+(d.light_top_count!=null?d.light_top_count:'')+'"></div>'+
+     '<div class="ols hide" style="flex:0 1 190px"><label>จำนวนช่องแสงข้าง (รวม 2 ข้าง)</label>'+
+       '<input class="o_lsc" type="number" min="2" step="2" value="'+(d.light_side_count!=null?d.light_side_count:'')+'"></div>'+
+     '<div style="flex:1 1 100%"><div class="footnote">ค่าแรงคิดจาก <b>ช่องเปิด + ช่องแสง</b> รวมกัน — กรอกให้ตรงกับใบช่าง</div></div>'+
+   '</div>'+
+   '<div class="row" style="margin-top:8px">'+
+     '<div><label>กว้าง (ซม.)</label><input class="o_w" type="number" step="0.5" value="'+(d.width_cm!=null?d.width_cm:'')+'"></div>'+
+     '<div><label>สูง (ซม.)</label><input class="o_h" type="number" step="0.5" value="'+(d.height_cm!=null?d.height_cm:'')+'"></div>'+
+     '<div style="flex:0 1 80px"><label>จำนวนวง</label><input class="o_qty" type="number" step="1" value="'+(d.qty!=null?d.qty:'')+'"></div>'+
+     '<div style="flex:0 1 80px"><label>งานที่</label><input class="o_job" type="number" min="1" value="'+(d.job_no||1)+'"></div>'+
+   '</div>'+
+   '<div class="row" style="margin-top:8px"><div><label>ค่าแรงที่ช่างเขียนบนใบ (เฉพาะงานที่ไม่มีสูตร)</label>'+
+     '<input class="o_man" type="number" step="1" value="'+(d.manual_labour!=null?d.manual_labour:'')+'" placeholder="ว่างไว้ = ใช้สูตร"></div></div>'+
+   '</div>');
+  syncOutLight(document.getElementById(i));
+}
+/* ซ่อน/โชว์ช่องกรอกช่องแสงในใบผลิต ตามแบบวงกบที่เลือก */
+function syncOutLight(box){
+  if(!box) return;
+  const code = box.querySelector('.o_pat').value;
+  const p = (SH.patterns||[]).filter(x=>x.code===code)[0];
+  const lk = (p && p.light_kind) || 'none';
+  const hasT=(lk==='top'||lk==='ring'), hasS=(lk==='side'||lk==='ring');
+  box.querySelector('.olight').classList.toggle('hide', !(hasT||hasS));
+  box.querySelector('.olight .olt').classList.toggle('hide', !hasT);
+  box.querySelector('.olight .ols').classList.toggle('hide', !hasS);
+  if(!hasT) box.querySelector('.o_ltc').value='';
+  if(!hasS) box.querySelector('.o_lsc').value='';
+}
+/* คิดไม้เหลือจากรายการตัดสต๊อกให้อัตโนมัติ แล้วให้พนักงานกดยืนยันว่าจะเอาไปทำอะไร */
+function suggestLeftovers(){
+  const seen = {};
+  [...document.querySelectorAll('.leftrow')].forEach(b=>{
+    seen[b.querySelector('.l_wood').value+'|'+(Number(b.querySelector('.l_len').value)||0)] = true;
+  });
+  const groups = {};
+  [...document.querySelectorAll('.cutrow')].forEach(b=>{
+    const c = cutInfo(b);
+    if(!c || c.per<1 || c.left<=0 || c.sticks<=0) return;
+    const key = c.wood.id+'|'+c.left+'|'+c.job;
+    if(!groups[key]) groups[key] = {wood:c.wood, len:c.left, qty:0, job:c.job, from:c.wood.length_cm, cut:c.cut};
+    groups[key].qty += c.sticks;
+  });
+  const list = Object.keys(groups).map(k=>groups[k])
+    .filter(g=>!seen[g.wood.id+'|'+g.len]);
+  $('s_sug').innerHTML = !list.length ? '' :
+    '<div class="dim" style="margin-bottom:6px">ระบบคิดจากรายการไม้ที่เบิกออก — กดเลือกว่าไม้เหลือแต่ละกองจะเอาไปทำอะไร</div>'+
+    list.map((g,idx)=>
+      '<div class="sug" id="sug'+idx+'">'+
+      '<div class="lab">'+esc(g.wood.species)+' '+g.wood.thick_in+'"×'+g.wood.width_in+'" ยาว '+nf(g.len)+' ซม. · '+nf(g.qty)+' ตัว</div>'+
+      '<div class="why">มาจากไม้ยาว '+nf(g.from)+' ซม. ตัดชิ้นยาว '+nf(g.cut)+' ซม. แล้วเหลือ (งานที่ '+g.job+')</div>'+
+      '<div class="bt">'+
+        '<button class="btn sm" onclick="takeSug('+idx+',\'return_stock\')">เก็บเข้าสต๊อก</button>'+
+        '<button class="btn sm sec" onclick="takeSug('+idx+',\'return_upk\')">ส่งคืน UPK</button>'+
+        '<button class="btn sm sec" onclick="takeSug('+idx+',\'sale_discount\')">ขายลดราคา</button>'+
+        '<button class="btn del" onclick="takeSug('+idx+',\'scrap\')">เศษทิ้ง</button>'+
+      '</div></div>').join('');
+  SUG = list;
+}
+let SUG = [];
+function takeSug(idx, status){
+  const g = SUG[idx]; if(!g) return;
+  addLeft({id:0, wood_id:g.wood.id, length_cm:g.len, qty:g.qty, job_no:g.job, status:status});
+  const el = $('sug'+idx); if(el) el.remove();
+}
+function addLeft(d){
+  d = (d && typeof d==='object') ? d : {};
+  const i='l'+Math.random().toString(36).slice(2,8);
+  $('s_lefts').insertAdjacentHTML('beforeend',
+   '<div class="itemcard leftrow" id="'+i+'">'+
+   '<div class="hd"><b>ไม้เหลือ</b><button class="btn del" onclick="document.getElementById(\''+i+'\').remove();suggestLeftovers()">ลบ</button></div>'+
+   '<div class="row"><div style="flex:2 1 200px"><label>มาจากไม้ท่อน</label><select class="l_wood">'+woodOpts(d.wood_id)+'</select></div></div>'+
+   '<div class="row" style="margin-top:8px">'+
+     '<div style="flex:0 1 110px"><label>ยาวที่เหลือ (ซม.)</label><input class="l_len" type="number" step="0.5" value="'+(d.length_cm!=null?d.length_cm:'')+'"></div>'+
+     '<div style="flex:0 1 80px"><label>จำนวน</label><input class="l_qty" type="number" step="1" value="'+(d.qty!=null?d.qty:'')+'"></div>'+
+     '<div><label>สถานะ</label><select class="l_st">'+selOpts(LEFT_ST, d.status||'return_stock')+'</select></div>'+
+     '<div style="flex:0 1 80px"><label>งานที่</label><input class="l_job" type="number" min="1" value="'+(d.job_no||1)+'"></div>'+
+   '</div></div>');
+}
+async function saveSheet(){
+  say('s_msg','');
+  const payload = {
+    work_date:$('s_date').value, gs_no:$('s_gs').value, gr_no:$('s_gr').value,
+    recorder:$('s_rec').value, cutter:$('s_cut').value, note:$('s_note').value,
+    cuts:[...document.querySelectorAll('.cutrow')].map(b=>({
+      wood_id:b.querySelector('.c_wood').value, purpose:b.querySelector('.c_pur').value,
+      qty:b.querySelector('.c_qty').value, job_no:b.querySelector('.c_job').value,
+      cut_len_cm:b.querySelector('.c_cut').value,
+      pieces_per_stick:b.querySelector('.c_per').value})).filter(x=>x.wood_id&&Number(x.qty)>0),
+    outputs:[...document.querySelectorAll('.outrow')].map(b=>({
+      item_name:b.querySelector('.o_name').value, pattern_code:b.querySelector('.o_pat').value,
+      frame_kind:b.querySelector('.o_kind').value,
+      channels:b.querySelector('.o_ch').value, width_cm:b.querySelector('.o_w').value,
+      height_cm:b.querySelector('.o_h').value, qty:b.querySelector('.o_qty').value,
+      light_top_count:b.querySelector('.o_ltc').value,
+      light_side_count:b.querySelector('.o_lsc').value,
+      job_no:b.querySelector('.o_job').value, manual_labour:b.querySelector('.o_man').value}))
+      .filter(x=>Number(x.qty)>0),
+    leftovers:[...document.querySelectorAll('.leftrow')].map(b=>({
+      wood_id:b.querySelector('.l_wood').value, length_cm:b.querySelector('.l_len').value,
+      qty:b.querySelector('.l_qty').value, status:b.querySelector('.l_st').value,
+      job_no:b.querySelector('.l_job').value})).filter(x=>x.wood_id&&Number(x.qty)>0),
+    jobs: PULLED.map(p=>({job_id:p.job_id, job_no:p.job_no}))
+  };
+  if(!payload.work_date){ say('s_msg','ยังไม่ได้ใส่วันที่'); return; }
+  const r = await rpc('fr_sheet_save',{p_pin:PIN, p_payload:payload});
+  if(!r.ok){ say('s_msg', r.error); return; }
+  let msg = 'บันทึกใบวันที่ '+r.work_date+' เรียบร้อย';
+  if(PULLED.length) msg += ' · ตีสถานะ “ผลิตแล้ว” ให้ '+PULLED.length+' งาน';
+  const dif = r.plan_diffs||[];
+  if(dif.length){
+    say('s_msg','<b>'+esc(msg)+'</b><br>⚠️ ไม้ที่เบิกจริงไม่ตรงกับแผน — เจ้าของควรตรวจ<br>'+
+      dif.map(x=>'• '+esc(x.wood)+' : แผน '+nf(x.planned)+' ตัว · เบิกจริง '+nf(x.actual)+' ตัว').join('<br>'),'warn',true);
+  } else {
+    say('s_msg', msg, 'ok');
+  }
+  PULLED=[]; renderPulled();
+}
+async function showCosting(){
+  const r = await rpc('fr_sheet_costing',{p_pin:PIN, p_date:$('s_date').value});
+  if(!r.ok){ $('s_cost').innerHTML='<div class="msg err">'+esc(r.error)+'</div>'; return; }
+  let h = '<div class="card"><h2>ต้นทุนของใบวันที่ '+esc(r.work_date)+'</h2>';
+  if(r.has_placeholder) h += '<div class="msg warn">⚠️ ยังมีราคาไม้ที่เป็นราคาสมมุติ ตัวเลขนี้ยังเชื่อไม่ได้</div>';
+  (r.warnings||[]).forEach(w=> h += '<div class="msg err">'+esc(w)+'</div>');
+  h += '<table><tr><td>ค่าไม้ (เฉพาะทำวงกบ · ทั้งท่อนรวมเศษ)</td><td class="num">'+nf(r.wood_gross)+'</td></tr>'+
+       '<tr><td>ค่าแรงช่าง</td><td class="num">'+nf(r.labour)+'</td></tr>'+
+       '<tr><td><b>ต้นทุนรวม</b></td><td class="num"><b>'+nf(r.total_cost)+'</b></td></tr></table>';
+  h += '<h2 style="margin-top:14px">ต้นทุนต่อวง (ไปคีย์ใน ACC-BILLING)</h2><div style="overflow-x:auto"><table>'+
+       '<tr><th>รายการ</th><th class="num">จำนวน</th><th class="num">ค่าไม้ปัน</th><th class="num">ค่าแรง</th><th class="num">ทุน/วง</th></tr>';
+  (r.lines||[]).forEach(l=>{
+    h += '<tr><td>'+esc(l.item_name||('วงกบ '+(l.width_cm||'?')+'×'+(l.height_cm||'?')))+'</td><td class="num">'+nf(l.qty)+
+         '</td><td class="num">'+nf(l.wood_alloc)+'</td><td class="num">'+nf(l.labour)+
+         '</td><td class="num"><b>'+nf(l.unit_cost)+'</b></td></tr>';
+  });
+  h += '</table></div><div class="footnote">ค่าไม้ปันตามสัดส่วนค่าแรงภายใน “งานที่” เดียวกัน · '+
+       'ไม้เหลือไม่หักออกจากต้นทุนใบนี้ — งานหน้าที่หยิบไปใช้ได้ไม้ฟรี</div>';
+  if((r.leftovers||[]).length){
+    h += '<div class="dim" style="margin-top:8px">ไม้เหลือที่บันทึกไว้ (มูลค่า 0 · งานหน้าใช้ฟรี): '+
+         r.leftovers.map(x=>esc(x.species||'ไม้')+' ยาว '+nf(x.length_cm)+' ซม. × '+nf(x.qty)).join(' · ')+'</div>';
+  }
+  h += '</div>';
+  $('s_cost').innerHTML = h;
+}
+
+/* ================= สต๊อกไม้โรงช่าง ================= */
+let KS = {};
+const MOVE_TXT = {receive:'รับเข้า', cut:'ตัดใช้ทำวงกบ', leftover:'ไม้เหลือคืนกอง', adjust:'ปรับยอด', count:'นับจริง'};
+async function initStock(){
+  if(!$('k_date').value) $('k_date').value = today();
+  const r = await rpc('fr_stock_data',{p_pin:PIN});
+  if(!r.ok){ say('k_msg', r.error); return; }
+  KS = r;
+  const canEdit = !!r.can_edit;
+  document.querySelectorAll('.stock-edit').forEach(e=>e.classList.toggle('hide', !canEdit));
+  let h = '<tr><th>ชนิด / ขนาดไม้</th><th class="num">คงเหลือ (ตัว)</th>'+
+          '<th class="num">ในนั้นเป็น<br>ไม้เหลือจากงาน</th><th>สถานะ</th>'+(canEdit?'<th class="noprint"></th>':'')+'</tr>';
+  (r.rows||[]).forEach(x=>{
+    const n = Number(x.on_hand)||0, lo = Number(x.from_leftover)||0;
+    const pill = n>0 ? '<span class="pill ok">มีของ</span>'
+                     : '<span class="pill '+(x.orderable?'warn':'dim')+'">'+(x.orderable?'ต้องสั่งเข้า':'เลิกใช้')+'</span>';
+    h += '<tr><td>'+esc(x.species)+' '+x.thick_in+'"×'+x.width_in+'" ยาว '+x.length_cm+' ซม.'+
+         (x.note?'<div class="dim" style="font-size:11px;color:#8a5b00">⚠️ '+esc(x.note)+'</div>':'')+'</td>'+
+         '<td class="num"'+(n>0?' style="font-weight:600"':'')+'>'+nf(n)+'</td>'+
+         '<td class="num">'+(lo>0?'<span class="pill warn">'+nf(lo)+'</span>':'<span class="dim">—</span>')+'</td>'+
+         '<td>'+pill+'</td>'+
+         (canEdit?'<td class="noprint"><button class="btn sm sec" onclick="countStock('+x.wood_id+','+n+')">นับจริง</button></td>':'')+'</tr>';
+  });
+  $('k_rows').innerHTML = h;
+  renderOpenCount(canEdit);
+  if(!canEdit) return;
+  let mh = '<tr><th>วันที่</th><th>ไม้</th><th class="num">จำนวน</th><th>รายการ</th><th>อ้างอิง</th></tr>';
+  (r.moves||[]).forEach(m=>{
+    const q = Number(m.qty)||0;
+    mh += '<tr><td>'+esc(m.date)+'</td><td>'+esc(m.wood)+'</td>'+
+          '<td class="num" style="color:'+(q<0?'var(--bad)':'var(--ok)')+'">'+(q>0?'+':'')+nf(q)+'</td>'+
+          '<td>'+esc(MOVE_TXT[m.reason]||m.reason)+'</td><td class="dim">'+esc(m.gs_no||m.note||'')+'</td></tr>';
+  });
+  $('k_moves').innerHTML = mh;
+  if($('k_recv').children.length===0) addRecv();
+  else refreshRecvSelects();
+}
+/* 📋 นับไม้ตั้งต้น — โผล่เฉพาะตอนที่ยังไม่เคยมีความเคลื่อนไหวสต๊อกเลย (ทำครั้งเดียวตอนเริ่มใช้) */
+function renderOpenCount(canEdit){
+  const box = $('k_open'); if(!box) return;
+  if(!canEdit || KS.started){ box.innerHTML=''; return; }
+  box.innerHTML =
+   '<div class="card in">'+
+   '<h2>📋 นับไม้ตั้งต้น (ทำครั้งเดียวตอนเริ่มใช้)</h2>'+
+   '<div class="dim" style="margin-bottom:8px">เดินนับไม้ที่กองอยู่หน้าโรงช่างตอนนี้ แล้วใส่จำนวนตามความยาว — ช่องไหนไม่มีเว้นว่างไว้ได้<br>'+
+   'ใส่ครบแล้วกดบันทึกทีเดียว จากนั้นระบบจะตัดออก/บวกไม้เหลือคืนให้เองทุกครั้งที่บันทึกใบตัด</div>'+
+   '<div style="overflow-x:auto"><table>'+
+   '<tr><th>ชนิด / ขนาดไม้</th><th class="num">นับได้ (ตัว)</th></tr>'+
+   (KS.rows||[]).map(w=>'<tr><td>'+esc(w.species)+' '+w.thick_in+'"×'+w.width_in+'" ยาว '+w.length_cm+' ซม.</td>'+
+     '<td class="num"><input class="ko_qty" data-wood="'+w.wood_id+'" type="number" step="1" min="0" '+
+     'style="max-width:110px;text-align:right"></td></tr>').join('')+
+   '</table></div>'+
+   '<button class="btn" style="width:100%;margin-top:10px" onclick="saveOpenCount(this)">บันทึกไม้ตั้งต้น</button>'+
+   '</div>';
+}
+async function saveOpenCount(btn){
+  const items = [...document.querySelectorAll('.ko_qty')].map(i=>({
+      wood_id: i.dataset.wood, qty: i.value,
+      move_date: $('k_date').value || today(), gs_no: 'นับตั้งต้น'
+    })).filter(x=>Number(x.qty) > 0);
+  if(!items.length){ say('k_msg','ยังไม่ได้ใส่จำนวนไม้สักช่อง'); return; }
+  if(!confirm('บันทึกไม้ตั้งต้น '+items.length+' ขนาด?\nทำครั้งเดียวพอ — หลังจากนี้ให้ใช้ปุ่ม “นับจริง” แทน')) return;
+  btn.disabled = true;
+  const r = await rpc('fr_stock_receive',{p_pin:PIN, p_items:items});
+  btn.disabled = false;
+  if(!r.ok){ say('k_msg', r.error); return; }
+  say('k_msg','บันทึกไม้ตั้งต้น '+r.saved+' ขนาดแล้ว — ต่อจากนี้หน้าเสนอราคาจะเช็คไม้พอ/ไม่พอให้เอง','ok');
+  qLoaded = false;            /* ให้หน้าเสนอราคาโหลดธง stock_started ใหม่ */
+  initStock();
+}
+function stockWoodOpts(sel){
+  return '<option value="">— เลือกไม้ —</option>'+(KS.rows||[]).map(w=>
+    '<option value="'+w.wood_id+'"'+(String(w.wood_id)===String(sel)?' selected':'')+'>'+
+    esc(w.species)+' '+w.thick_in+'"×'+w.width_in+'" ยาว '+w.length_cm+' ซม.</option>').join('');
+}
+function refreshRecvSelects(){
+  document.querySelectorAll('.kr_wood').forEach(s=>{ const k=s.value; s.innerHTML=stockWoodOpts(k); if(k) s.value=k; });
+}
+function addRecv(){
+  const i='k'+Math.random().toString(36).slice(2,8);
+  $('k_recv').insertAdjacentHTML('beforeend',
+   '<div class="itemcard recvrow" id="'+i+'">'+
+   '<div class="hd"><b>ไม้ที่รับเข้า</b><button class="btn del" onclick="document.getElementById(\''+i+'\').remove()">ลบ</button></div>'+
+   '<div class="row"><div style="flex:2 1 200px"><label>ชนิด/ขนาดไม้</label><select class="kr_wood">'+stockWoodOpts()+'</select></div>'+
+   '<div style="flex:0 1 110px"><label>จำนวน (ตัว)</label><input class="kr_qty" type="number" step="1"></div></div></div>');
+}
+async function saveRecv(){
+  const items = [...document.querySelectorAll('.recvrow')].map(b=>({
+    wood_id: b.querySelector('.kr_wood').value,
+    qty: b.querySelector('.kr_qty').value,
+    move_date: $('k_date').value, gs_no: $('k_gs').value
+  })).filter(x=>x.wood_id && Number(x.qty)>0);
+  if(!items.length){ say('k_msg','ยังไม่ได้ใส่ไม้ที่รับเข้า'); return; }
+  const r = await rpc('fr_stock_receive',{p_pin:PIN, p_items:items});
+  if(!r.ok){ say('k_msg', r.error); return; }
+  $('k_recv').innerHTML=''; $('k_gs').value='';
+  say('k_msg','บันทึกรับไม้เข้า '+r.saved+' รายการแล้ว','ok');
+  initStock();
+}
+async function countStock(woodId, cur){
+  const v = prompt('นับจริงได้กี่ตัว? (ระบบคิดว่ามี '+cur+')', cur);
+  if(v===null) return;
+  const n = Number(v);
+  if(!isFinite(n) || n < 0){ say('k_msg','ใส่เป็นตัวเลขไม่ติดลบ'); return; }
+  const r = await rpc('fr_stock_count',{p_pin:PIN, p_wood_id:woodId, p_counted:n});
+  if(!r.ok){ say('k_msg', r.error); return; }
+  const bad = Number(r.diff) < 0 && Number(r.from_leftover) > 0;
+  say('k_msg', r.message || 'บันทึกแล้ว', r.diff===0 ? 'ok' : (bad ? 'err' : 'warn'));
+  initStock();
+}
+
+/* ================= เตือนยอด ================= */
+function initRecon(){
+  if(!$('r_to').value){
+    const t = today(); $('r_to').value = t;
+    const d = new Date(Date.now()+7*3600e3); d.setDate(d.getDate()-30);
+    $('r_from').value = d.toISOString().slice(0,10);
+    loadRecon();
+  }
+}
+const R_ST = {match:['ตรงกัน','ok'], diff:['ไม่ตรง','bad'], no_sheet:['ไม่มีใบตัด/ผลิต','warn'], no_pay:['ยังไม่จ่าย','dim']};
+async function loadRecon(){
+  const r = await rpc('fr_recon',{p_pin:PIN, p_from:$('r_from').value, p_to:$('r_to').value});
+  if(!r.ok){ $('r_out').innerHTML='<div class="msg err">'+esc(r.error)+'</div>'; return; }
+  const rows = r.rows||[];
+  const bad = rows.filter(x=>!x.acked && (x.status==='diff'||x.status==='no_sheet'));
+  let h = '<div class="card">';
+  h += bad.length ? '<div class="msg err">มี '+bad.length+' วันที่ต้องตรวจ</div>'
+                  : '<div class="msg ok">ไม่มีรายการที่ต้องตรวจในช่วงนี้</div>';
+  h += '<div style="overflow-x:auto"><table><tr><th>วันที่</th><th class="num">ระบบคำนวณ</th><th class="num">จ่ายจริง</th><th class="num">ต่าง</th><th>สถานะ</th><th></th></tr>';
+  rows.forEach(x=>{
+    const st = R_ST[x.status]||['?','dim'];
+    h += '<tr><td>'+esc(x.work_date)+'</td><td class="num">'+nf(x.calc)+'</td><td class="num">'+nf(x.paid)+
+         '</td><td class="num"'+(Number(x.diff)!==0?' style="color:var(--bad);font-weight:600"':'')+'>'+nf(x.diff)+
+         '</td><td><span class="pill '+st[1]+'">'+st[0]+'</span>'+(x.acked?' <span class="pill dim">ตรวจแล้ว</span>':'')+'</td>'+
+         '<td class="noprint">'+(x.status==='match'?'':
+           '<button class="btn sm sec" onclick="ackRecon(\''+x.work_date+'\','+(x.acked?'false':'true')+')">'+(x.acked?'ยกเลิก':'ตรวจแล้ว')+'</button>')+'</td></tr>';
+  });
+  h += '</table></div></div>';
+  $('r_out').innerHTML = h;
+}
+async function ackRecon(d,on){
+  let note = '';
+  if(on){
+    const ans = prompt('เหตุผล / บันทึกสั้นๆ ว่าทำไมรับได้');
+    if(ans===null) return;          // กดยกเลิก = ไม่ปิดเคส
+    note = ans;
+  }
+  const r = await rpc('fr_recon_ack_set',{p_pin:PIN, p_date:d, p_note:note, p_on:on});
+  if(r.ok) loadRecon();
+}
+
+/* ================= ตั้งค่า ================= */
+async function initAdmin(){
+  initRecon();
+  const r = await rpc('fr_admin_data',{p_pin:PIN});
+  if(!r.ok){ say('a_msg', r.error); return; }
+  AD = r;
+  const t = today();
+  ['a_wood_from','a_lab_from','a_mar_from'].forEach(k=>{ if(!$(k).value) $(k).value = t; });
+  renderWood(); renderLabour(); renderMargin();
+  const ru = r.rule||{};
+  $('a_rule_sp').value=ru.default_species||''; $('a_rule_th').value=ru.default_thick_in||'';
+  $('a_rule_wd').value=ru.default_width_in||''; $('a_rule_ve').value=ru.vertical_extra;
+  $('a_rule_mt').value=ru.miter_allow_cm; $('a_rule_hd').value=ru.h_count_door;
+  $('a_rule_hw').value=ru.h_count_window; $('a_rule_ow').value=ru.outer_extra_w_cm;
+  $('a_rule_oh').value=ru.outer_extra_h_cm; $('a_rule_ew').value=ru.extra_waste_pct;
+  $('a_rule_sc').value=ru.min_usable_scrap_cm; $('a_rule_op').value=ru.one_piece_per_stick?'1':'0';
+  $('a_rule_rt').value=ru.round_to;
+  ruleDemo();
+  if(r.has_placeholder) $('phWarn').innerHTML =
+    '<div class="msg warn">⚠️ ยังมีราคาไม้ที่เป็น <b>ราคาสมมุติสำหรับทดสอบ</b> (แถวสีแดงข้างล่าง) — ใส่ราคาจริงแล้วคำเตือนจะหายไป</div>';
+  else $('phWarn').innerHTML='';
+}
+function renderWood(){
+  let h='<tr><th>ชนิด</th><th>หนา"</th><th>กว้าง"</th><th>ยาว ซม.</th><th class="num">ราคา/ตัว</th><th>ใช้</th></tr>';
+  (AD.wood||[]).forEach(w=>{
+    h += '<tr class="wrow" data-id="'+w.id+'"'+(w.note?' title="'+esc(w.note)+'"':'')+'>'+
+      '<td><input class="w_sp" value="'+esc(w.species)+'" style="min-width:90px">'+
+        (w.note?'<div class="dim" style="font-size:11px;color:#8a5b00">⚠️ '+esc(w.note)+'</div>':'')+'</td>'+
+      '<td><input class="w_th" type="number" step="0.25" value="'+w.thick_in+'" style="width:62px"></td>'+
+      '<td><input class="w_wd" type="number" step="0.25" value="'+w.width_in+'" style="width:62px"></td>'+
+      '<td><input class="w_ln" type="number" step="1" value="'+w.length_cm+'" style="width:74px"></td>'+
+      '<td><input class="w_pr" type="number" step="0.01" value="'+(w.price!=null?w.price:'')+'" style="width:88px'+
+          (w.is_placeholder?';border-color:var(--bad);background:#fdecec':'')+'"></td>'+
+      '<td><input class="w_ac" type="checkbox"'+(w.active?' checked':'')+'></td></tr>';
+  });
+  $('a_wood').innerHTML = h;
+}
+function addWoodRow(){
+  $('a_wood').insertAdjacentHTML('beforeend',
+   '<tr class="wrow" data-id=""><td><input class="w_sp" value="ไม้ยาง" style="min-width:90px"></td>'+
+   '<td><input class="w_th" type="number" step="0.25" value="2" style="width:62px"></td>'+
+   '<td><input class="w_wd" type="number" step="0.25" value="4" style="width:62px"></td>'+
+   '<td><input class="w_ln" type="number" step="1" style="width:74px"></td>'+
+   '<td><input class="w_pr" type="number" step="0.01" style="width:88px"></td>'+
+   '<td><input class="w_ac" type="checkbox" checked></td></tr>');
+}
+async function saveWood(){
+  const items = [...document.querySelectorAll('.wrow')].map(r=>({
+    id:r.dataset.id, species:r.querySelector('.w_sp').value, thick_in:r.querySelector('.w_th').value,
+    width_in:r.querySelector('.w_wd').value, length_cm:r.querySelector('.w_ln').value,
+    price:r.querySelector('.w_pr').value, price_from:$('a_wood_from').value,
+    active:r.querySelector('.w_ac').checked
+  })).filter(x=>x.species && x.length_cm);
+  const r = await rpc('fr_admin_save_wood',{p_pin:PIN, p_items:items});
+  say('a_msg', r.ok?'บันทึกราคาไม้แล้ว':r.error, r.ok?'ok':'err');
+  if(r.ok) initAdmin();
+}
+function renderLabour(){
+  let h='<tr><th>แบบ</th><th class="num">ค่าคงที่</th><th class="num">ต่อช่อง</th><th class="num">หักช่อง</th><th>ตัวอย่าง</th></tr>';
+  (AD.patterns||[]).forEach(p=>{
+    const r0=p.rate||{};
+    h += '<tr class="lrow" data-code="'+esc(p.code)+'"><td>'+esc(p.label)+'</td>'+
+      '<td><input class="l_b" type="number" step="1" value="'+(r0.base!=null?r0.base:0)+'" style="width:76px"></td>'+
+      '<td><input class="l_p" type="number" step="1" value="'+(r0.per_channel!=null?r0.per_channel:0)+'" style="width:76px"></td>'+
+      '<td><input class="l_o" type="number" step="1" value="'+(r0['offset']!=null?r0['offset']:0)+'" style="width:70px"></td>'+
+      '<td class="dim" style="font-size:12px">3 ช่อง = '+nf((r0.base||0)+(r0.per_channel||0)*(3-(r0['offset']||0)))+' บาท</td></tr>';
+  });
+  $('a_lab').innerHTML=h;
+}
+async function saveLabour(){
+  const items=[...document.querySelectorAll('.lrow')].map(r=>({
+    code:r.dataset.code, base:r.querySelector('.l_b').value, per_channel:r.querySelector('.l_p').value,
+    offset:r.querySelector('.l_o').value, from:$('a_lab_from').value}));
+  const r = await rpc('fr_admin_save_labour',{p_pin:PIN, p_items:items});
+  say('a_msg', r.ok?'บันทึกค่าแรงแล้ว':r.error, r.ok?'ok':'err');
+  if(r.ok) initAdmin();
+}
+function renderMargin(){
+  let h='<tr><th>ลูกค้า</th><th class="num">กำไร %</th><th class="num">เผื่อเศษ %</th></tr>';
+  (AD.margins||[]).forEach(m=>{
+    h += '<tr class="mrow" data-code="'+esc(m.customer_type)+'"><td><input class="m_l" value="'+esc(m.label)+'" style="min-width:130px"></td>'+
+      '<td><input class="m_p" type="number" step="0.5" value="'+m.margin_pct+'" style="width:80px"></td>'+
+      '<td><input class="m_w" type="number" step="0.5" value="'+m.waste_pct+'" style="width:80px"></td></tr>';
+  });
+  $('a_mar').innerHTML=h;
+}
+async function saveMargin(){
+  const items=[...document.querySelectorAll('.mrow')].map(r=>({
+    customer_type:r.dataset.code, label:r.querySelector('.m_l').value,
+    margin_pct:r.querySelector('.m_p').value, waste_pct:r.querySelector('.m_w').value,
+    from:$('a_mar_from').value}));
+  const r = await rpc('fr_admin_save_margin',{p_pin:PIN, p_items:items});
+  say('a_msg', r.ok?'บันทึกเรตแล้ว':r.error, r.ok?'ok':'err');
+  if(r.ok) initAdmin();
+}
+/* ตัวอย่างสดๆ ให้เห็นว่ากติกาที่ตั้งไว้ตัดไม้ยาวเท่าไหร่ */
+function ruleDemo(){
+  const m = Number($('a_rule_mt').value)||0;
+  $('a_rule_demo').innerHTML = 'ตัวอย่าง: วงกบประตูริมใน 80×200 ซม. → ไม้หัววงกบยาว <b>'+(80+m*2)+
+    '</b> ซม. · ไม้ขายาว <b>'+(200+m*2)+'</b> ซม. (เผื่อข้างละ '+m+' ซม.)';
+}
+['a_rule_mt'].forEach(id=>$(id).addEventListener('input', ruleDemo));
+async function saveRule(){
+  const rule={default_species:$('a_rule_sp').value, default_thick_in:$('a_rule_th').value,
+    default_width_in:$('a_rule_wd').value, vertical_extra:$('a_rule_ve').value,
+    miter_allow_cm:$('a_rule_mt').value, h_count_door:$('a_rule_hd').value,
+    h_count_window:$('a_rule_hw').value, outer_extra_w_cm:$('a_rule_ow').value,
+    outer_extra_h_cm:$('a_rule_oh').value, extra_waste_pct:$('a_rule_ew').value,
+    min_usable_scrap_cm:$('a_rule_sc').value, one_piece_per_stick:$('a_rule_op').value,
+    round_to:$('a_rule_rt').value};
+  const r = await rpc('fr_admin_save_rule',{p_pin:PIN, p_rule:rule});
+  say('a_msg', r.ok?'บันทึกกติกาแล้ว':r.error, r.ok?'ok':'err');
+  if(r.ok) ruleDemo();
+}
+async function setPin(key, field){
+  const v = $(field).value.trim();
+  const r = await rpc('fr_admin_set_pin',{p_pin:PIN, p_key:key, p_new:v});
+  say('a_msg', r.ok?'เปลี่ยนรหัสแล้ว':r.error, r.ok?'ok':'err');
+  if(r.ok) $(field).value='';
+}
+
+/* auto-login จาก session เดิม */
+(async ()=>{ const p = sessionStorage.getItem('fr_pin');
+  if(p){ $('pin').value=p; await doLogin(); }
+  if(!$('login').classList.contains('hide')) $('pin').focus();
+})();
+</script>
+</body>
+</html>
