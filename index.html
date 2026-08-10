@@ -840,8 +840,6 @@ function frameSvg(o){
       'transform="rotate(-90 '+xx+','+my+')">'+label+'</text>';
   };
   const isOuterFix = (o.basis==='outer');
-  const cOut = isOuterFix ? C_FIX : C_CALC;
-  const tagOut = isOuterFix ? ' FIX' : '';
   const tagLt = (o.hasLight && !isOuterFix) ? ' FIX' : '';
   const lW = Number(o.leafW)||0, lH = Number(o.leafH)||0;
   const oW = Number(o.outerW)||0, oH = Number(o.outerH)||0;
@@ -849,16 +847,20 @@ function frameSvg(o){
   // 🚪 ขนาดบาน = ช่องเปิดริมใน — ลูกค้าสั่งมาแล้ว ยึดเสมอ
   if(lW>0) dimS += dimH(mainX0, mainX1, (o.hasTop ? bodyY0 : iy0) + 12, nf(lW)+' FIX', C_FIX, 11);
   if(lH>0) dimS += dimV(bodyY0, iy1, mainX0 + 12, nf(lH)+' FIX', C_FIX, 11);
-  // ช่องปูน (ริมนอก) — ส้มถ้าลูกค้าฟิกซ์ เทาถ้าเป็นผลที่ได้ตามมา
-  if(oW>0) dimS += dimH(x0, x1, y0-15, nf(oW)+tagOut, cOut, 10);
-  if(oH>0) dimS += dimV(y0, y1, x1+21, nf(oH)+tagOut, cOut, 10);
+  /* ช่องปูน (ริมนอก) — วาดเฉพาะตอนลูกค้าฟิกซ์มาเท่านั้น
+     ถ้าเป็นขนาดที่ระบบคิดให้ ไม่ต้องขึ้นบนรูป (เลขนอกกรอบทำให้สับสนกับขนาดที่ต้องยึด) */
+  if(isOuterFix){
+    if(oW>0) dimS += dimH(x0, x1, y0-15, nf(oW)+' FIX', C_FIX, 10);
+    if(oH>0) dimS += dimV(y0, y1, x1+21, nf(oH)+' FIX', C_FIX, 10);
+  }
   // ช่องแสง — ตัวที่ปรับได้ (ถ้าฟิกซ์ริมนอก ตัวนี้คือผลลัพธ์ที่ระบบคิดให้)
   if(o.hasTop && o.topUse>0)   dimS += dimV(iy0, iy0+topH, x0-13, nf(o.topUse)+tagLt, C_LT, 10);
   if(o.hasSide && o.sideUse>0) dimS += dimH(ix0, ix0+sideW, bodyY0+16, nf(o.sideUse)+tagLt, C_LT, 10);
 
   // ── ป้ายกำกับ (ใบเสนอราคาที่พิมพ์ให้ลูกค้าไม่ต้องมีป้ายชิ้นส่วน) ──
   if(o.noLabels)
-    return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="'+(x0-34)+' '+(y0-24)+' '+(x1-x0+76)+' '+(y1-y0+48)+'" '+
+    return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="'+(x0-30)+' '+(y0-(isOuterFix?24:8))+' '+
+           (x1-x0+(isOuterFix?70:44))+' '+(y1-y0+(isOuterFix?48:30))+'" '+
            'width="'+W+'" font-family="Noto Sans Thai,Sarabun,sans-serif">'+s+dimS+'</svg>';
   s += txt((x0+x1)/2, y0+t-2, 'หัววงกบ', 10);
   s += '<text x="'+(x0-6)+'" y="'+((y0+y1)/2)+'" font-size="11" fill="#4a2f14" text-anchor="middle" transform="rotate(-90 '+(x0-6)+','+((y0+y1)/2)+')">ขา</text>';
@@ -875,7 +877,8 @@ function frameSvg(o){
   s += txt((mainX0+mainX1)/2, bodyY0+bodyH/2, 'ช่องเปิด '+o.ch+' ช่อง', 10, '#6b7785');
   if(o.ch>1) s += txt(mainX0+cellW+t/2, bodyY0+13, 'เสากลาง', 9, '#4a2f14');
 
-  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -9 '+W+' '+(y1+43)+'" width="'+W+'" '+
+  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 '+(isOuterFix?-9:0)+' '+W+' '+
+         (y1+(isOuterFix?43:36))+'" width="'+W+'" '+
          'font-family="Noto Sans Thai,Sarabun,sans-serif">'+s+dimS+'</svg>';
 }
 
@@ -933,10 +936,9 @@ function drawPic(box){
     (o.leaves>1 ? (o.hasMid ? ' (มีเสากั้นกลาง → '+o.ch+' ช่องเปิด)' : ' (ไม่มีเสากั้นกลาง → 1 ช่องเปิด)') : '')+
     ' <span class="fixtag">'+fixTxt+'</span><br>'+
     leafSummary(o)+ sizeTxt+ lightSummary(o)+
-    '<div style="margin-top:3px;font-size:12px">เลขบนรูป (ซม.): '+
-      '<b style="color:#c2410c">สีส้ม+FIX = ตัวเลขที่ยึด</b> · '+
-      '<span style="color:#94a3b8">เทา = ได้ตามมา</span> · '+
-      '<span style="color:#2b6b85">น้ำเงิน = ช่องแสง</span></div>'+
+    '<div style="margin-top:3px;font-size:12px">เลขบนรูป (ซม.) = <b style="color:#c2410c">ขนาดที่ยึดเท่านั้น</b>'+
+      ' · <span style="color:#2b6b85">น้ำเงิน = ช่องแสง</span>'+
+      '<br><span class="dim">ขนาดวงกบที่ระบบคิดให้อยู่ในบรรทัดข้อความข้างบน ไม่เอาขึ้นรูปกันสับสน</span></div>'+
     '<span style="color:#9aa4b0">ภาพประกอบ ไม่ใช่สัดส่วนจริง</span></div>';
 }
 function fillModel(sel){
