@@ -522,72 +522,82 @@ function addQuoteItem(){
       '<div><label>แบบวงกบ</label><select class="q_pat">'+patOpts()+'</select></div>'+
       '<div style="flex:0 1 120px"><label>จำนวนช่องเปิด</label><input class="q_ch" type="number" min="1" value="1"></div>'+
     '</div>'+
-    '<div class="lightbox hide">'+
-      '<div class="lb-hd">ช่องแสง — กรอกแยกจากช่องเปิด</div>'+
-      '<div class="row lt hide">'+
-        '<div style="flex:0 1 150px"><label>จำนวนช่องแสงบน *</label>'+
-          '<input class="q_ltc" type="number" min="1" step="1" placeholder="เช่น 3"></div>'+
-        '<div style="flex:1 1 180px"><label>ความสูงช่องแสงบน (ซม.)</label>'+
-          '<input class="q_ltcm" type="number" step="0.5" placeholder="เว้นว่าง = เฉลี่ย 3 ช่อง"></div>'+
-      '</div>'+
-      '<div class="row ls hide" style="margin-top:6px">'+
-        '<div style="flex:0 1 190px"><label>จำนวนช่องแสงข้าง รวม 2 ข้าง *</label>'+
-          '<input class="q_lsc" type="number" min="2" step="2" placeholder="เช่น 6 = ข้างละ 3"></div>'+
-        '<div style="flex:1 1 200px"><label>ความกว้างช่องแสงข้าง ต่อ 1 ข้าง (ซม.)</label>'+
-          '<input class="q_lscm" type="number" step="0.5" placeholder="เว้นว่าง = เฉลี่ย 3 ช่อง"></div>'+
-      '</div>'+
-      '<div class="row" style="margin-top:6px"><div style="flex:1 1 100%">'+
-        '<label style="display:flex;align-items:center;gap:8px;cursor:pointer;color:var(--ink);font-size:14px">'+
-        '<input type="checkbox" class="q_lfix" style="width:20px;height:20px;flex:0 0 auto">'+
-        '<span>🔴 <b>ระยะช่องแสง FIX</b> — ลูกค้าสั่งมาตายตัว ต้องทำให้ได้ตามนี้ '+
-        '<span class="dim">(ไม่ติ๊ก = ระยะที่ตั้งไว้ ช่างปรับได้ตามหน้างาน)</span></span></label>'+
-      '</div></div>'+
-      '<div class="footnote">* ต้องกรอก · ช่อง “ขนาด” เว้นว่างได้ ระบบจะเฉลี่ยเป็น 3 ช่องเท่ากันให้ แล้วบอกตัวเลขที่ใช้จริงใต้รูป<br>'+
-        '📏 <b>ขนาดช่องแสง = ระยะกระจกที่เห็น (ริมใน) เสมอ</b> ไม่ว่าตัววงกบจะฟิกซ์ริมในหรือริมนอก</div>'+
-    '</div>'+
 
-    /* 🚪 บาน — บอกช่างอย่างเดียว ไม่มีผลกับราคา */
+    /* 🚪 บาน = ตัวตั้งต้นของทุกอย่าง (ช่องเปิดริมใน = ขนาดบานเป๊ะ) */
     '<div class="leafbox">'+
-      '<div class="lb-hd">บาน (บอกช่าง — ไม่มีผลกับราคา)</div>'+
+      '<div class="lb-hd">บาน / ช่องเปิด — ตัวตั้งต้นของขนาดวงกบ</div>'+
       '<div class="row">'+
-        '<div style="flex:0 1 150px"><label>ขนาดบาน กว้าง (ซม.)</label>'+
-          '<input class="q_lfw" type="number" step="0.5" placeholder="เว้นว่างได้"></div>'+
-        '<div style="flex:0 1 150px"><label>ขนาดบาน สูง (ซม.)</label>'+
-          '<input class="q_lfh" type="number" step="0.5" placeholder="เว้นว่างได้"></div>'+
+        '<div style="flex:1 1 160px"><label>ขนาดบาน <b>กว้างรวมทุกบาน</b> (ซม.) *</label>'+
+          '<input class="q_lfw" type="number" step="0.5" inputmode="decimal"></div>'+
+        '<div style="flex:1 1 150px"><label>ขนาดบาน <b>สูง</b> (ซม.) *</label>'+
+          '<input class="q_lfh" type="number" step="0.5" inputmode="decimal"></div>'+
         '<div style="flex:1 1 230px"><label>การติดตั้งบาน</label><select class="q_inst">'+
           '<option value="rebate">บังใบใส่บานพับ (วงกบบังใบ)</option>'+
           '<option value="slide">บานเลื่อนสไลด์ (วงกบไม่บังใบ)</option></select></div>'+
       '</div>'+
       '<div class="footnote instnote"></div>'+
+      '<div class="footnote">ช่องเปิด (ริมใน) = ขนาดบานพอดี · <b>หลายบานให้รวมกัน</b> เช่น 2 บาน บานละ 80 → กรอก 160 (ระบบบวกเสากลางให้เอง)</div>'+
+    '</div>'+
+
+    /* ถามว่าลูกค้าฟิกซ์อะไร — เฉพาะแบบที่มีช่องแสง เพราะช่องแสงคือตัวเดียวที่ปรับได้ */
+    '<div class="basisrow hide">'+
+      '<div class="row" style="margin-top:8px"><div style="flex:1 1 100%">'+
+        '<label>นอกจากบานแล้ว ลูกค้าฟิกซ์อะไรมาอีก</label><select class="q_basis">'+
+          '<option value="inner" selected>ระบุระยะช่องแสงเอง → ระบบคิดขนาดวงกบให้</option>'+
+          '<option value="outer">ฟิกซ์ช่องปูน (ริมนอก) → ระบบคิดระยะช่องแสงที่เหลือให้</option>'+
+        '</select></div></div>'+
+    '</div>'+
+
+    /* ช่องปูน — โผล่เฉพาะตอนฟิกซ์ริมนอก */
+    '<div class="outerbox hide">'+
+      '<div class="lb-hd">ช่องปูนที่ก่อไว้ (ริมนอก) — ขนาดทั้งวง</div>'+
+      '<div class="row">'+
+        '<div><label>กว้างช่องปูน (ซม.) *</label><input class="q_w" type="number" step="0.5" inputmode="decimal"></div>'+
+        '<div><label>สูงช่องปูน (ซม.) *</label><input class="q_h" type="number" step="0.5" inputmode="decimal"></div>'+
+      '</div>'+
+      '<div class="footnote">ระบบจะเอาช่องปูน − บาน = ระยะช่องแสงที่ทำได้ แล้วเติมให้ข้างล่างเอง</div>'+
+    '</div>'+
+
+    '<div class="lightbox hide">'+
+      '<div class="lb-hd">ช่องแสง — กรอกแยกจากช่องเปิด</div>'+
+      '<div class="row lt hide">'+
+        '<div style="flex:0 1 150px"><label>จำนวนช่องแสงบน *</label>'+
+          '<input class="q_ltc" type="number" min="1" step="1" placeholder="เช่น 3"></div>'+
+        '<div style="flex:1 1 180px"><label class="lbl_ltcm">ความสูงช่องแสงบน (ซม.) *</label>'+
+          '<input class="q_ltcm" type="number" step="0.5"></div>'+
+      '</div>'+
+      '<div class="row ls hide" style="margin-top:6px">'+
+        '<div style="flex:0 1 190px"><label>จำนวนช่องแสงข้าง รวม 2 ข้าง *</label>'+
+          '<input class="q_lsc" type="number" min="2" step="2" placeholder="เช่น 6 = ข้างละ 3"></div>'+
+        '<div style="flex:1 1 200px"><label class="lbl_lscm">ความกว้างช่องแสงข้าง ต่อ 1 ข้าง (ซม.) *</label>'+
+          '<input class="q_lscm" type="number" step="0.5"></div>'+
+      '</div>'+
+      '<div class="row lfixrow" style="margin-top:6px"><div style="flex:1 1 100%">'+
+        '<label style="display:flex;align-items:center;gap:8px;cursor:pointer;color:var(--ink);font-size:14px">'+
+        '<input type="checkbox" class="q_lfix" style="width:20px;height:20px;flex:0 0 auto">'+
+        '<span>🔴 <b>ระยะช่องแสง FIX</b> — ลูกค้าสั่งมาตายตัว ต้องทำให้ได้ตามนี้ '+
+        '<span class="dim">(ไม่ติ๊ก = ระยะที่ตั้งไว้ ช่างปรับได้ตามหน้างาน)</span></span></label>'+
+      '</div></div>'+
+      '<div class="footnote">📏 <b>ขนาดช่องแสง = ระยะกระจกที่เห็น (ริมใน)</b> · ตัวเลขนี้คือตัวที่ปรับได้เวลาหน้างานไม่ลงตัว</div>'+
     '</div>'+
 
     '<div class="row" style="margin-top:8px">'+
-      '<div><label>ลูกค้าฟิกซ์ขนาดที่ (ยึดตอนทำจริง)</label><select class="q_basis">'+
-        '<option value="outer">ริมนอก (ช่องปูน) — ช่องที่ก่อไว้ วางวงกบทั้งวง</option>'+
-        '<option value="inner" selected>ริมใน — ขนาดประตู/ช่องเปิด</option></select></div>'+
-      '<div class="scopewrap"><label>ขนาดที่กรอกเป็นของ</label><select class="q_scope">'+
-        '<option value="total">ทั้งวง (กว้างรวมทุกช่อง)</option>'+
-        '<option value="per_channel">ต่อ 1 ช่อง (เช่น 2 ช่อง บานละ 60×100)</option></select>'+
-        '<div class="footnote scopehint hide">ริมนอก (ช่องปูน) = ขนาดทั้งวงเสมอ กรอกต่อช่องไม่ได้</div></div>'+
-    '</div>'+
-    '<div class="row" style="margin-top:8px">'+
-      '<div><label class="lbl_w">กว้าง (ซม.)</label><input class="q_w" type="number" step="0.5" inputmode="decimal"></div>'+
-      '<div><label class="lbl_h">สูง (ซม.)</label><input class="q_h" type="number" step="0.5" inputmode="decimal"></div>'+
-      '<div style="flex:0 1 90px"><label>จำนวนชุด</label><input class="q_qty" type="number" min="1" value="1"></div>'+
+      '<div style="flex:0 1 110px"><label>จำนวนชุด</label><input class="q_qty" type="number" min="1" value="1"></div>'+
     '</div>'+
     '<div class="pic"></div>'+
     '<div class="footnote">ดูรูปว่าตรงกับที่ลูกค้าต้องการไหม ถ้าไม่ตรงให้เปลี่ยนชนิดงาน/แบบ/จำนวนช่อง — ถามช่างถ้าไม่แน่ใจ อย่าเดา</div>'+
     '</div>';
   $('q_items').insertAdjacentHTML('beforeend', html);
   const box = $('qi'+i);
-  box.querySelectorAll('.q_kind,.q_pat,.q_ch,.q_basis,.q_scope,.q_w,.q_h,'+
+  box.querySelectorAll('.q_kind,.q_pat,.q_ch,.q_basis,.q_w,.q_h,'+
                        '.q_ltc,.q_ltcm,.q_lsc,.q_lscm,.q_lfix,.q_qty,.q_lfw,.q_lfh,.q_inst').forEach(el=>{
-    el.addEventListener('change', ()=>{ syncBasisScope(box); syncLightBox(box); syncLeafBox(box); drawPic(box); });
-    el.addEventListener('input',  ()=>{ syncBasisScope(box); syncLightBox(box); syncLeafBox(box); drawPic(box); });
+    el.addEventListener('change', ()=>syncCard(box));
+    el.addEventListener('input',  ()=>syncCard(box));
   });
-  box.querySelector('.q_basis').dataset.prev = box.querySelector('.q_basis').value;
-  syncBasisScope(box); syncLightBox(box); syncLeafBox(box); drawPic(box);
+  syncCard(box);
 }
+/* เรียกรวมทีเดียว: ซ่อน/โชว์ให้ตรงแบบ → เติมค่าที่คำนวณให้ → วาดรูป */
+function syncCard(box){ syncLightBox(box); syncBasisScope(box); syncLeafBox(box); drawPic(box); }
 
 /* ---------- รูปประกอบ: ให้พนักงานเห็นว่าเลือกถูกแบบไหม ---------- */
 const WOOD='#c9a882', WOOD2='#dcc3a5', LINE_='#6d451f', GLASS='#dff0f7', GLASS_L='#9ec9d8';
@@ -606,42 +616,29 @@ function frRules(){
   return { ow: Number(r.outer_extra_w_cm)||10, oh: Number(r.outer_extra_h_cm)||10,
            mu: Number(r.mullion_cm)||5 };
 }
-/* 🔒 ริมนอก = ช่องปูน วางวงกบทั้งวง → ห้ามกรอกขนาดต่อ 1 ช่อง */
+/* 🔒 ลูกค้าฟิกซ์ได้ทีละอย่าง: ระบุช่องแสงเอง (ริมใน) หรือ ฟิกซ์ช่องปูน (ริมนอก)
+   ไม่มีช่องแสง = ไม่มีตัวปรับ → ไม่ต้องถาม ใช้ขนาดบานตรง ๆ */
 function syncBasisScope(box){
-  const bs = box.querySelector('.q_basis');
-  const isOuter = bs.value === 'outer';
-  /* 🧹 สลับฐาน = ตัวเลขเดิมคนละความหมาย → ล้างทิ้ง กันกรอก 80 ริมในแล้วเปลี่ยนเป็นริมนอกโดยไม่แก้ */
-  if(bs.dataset.prev !== undefined && bs.dataset.prev !== bs.value){
-    const w = box.querySelector('.q_w'), h = box.querySelector('.q_h');
-    if(w.value || h.value){
-      w.value = ''; h.value = '';
-      say('q_msg','เปลี่ยนฐานขนาดแล้ว — ล้างช่องกว้าง/สูงให้ กรอกตัวเลขของ'+
-          (isOuter?'ริมนอก (ช่องปูน)':'ริมใน')+' ใหม่','warn');
-    }
-  }
-  bs.dataset.prev = bs.value;
+  const lk = patLightKind(box.querySelector('.q_pat').value);
+  const hasLight = (lk!=='none');
+  const isOuter  = hasLight && box.querySelector('.q_basis').value === 'outer';
+  box.querySelector('.basisrow').classList.toggle('hide', !hasLight);
+  box.querySelector('.outerbox').classList.toggle('hide', !isOuter);
+  box.querySelector('.lightbox .lfixrow').classList.toggle('hide', isOuter);
+  if(!hasLight){ box.querySelector('.q_w').value=''; box.querySelector('.q_h').value=''; }
+  if(isOuter) box.querySelector('.q_lfix').checked = false;
 
-  const sc = box.querySelector('.q_scope');
-  const perCh = sc.querySelector('option[value="per_channel"]');
-  perCh.disabled = isOuter;
-  if(isOuter && sc.value === 'per_channel') sc.value = 'total';
-  sc.title = isOuter ? 'ริมนอก (ช่องปูน) เป็นขนาดของทั้งวงเสมอ' : '';
-  const hint = box.querySelector('.scopehint');
-  if(hint) hint.classList.toggle('hide', !isOuter);
-
-  /* ป้ายช่องกรอกบอกตรงๆ ว่ากำลังกรอกขนาดอะไร */
-  const perCh2 = (sc.value === 'per_channel');
-  const lw = box.querySelector('.lbl_w'), lh = box.querySelector('.lbl_h');
-  if(isOuter){
-    lw.innerHTML = 'กว้าง <b>ทั้งวง (ริมนอก)</b> ซม.';
-    lh.innerHTML = 'สูง <b>ทั้งวง (ริมนอก)</b> ซม.';
-  } else if(perCh2){
-    lw.innerHTML = 'กว้าง <b>ต่อ 1 ช่อง (ริมใน)</b> ซม.';
-    lh.innerHTML = 'สูง <b>ริมใน</b> ซม.';
-  } else {
-    lw.innerHTML = 'กว้าง <b>ริมใน</b> (รวมทุกช่อง) ซม.';
-    lh.innerHTML = 'สูง <b>ริมใน</b> ซม.';
-  }
+  /* ฟิกซ์ริมนอก → ระยะช่องแสงเป็นผลลัพธ์ ไม่ให้พิมพ์เอง เติมให้อัตโนมัติ */
+  const o = readItem(box);
+  [['.q_ltcm','.lbl_ltcm', o.hasTop,  o.topUse,  'ความสูงช่องแสงบน'],
+   ['.q_lscm','.lbl_lscm', o.hasSide, o.sideUse, 'ความกว้างช่องแสงข้าง ต่อ 1 ข้าง']].forEach(([sel,lsel,on,val,name])=>{
+    const el = box.querySelector(sel), lb = box.querySelector(lsel);
+    el.readOnly = isOuter;
+    el.style.background = isOuter ? '#eef2f6' : '';
+    if(lb) lb.innerHTML = isOuter ? name+' (ซม.) — <b style="color:#2b6b85">ระบบคำนวณให้</b>' : name+' (ซม.) *';
+    if(isOuter && on) el.value = (val>0 ? val : '');
+    if(isOuter && !on) el.value = '';
+  });
 }
 /* 🚪 บาน: บอกช่างว่าวงกบต้องบังใบไหม */
 function syncLeafBox(box){
@@ -661,7 +658,8 @@ function syncLightBox(box){
   if(!hasS){ box.querySelector('.q_lsc').value=''; box.querySelector('.q_lscm').value=''; }
   if(!(hasT||hasS)) box.querySelector('.q_lfix').checked = false;
 }
-/* อ่านค่าทั้งการ์ด + คำนวณขนาดริมในไว้ใช้ทั้งวาดรูปและข้อความสรุป */
+/* 🔑 อ่านค่าทั้งการ์ด — ขนาดวงกบไม่ได้กรอกตรง ๆ แล้ว มาจาก "บาน + ช่องแสง" หรือ "ช่องปูน − บาน"
+      สูตรตรงกับฝั่งเซิร์ฟเวอร์ (fr__wood_cost): openW/ช่อง = (ริมใน − ช่องแสงข้าง×2 − เสากั้น 2 − เสากลาง)/ช่อง */
 function readItem(box){
   const g = c => box.querySelector(c);
   const pat = g('.q_pat').value, lk = patLightKind(pat);
@@ -669,35 +667,63 @@ function readItem(box){
   const o = {
     pat: pat, lk: lk, patLabel: patLabel(pat),
     kind: g('.q_kind').value,
-    basis: g('.q_basis').value, scope: g('.q_scope').value,
     ch: Math.max(1, Math.min(8, Math.round(Number(g('.q_ch').value)||1))),
-    w: Number(g('.q_w').value)||0, h: Number(g('.q_h').value)||0,
     qty: Number(g('.q_qty').value)||1,
     topN: Number(g('.q_ltc').value)||0,
     sideN: Number(g('.q_lsc').value)||0,
-    topCm: Number(g('.q_ltcm').value)||0,
-    sideCm: Number(g('.q_lscm').value)||0,
     lfix: g('.q_lfix').checked,
     leafW: Number(g('.q_lfw').value)||0,
     leafH: Number(g('.q_lfh').value)||0,
     inst:  g('.q_inst').value
   };
-  o.lbasis = 'inner';              // 📏 ขนาดช่องแสง = ระยะกระจกที่เห็น (ริมใน) เสมอ
   o.hasTop  = (lk==='top'||lk==='ring');
   o.hasSide = (lk==='side'||lk==='ring');
-  // แปลงเป็นริมในเพื่อคำนวณ/แสดงผล (ตัวเลขจริงที่ใช้คิดเงินมาจากฝั่งเซิร์ฟเวอร์)
-  let wOne = o.basis==='outer' ? o.w - R.ow : o.w;
-  o.innerH = o.basis==='outer' ? o.h - R.oh : o.h;
-  o.innerW = o.scope==='per_channel' ? (o.ch*wOne + (o.ch-1)*R.mu) : wOne;
-  o.topUse  = o.hasTop  ? (o.topCm  > 0 ? o.topCm  : Math.round(o.innerH/3*10)/10) : 0;
-  o.sideUse = o.hasSide ? (o.sideCm > 0 ? o.sideCm : Math.round(o.innerW/3*10)/10) : 0;
-  o.topAuto  = o.hasTop  && !(o.topCm  > 0);
-  o.sideAuto = o.hasSide && !(o.sideCm > 0);
+  o.hasLight = (lk!=='none');
+  o.basis = o.hasLight ? g('.q_basis').value : 'inner';
+  o.scope = 'total';
+  o.lbasis = 'inner';              // 📏 ขนาดช่องแสง = ระยะกระจกที่เห็น (ริมใน) เสมอ
+  o.mullion = R.mu;
+  const sidePosts = o.hasSide ? 2*R.mu : 0;          // เสากั้นช่องแสงข้าง ซ้าย+ขวา
+  const midPosts  = (o.ch-1)*R.mu;                   // เสากลางระหว่างช่องเปิด
+
+  if(o.basis === 'outer'){
+    /* ลูกค้าฟิกซ์ช่องปูน + บาน → ช่องแสงคือส่วนที่เหลือ */
+    o.outerW = Number(g('.q_w').value)||0;
+    o.outerH = Number(g('.q_h').value)||0;
+    o.innerW = o.outerW>0 ? o.outerW - R.ow : 0;
+    o.innerH = o.outerH>0 ? o.outerH - R.oh : 0;
+    o.topUse  = (o.hasTop  && o.innerH>0 && o.leafH>0) ? Math.round((o.innerH - o.leafH - R.mu)*10)/10 : 0;
+    o.sideUse = (o.hasSide && o.innerW>0 && o.leafW>0)
+        ? Math.round(((o.innerW - o.leafW - midPosts - sidePosts)/2)*10)/10 : 0;
+    o.autoLight = true;
+  } else {
+    /* ลูกค้าระบุระยะช่องแสง (หรือไม่มีช่องแสง) → ขนาดวงกบเป็นผลลัพธ์ */
+    o.topUse  = o.hasTop  ? (Number(g('.q_ltcm').value)||0) : 0;
+    o.sideUse = o.hasSide ? (Number(g('.q_lscm').value)||0) : 0;
+    o.innerW = o.leafW>0 ? o.leafW + midPosts + (o.hasSide ? o.sideUse*2 + sidePosts : 0) : 0;
+    o.innerH = o.leafH>0 ? o.leafH + (o.hasTop ? o.topUse + R.mu : 0) : 0;
+    o.outerW = o.innerW>0 ? o.innerW + R.ow : 0;
+    o.outerH = o.innerH>0 ? o.innerH + R.oh : 0;
+    o.autoLight = false;
+  }
+  o.w = o.basis==='outer' ? o.outerW : o.innerW;     // ตัวเลขที่ส่งเข้า RPC ตามฐานที่ยึด
+  o.h = o.basis==='outer' ? o.outerH : o.innerH;
   o.topShow  = o.topUse;
   o.sideShow = o.sideUse;
-  o.outerW = o.innerW>0 ? o.innerW + R.ow : 0;
-  o.outerH = o.innerH>0 ? o.innerH + R.oh : 0;
+  o.topAuto  = false; o.sideAuto = false;
   o.labourCh = o.ch + (o.hasTop?o.topN:0) + (o.hasSide?o.sideN:0);
+  /* ช่องแสงที่คำนวณได้ต้องเป็นบวกและใหญ่พอจะทำจริง */
+  o.badTop  = o.hasTop  && o.basis==='outer' && o.leafH>0 && o.outerH>0 && o.topUse  < 5;
+  o.badSide = o.hasSide && o.basis==='outer' && o.leafW>0 && o.outerW>0 && o.sideUse < 5;
+  /* 🔑 ด้านที่ไม่มีช่องแสง = ไม่มีตัวปรับ → ช่องปูนกับบานต้องลงตัวพอดี ไม่งั้นทำไม่ได้จริง */
+  o.needW = o.leafW>0 ? Math.round((o.leafW + midPosts + R.ow)*10)/10 : 0;   // ช่องปูนที่กว้างพอดี
+  o.needH = o.leafH>0 ? Math.round((o.leafH + R.oh)*10)/10 : 0;              // ช่องปูนที่สูงพอดี (ไม่มีช่องแสงบน)
+  o.diffW = (o.basis==='outer' && !o.hasSide && o.outerW>0 && o.needW>0)
+              ? Math.round((o.outerW - o.needW)*10)/10 : 0;
+  o.diffH = (o.basis==='outer' && !o.hasTop  && o.outerH>0 && o.needH>0)
+              ? Math.round((o.outerH - o.needH)*10)/10 : 0;
+  o.badW = Math.abs(o.diffW) > 0.5;
+  o.badH = Math.abs(o.diffH) > 0.5;
   return o;
 }
 
@@ -787,25 +813,21 @@ function frameSvg(o){
       'transform="rotate(-90 '+xx+','+my+')">'+label+'</text>';
   };
   const isOuterFix = (o.basis==='outer');
-  const cIn  = isOuterFix ? C_CALC : C_FIX;
-  const cOut = isOuterFix ? C_FIX  : C_CALC;
-  const tagIn  = isOuterFix ? '' : ' FIX';
+  const cOut = isOuterFix ? C_FIX : C_CALC;
   const tagOut = isOuterFix ? ' FIX' : '';
-  const iW = Number(o.innerW)||0, iH = Number(o.innerH)||0;
-  const oW = Number(o.outerW)||(iW>0?iW+frRules().ow:0), oH = Number(o.outerH)||(iH>0?iH+frRules().oh:0);
+  const tagLt = (o.hasLight && !isOuterFix) ? ' FIX' : '';
+  const lW = Number(o.leafW)||0, lH = Number(o.leafH)||0;
+  const oW = Number(o.outerW)||0, oH = Number(o.outerH)||0;
   let dimS='';
-  if(iW>0){   // กว้างริมใน — ใต้หัววงกบ (ถ้ามีช่องแสงบน ให้ลงมาใต้คานขวาง)
-    const yW = (o.hasTop ? bodyY0 : iy0) + 12;
-    dimS += dimH(ix0, ix1, yW, nf(iW)+tagIn, cIn, 11);
-  }
-  if(iH>0){   // สูงริมใน — ด้านในของขา (ถ้ามีช่องแสงข้าง ให้ขยับเข้ามาในช่องเปิด)
-    const xH = (o.hasSide ? mainX0 : ix0) + 12;
-    dimS += dimV(iy0, iy1, xH, nf(iH)+tagIn, cIn, 11);
-  }
-  if(oW>0) dimS += dimH(x0, x1, y0-15, nf(oW)+tagOut, cOut, 10);   // กว้างริมนอก (ช่องปูน)
-  if(oH>0) dimS += dimV(y0, y1, x1+21, nf(oH)+tagOut, cOut, 10);   // สูงริมนอก (ช่องปูน)
-  if(o.hasTop && o.topUse>0)   dimS += dimV(iy0, iy0+topH, x0-13, nf(o.topUse), C_LT, 10);
-  if(o.hasSide && o.sideUse>0) dimS += dimH(ix0, ix0+sideW, bodyY0+16, nf(o.sideUse), C_LT, 10);
+  // 🚪 ขนาดบาน = ช่องเปิดริมใน — ลูกค้าสั่งมาแล้ว ยึดเสมอ
+  if(lW>0) dimS += dimH(mainX0, mainX1, (o.hasTop ? bodyY0 : iy0) + 12, nf(lW)+' FIX', C_FIX, 11);
+  if(lH>0) dimS += dimV(bodyY0, iy1, mainX0 + 12, nf(lH)+' FIX', C_FIX, 11);
+  // ช่องปูน (ริมนอก) — ส้มถ้าลูกค้าฟิกซ์ เทาถ้าเป็นผลที่ได้ตามมา
+  if(oW>0) dimS += dimH(x0, x1, y0-15, nf(oW)+tagOut, cOut, 10);
+  if(oH>0) dimS += dimV(y0, y1, x1+21, nf(oH)+tagOut, cOut, 10);
+  // ช่องแสง — ตัวที่ปรับได้ (ถ้าฟิกซ์ริมนอก ตัวนี้คือผลลัพธ์ที่ระบบคิดให้)
+  if(o.hasTop && o.topUse>0)   dimS += dimV(iy0, iy0+topH, x0-13, nf(o.topUse)+tagLt, C_LT, 10);
+  if(o.hasSide && o.sideUse>0) dimS += dimH(ix0, ix0+sideW, bodyY0+16, nf(o.sideUse)+tagLt, C_LT, 10);
 
   // ── ป้ายกำกับ (ใบเสนอราคาที่พิมพ์ให้ลูกค้าไม่ต้องมีป้ายชิ้นส่วน) ──
   if(o.noLabels)
@@ -833,48 +855,59 @@ function frameSvg(o){
 /* ข้อความสรุปใต้รูป (แบบที่คุณหลิงขอ: "1 ช่องบน ความสูงริมใน … ซม.") */
 function lightSummary(o){
   if(!o.hasTop && !o.hasSide) return '';
-  const bt = 'ริมใน';
   let out=[];
   if(o.hasTop)
-    out.push('<b>'+(o.topN||'—')+' ช่องบน</b> ความสูง'+bt+' '+(o.topShow>0?nf(o.topShow):'—')+' ซม.'+
-             (o.topAuto?' <span style="color:#8a5b00">(เฉลี่ย 3 ช่อง — ยังไม่ได้ระบุ)</span>':''));
+    out.push('<b>'+(o.topN||'—')+' ช่องบน</b> ความสูงริมใน '+(o.topShow>0?nf(o.topShow):'—')+' ซม.');
   if(o.hasSide)
-    out.push('<b>'+(o.sideN||'—')+' ช่องข้าง</b> (ข้างละ '+(o.sideN?Math.round(o.sideN/2):'—')+') ความกว้าง'+bt+
-             'ข้างละ '+(o.sideShow>0?nf(o.sideShow):'—')+' ซม.'+
-             (o.sideAuto?' <span style="color:#8a5b00">(เฉลี่ย 3 ช่อง — ยังไม่ได้ระบุ)</span>':''));
+    out.push('<b>'+(o.sideN||'—')+' ช่องข้าง</b> (ข้างละ '+(o.sideN?Math.round(o.sideN/2):'—')+') ความกว้างริมในข้างละ '+
+             (o.sideShow>0?nf(o.sideShow):'—')+' ซม.');
   return '<div style="margin-top:3px;color:#2b6b85">'+out.join('<br>')+'</div>'+
-         '<div>'+(o.lfix
-            ? '<span class="fixtag">ระยะช่องแสง FIX</span>'
-            : '<span class="dim">ระยะช่องแสง = ที่ตั้งไว้ ปรับได้ตามหน้างาน</span>')+'</div>'+
+         '<div>'+(o.autoLight
+            ? '<span class="dim">ระยะช่องแสง = ส่วนที่เหลือจาก ช่องปูน − บาน (ระบบคิดให้)</span>'
+            : (o.lfix ? '<span class="fixtag">ระยะช่องแสง FIX</span>'
+                      : '<span class="dim">ระยะช่องแสง = ที่ระบุไว้ ช่างปรับได้ตามหน้างาน</span>'))+'</div>'+
          '<div class="dim">ค่าแรงนับ '+o.labourCh+' ช่อง (ช่องเปิด '+o.ch+' + ช่องแสง '+(o.labourCh-o.ch)+')</div>';
 }
-
 function leafSummary(o){
   const inst = o.inst==='slide' ? 'บานเลื่อนสไลด์ — <b>วงกบไม่บังใบ</b>' : 'บังใบใส่บานพับ — วงกบบังใบ';
-  const sz = (o.leafW>0 && o.leafH>0) ? 'ขนาดบาน <b>'+nf(o.leafW)+'×'+nf(o.leafH)+' ซม.</b>'
-                                      : '<span style="color:#8a5b00">ยังไม่ได้ระบุขนาดบาน</span>';
+  const sz = (o.leafW>0 && o.leafH>0)
+    ? 'บาน/ช่องเปิด <b>'+nf(o.leafW)+'×'+nf(o.leafH)+' ซม.</b>'+(o.ch>1?' (รวม '+o.ch+' บาน)':'')
+    : '<span style="color:#8a5b00">ยังไม่ได้ระบุขนาดบาน</span>';
   return '<div style="margin-top:3px">🚪 '+sz+' · '+inst+'</div>';
 }
 function drawPic(box){
   const o = readItem(box);
   const kindTxt = o.kind==='window' ? 'วงกบหน้าต่าง' : 'วงกบประตู';
-  const basisTxt = o.basis==='outer'
-      ? 'ขนาดที่กรอก = <b>ริมนอก (ช่องปูน)</b> — ช่องที่ก่อไว้ วางวงกบทั้งวง'
-      : 'ขนาดที่กรอก = <b>ริมใน</b> (ช่องใส่ประตู/หน้าต่าง)';
   let warn='';
-  if(o.basis==='outer' && o.scope==='per_channel')
-    warn += '<div class="msg err" style="margin:6px 0 0;text-align:left">ริมนอก (ช่องปูน) เป็นขนาดของ<b>ทั้งวง</b> — กรอกขนาดต่อ 1 ช่องไม่ได้</div>';
   if(o.hasSide && o.sideN && o.sideN%2!==0)
-    warn = '<div class="msg warn" style="margin:6px 0 0;text-align:left">จำนวนช่องแสงข้างต้องเป็น<b>เลขคู่</b> (ซ้าย-ขวาเท่ากัน) เช่น 6 = ข้างละ 3</div>';
-  const fixTxt = o.basis==='outer' ? 'ริมนอก (ช่องปูน)' : 'ริมใน';
+    warn += '<div class="msg warn" style="margin:6px 0 0;text-align:left">จำนวนช่องแสงข้างต้องเป็น<b>เลขคู่</b> (ซ้าย-ขวาเท่ากัน) เช่น 6 = ข้างละ 3</div>';
+  if(o.badTop)
+    warn += '<div class="msg err" style="margin:6px 0 0;text-align:left">ช่องปูนสูง '+nf(o.outerH)+' ซม. เหลือให้ช่องแสงบนแค่ <b>'+
+            nf(o.topUse)+' ซม.</b> — เล็กเกินไป/ติดลบ ให้เช็คขนาดบานหรือขนาดช่องปูนอีกที</div>';
+  if(o.badSide)
+    warn += '<div class="msg err" style="margin:6px 0 0;text-align:left">ช่องปูนกว้าง '+nf(o.outerW)+' ซม. เหลือให้ช่องแสงข้างละแค่ <b>'+
+            nf(o.sideUse)+' ซม.</b> — เล็กเกินไป/ติดลบ ให้เช็คขนาดบานหรือขนาดช่องปูนอีกที</div>';
+  if(o.badW)
+    warn += '<div class="msg err" style="margin:6px 0 0;text-align:left">แบบนี้<b>ไม่มีช่องแสงข้าง</b> จึงไม่มีตัวปรับด้านกว้าง — '+
+            'บาน '+nf(o.leafW)+' ซม. ต้องใช้ช่องปูนกว้าง <b>'+nf(o.needW)+' ซม.</b> แต่กรอกมา '+nf(o.outerW)+
+            ' ซม. (ต่าง '+(o.diffW>0?'+':'')+nf(o.diffW)+')</div>';
+  if(o.badH)
+    warn += '<div class="msg err" style="margin:6px 0 0;text-align:left">แบบนี้<b>ไม่มีช่องแสงบน</b> จึงไม่มีตัวปรับด้านสูง — '+
+            'บานสูง '+nf(o.leafH)+' ซม. ต้องใช้ช่องปูนสูง <b>'+nf(o.needH)+' ซม.</b> แต่กรอกมา '+nf(o.outerH)+
+            ' ซม. (ต่าง '+(o.diffH>0?'+':'')+nf(o.diffH)+')</div>';
+
+  const fixTxt = !o.hasLight ? 'ยึดขนาดบาน'
+               : (o.basis==='outer' ? 'ยึดบาน + ช่องปูน (ริมนอก)' : 'ยึดบาน + ระยะช่องแสง');
+  const sizeTxt = (o.innerW>0 && o.innerH>0)
+    ? 'วงกบทั้งวง: ริมใน <b>'+nf(o.innerW)+'×'+nf(o.innerH)+'</b> · ริมนอก (ช่องปูน) <b>'+nf(o.outerW)+'×'+nf(o.outerH)+'</b> ซม.'
+    : '<span style="color:#8a5b00">ยังกรอกไม่ครบ — ยังคิดขนาดวงกบไม่ได้</span>';
   box.querySelector('.pic').innerHTML = frameSvg(o) + warn +
     '<div class="cap">'+esc(kindTxt)+(o.patLabel?' · '+esc(o.patLabel):'')+' · '+o.ch+' ช่องเปิด'+
-    (o.w&&o.h?' · '+nf(o.w)+'×'+nf(o.h)+' ซม.'+(o.scope==='per_channel'?' <b>ต่อ 1 ช่อง</b>':' (รวมทั้งวง)'):'')+
-    ' <span class="fixtag">FIX '+fixTxt+'</span><br>'+basisTxt+
-    lightSummary(o)+ leafSummary(o)+
+    ' <span class="fixtag">'+fixTxt+'</span><br>'+
+    leafSummary(o)+ sizeTxt+ lightSummary(o)+
     '<div style="margin-top:3px;font-size:12px">เลขบนรูป (ซม.): '+
-      '<b style="color:#c2410c">สีส้ม = ขนาดที่ยึด (FIX)</b> · '+
-      '<span style="color:#94a3b8">เทา = ขนาดที่ได้ตามมา</span> · '+
+      '<b style="color:#c2410c">สีส้ม+FIX = ตัวเลขที่ยึด</b> · '+
+      '<span style="color:#94a3b8">เทา = ได้ตามมา</span> · '+
       '<span style="color:#2b6b85">น้ำเงิน = ช่องแสง</span></div>'+
     '<span style="color:#9aa4b0">ภาพประกอบ ไม่ใช่สัดส่วนจริง</span></div>';
 }
@@ -883,38 +916,35 @@ function fillModel(sel){
   if(!o || !o.value) return;
   box.querySelector('.q_pat').value = o.dataset.p||'';
   box.querySelector('.q_ch').value  = o.dataset.c||1;
-  box.querySelector('.q_w').value   = o.dataset.w||'';
-  box.querySelector('.q_h').value   = o.dataset.h||'';
-  if(o.dataset.k) box.querySelector('.q_kind').value  = o.dataset.k;
-  if(o.dataset.b) box.querySelector('.q_basis').value = o.dataset.b;
-  const bs = box.querySelector('.q_basis');
-  bs.dataset.prev = bs.value;      // เลือกแบบมาตรฐาน = ขนาดมาพร้อมฐานของมันแล้ว อย่าล้างทิ้ง
-  syncBasisScope(box); syncLightBox(box); syncLeafBox(box); drawPic(box);
+  /* ไซส์มาตรฐานในทะเบียนสินค้าเป็น "ริมใน" = ขนาดบานพอดี → เติมลงช่องขนาดบาน */
+  box.querySelector('.q_lfw').value = o.dataset.w||'';
+  box.querySelector('.q_lfh').value = o.dataset.h||'';
+  if(o.dataset.k) box.querySelector('.q_kind').value = o.dataset.k;
+  syncCard(box);
 }
 function quoteLines(){
   return [...document.querySelectorAll('#q_items .itemcard')].map(b=>{
-    const lk = patLightKind(b.querySelector('.q_pat').value);
-    const hasT = (lk==='top'||lk==='ring'), hasS = (lk==='side'||lk==='ring');
+    const o = readItem(b);
     return {
       model_id: (b.querySelector('.q_model')||{}).value || '',
-      pattern_code: b.querySelector('.q_pat').value,
-      channels: b.querySelector('.q_ch').value,
-      frame_kind: b.querySelector('.q_kind').value,
-      size_basis: b.querySelector('.q_basis').value,
-      size_scope: b.querySelector('.q_scope').value,
-      width_cm: b.querySelector('.q_w').value,
-      height_cm: b.querySelector('.q_h').value,
-      qty: b.querySelector('.q_qty').value || 1,
-      light_top_count:  hasT ? b.querySelector('.q_ltc').value  : '',
-      light_side_count: hasS ? b.querySelector('.q_lsc').value  : '',
-      light_top_cm:     hasT ? b.querySelector('.q_ltcm').value : '',
-      light_side_cm:    hasS ? b.querySelector('.q_lscm').value : '',
+      pattern_code: o.pat,
+      channels: o.ch,
+      frame_kind: o.kind,
+      size_basis: o.basis,          // inner = ยึดบาน+ช่องแสง · outer = ยึดช่องปูน
+      size_scope: 'total',          // ขนาดบานกรอกรวมทุกบานเสมอ
+      width_cm:  o.w || '',         // ริมในหรือริมนอกตามฐาน (ระบบคิดมาให้แล้ว)
+      height_cm: o.h || '',
+      qty: o.qty || 1,
+      light_top_count:  o.hasTop  ? o.topN  : '',
+      light_side_count: o.hasSide ? o.sideN : '',
+      light_top_cm:     o.hasTop  ? o.topUse  : '',
+      light_side_cm:    o.hasSide ? o.sideUse : '',
       light_basis: 'inner',                              // 📏 ช่องแสง = ระยะกระจกที่เห็นเสมอ
-      light_fixed: b.querySelector('.q_lfix').checked,
+      light_fixed: o.lfix,
       /* 🚪 บาน — ไม่ผ่านการคิดราคา แต่ติดไปกับใบ/งานผลิตเพื่อบอกช่าง */
-      leaf_w_cm: b.querySelector('.q_lfw').value,
-      leaf_h_cm: b.querySelector('.q_lfh').value,
-      install_type: b.querySelector('.q_inst').value
+      leaf_w_cm: o.leafW || '',
+      leaf_h_cm: o.leafH || '',
+      install_type: o.inst
     };
   });
 }
@@ -939,21 +969,33 @@ function validateQuoteItems(){
     if(!pat.value){ markBad(pat,1); errs.push('รายการที่ '+n+': ยังไม่ได้เลือกแบบวงกบ'); }
     else markBad(pat,0);
     need('.q_ch','ยังไม่ได้กรอกจำนวนช่องเปิด',1);
-    need('.q_w','ยังไม่ได้กรอกความกว้าง (ซม.)');
-    need('.q_h','ยังไม่ได้กรอกความสูง (ซม.)');
+    need('.q_lfw','ยังไม่ได้กรอกขนาดบาน กว้างรวมทุกบาน (ซม.)');
+    need('.q_lfh','ยังไม่ได้กรอกขนาดบาน สูง (ซม.)');
     need('.q_qty','ยังไม่ได้กรอกจำนวนชุด',1);
-    const bs=b.querySelector('.q_basis'), sp=b.querySelector('.q_scope');
-    if(bs.value==='outer' && sp.value==='per_channel'){
-      markBad(sp,1); errs.push('รายการที่ '+n+': ริมนอก (ช่องปูน) เป็นขนาดของทั้งวง — เลือก “ทั้งวง” หรือเปลี่ยนไปฟิกซ์ริมใน');
-    } else markBad(sp,0);
-    const lk=patLightKind(pat.value);
-    if(lk==='top'||lk==='ring') need('.q_ltc','ยังไม่ได้กรอกจำนวนช่องแสงบน',1);
-    if(lk==='side'||lk==='ring'){
+
+    const o = readItem(b);
+    if(o.hasTop)  need('.q_ltc','ยังไม่ได้กรอกจำนวนช่องแสงบน',1);
+    if(o.hasSide){
       if(need('.q_lsc','ยังไม่ได้กรอกจำนวนช่องแสงข้าง (อย่างน้อย 2 = ข้างละ 1)',2)){
         const el=b.querySelector('.q_lsc');
         if(Number(el.value)%2!==0){ markBad(el,1);
           errs.push('รายการที่ '+n+': จำนวนช่องแสงข้างต้องเป็นเลขคู่ (ซ้าย-ขวาเท่ากัน) เช่น 6 = ข้างละ 3'); }
       }
+    }
+    if(o.basis==='outer'){
+      need('.q_w','ยังไม่ได้กรอกความกว้างช่องปูน (ริมนอก)');
+      need('.q_h','ยังไม่ได้กรอกความสูงช่องปูน (ริมนอก)');
+      if(o.badTop){  markBad(b.querySelector('.q_h'),1);
+        errs.push('รายการที่ '+n+': ช่องปูนสูงไม่พอ — เหลือให้ช่องแสงบนแค่ '+nf(o.topUse)+' ซม.'); }
+      if(o.badSide){ markBad(b.querySelector('.q_w'),1);
+        errs.push('รายการที่ '+n+': ช่องปูนกว้างไม่พอ — เหลือให้ช่องแสงข้างละแค่ '+nf(o.sideUse)+' ซม.'); }
+      if(o.badW){ markBad(b.querySelector('.q_w'),1);
+        errs.push('รายการที่ '+n+': ไม่มีช่องแสงข้างให้ปรับ — บาน '+nf(o.leafW)+' ต้องใช้ช่องปูนกว้าง '+nf(o.needW)+' ซม. (กรอกมา '+nf(o.outerW)+')'); }
+      if(o.badH){ markBad(b.querySelector('.q_h'),1);
+        errs.push('รายการที่ '+n+': ไม่มีช่องแสงบนให้ปรับ — บานสูง '+nf(o.leafH)+' ต้องใช้ช่องปูนสูง '+nf(o.needH)+' ซม. (กรอกมา '+nf(o.outerH)+')'); }
+    } else {
+      if(o.hasTop)  need('.q_ltcm','ยังไม่ได้กรอกความสูงช่องแสงบน (ซม.)');
+      if(o.hasSide) need('.q_lscm','ยังไม่ได้กรอกความกว้างช่องแสงข้าง (ซม.)');
     }
   });
   return errs;
@@ -995,11 +1037,10 @@ function sizeLine(l){
   if(l.inner_w_cm==null || l.outer_w_cm==null) return '';
   const inner = nf(l.inner_w_cm)+'×'+nf(l.inner_h_cm);
   const outer = nf(l.outer_w_cm)+'×'+nf(l.outer_h_cm);
-  return l.size_basis==='outer'
-    ? '<div class="sizeline">สั่งตาม <b>ริมนอก '+outer+' ซม.</b></div>'+
-      '<div class="dim" style="font-size:12px">→ ช่องใส่ประตู/หน้าต่างจะได้ '+inner+' ซม.</div>'
-    : '<div class="sizeline">สั่งตาม <b>ริมใน '+inner+' ซม.</b> (ช่องใส่ประตู/หน้าต่าง)</div>'+
-      '<div class="dim" style="font-size:12px">→ ตัววงกบทั้งตัวจะได้ '+outer+' ซม.</div>';
+  const leaf  = (l.leaf_w_cm && l.leaf_h_cm) ? nf(l.leaf_w_cm)+'×'+nf(l.leaf_h_cm) : null;
+  return (leaf ? '<div class="sizeline">บาน <b>'+leaf+' ซม.</b>'+
+                 (l.size_basis==='outer' ? ' + ช่องปูน <b>'+outer+' ซม.</b>' : '')+'</div>' : '')+
+    '<div class="dim" style="font-size:12px">วงกบทั้งวง: ริมใน '+inner+' · ริมนอก '+outer+' ซม.</div>';
 }
 /* อธิบายว่าเบิกไม้ท่อนยาวเท่าไหร่ แล้วตัดเป็นชิ้นยาวเท่าไหร่ (กันงงว่าทำไมหัววงกบใช้ไม้ 110) */
 function woodPlanHtml(l){
@@ -1247,7 +1288,10 @@ function lineGeom(l){
            topN:Number(l.light_top_count)||0, sideN:Number(l.light_side_count)||0,
            topUse:Number(l.light_top_cm)||0,  sideUse:Number(l.light_side_cm)||0,
            innerW:innerW, innerH:innerH, wOne:wOne, noLabels:true,
-           outerW: innerW>0 ? innerW + R.ow : 0, outerH: innerH>0 ? innerH + R.oh : 0 };
+           hasLight:(lk!=='none'),
+           leafW:Number(l.leaf_w_cm)||0, leafH:Number(l.leaf_h_cm)||0,
+           outerW: basis==='outer' ? w : (innerW>0 ? innerW + R.ow : 0),
+           outerH: basis==='outer' ? h : (innerH>0 ? innerH + R.oh : 0) };
   /* ขนาดช่องเปิด (ริมใน) = ขนาดทั้งวง หักช่องแสง + เสา/คานที่กั้น */
   if(scope==='per_channel'){
     g.openW = wOne;
@@ -1259,6 +1303,8 @@ function lineGeom(l){
   g.topDisp  = g.topUse;
   g.sideDisp = g.sideUse;
   g.lfix     = !!l.light_fixed;
+  if(!(g.leafW>0)) g.leafW = Math.round(g.openW*ch*10)/10;   // ใบเก่าที่ยังไม่มีช่องขนาดบาน
+  if(!(g.leafH>0)) g.leafH = Math.round(g.openH*10)/10;
   return g;
 }
 /* Chrome/Edge ใช้ <title> เป็นชื่อไฟล์ตอน "Save as PDF" → ใส่เลขที่ใบให้อัตโนมัติ */
@@ -1275,33 +1321,34 @@ function priceOf(l, which){
       เพราะหน้าไม้จริงหลังไสอาจไม่เต็มตามระบุ ช่างต้องรู้ว่ายึดตัวไหน */
 function itemDetailHtml(l){
   const g = lineGeom(l);
-  const kindTxt  = g.kind==='window' ? 'วงกบหน้าต่าง' : 'วงกบประตู';
-  const openTxt  = g.kind==='window' ? 'ช่องหน้าต่าง' : 'ช่องประตู';
-  const basisTxt = g.basis==='outer' ? 'ริมนอก (ช่องปูน)' : 'ริมใน';
-  let h = '<div class="t1">'+esc(kindTxt)+' '+nf(g.w)+'×'+nf(g.h)+' ซม.'+
-          (g.scope==='per_channel' ? ' (ต่อ 1 ช่อง)' : '')+
-          ' <span class="fix">FIX '+basisTxt+'</span></div>';
+  const kindTxt = g.kind==='window' ? 'วงกบหน้าต่าง' : 'วงกบประตู';
+  const inst = l.install_type||'';
+  const instTxt = inst==='slide' ? 'บานเลื่อนสไลด์ (วงกบไม่บังใบ)'
+                : inst==='rebate' ? 'บังใบใส่บานพับ' : '';
+  let h = '<div class="t1">'+esc(kindTxt)+(g.ch>1?' '+g.ch+' ช่อง':'')+'</div>';
+  /* 🚪 บาน = ตัวตั้งต้น ลูกค้าสั่งมาแล้ว ยึดเสมอ */
+  if(g.leafW>0 && g.leafH>0)
+    h += '<div class="t2">– บาน / ช่องเปิด <b>'+nf(g.leafW)+'×'+nf(g.leafH)+' ซม.</b>'+
+         (g.ch>1?' (รวม '+g.ch+' บาน)':'')+' <span class="fix sm">FIX</span>'+
+         (instTxt?'<br><span style="margin-left:10px">'+esc(instTxt)+'</span>':'')+'</div>';
+  else if(instTxt) h += '<div class="t2">– '+esc(instTxt)+'</div>';
   if(g.hasTop || g.hasSide){
+    const auto = (g.basis==='outer');
     h += '<div class="t1 sp">ช่องแสง <span class="dimb">(ระยะกระจกที่เห็น · ริมใน)</span> '+
-         (g.lfix ? '<span class="fix sm">FIX</span>'
-                 : '<span class="flex">ปรับได้ตามหน้างาน</span>')+'</div>';
+         (auto ? '<span class="flex">ระบบคิดจากช่องปูนที่เหลือ</span>'
+               : (g.lfix ? '<span class="fix sm">FIX</span>'
+                         : '<span class="flex">ปรับได้ตามหน้างาน</span>'))+'</div>';
     if(g.hasTop)
       h += '<div class="t2">– ช่องแสงบน '+g.topN+' ช่อง สูง '+nf(g.topDisp)+' ซม.</div>';
     if(g.hasSide)
       h += '<div class="t2">– ช่องแสงข้าง '+g.sideN+' ช่อง (ข้างละ '+Math.round(g.sideN/2)+
            ') กว้างข้างละ '+nf(g.sideDisp)+' ซม.</div>';
   }
-  const lfw=Number(l.leaf_w_cm)||0, lfh=Number(l.leaf_h_cm)||0, inst=l.install_type||'';
-  if(lfw>0 || lfh>0 || inst){
-    const instTxt = inst==='slide' ? 'บานเลื่อนสไลด์ (วงกบไม่บังใบ)'
-                  : inst==='rebate' ? 'บังใบใส่บานพับ' : '';
-    h += '<div class="t2">– บาน'+((lfw>0&&lfh>0)?' '+nf(lfw)+'×'+nf(lfh)+' ซม.':'')+
-         (instTxt?' · '+esc(instTxt):'')+'</div>';
+  if(g.innerW>0 && g.innerH>0){
+    const outFix = (g.basis==='outer') ? ' <span class="fix sm">FIX</span>' : '';
+    h += '<div class="t3">วงกบทั้งวง: ริมใน '+nf(g.innerW)+'×'+nf(g.innerH)+
+         ' · ช่องปูน (ริมนอก) <b>'+nf(g.outerW)+'×'+nf(g.outerH)+'</b> ซม.'+outFix+'</div>';
   }
-  const showOpen = (g.hasTop || g.hasSide || g.ch > 1);   // ไม่มีช่องแสง + ช่องเดียว = ขนาดช่องเปิด = ขนาดวงกบอยู่แล้ว ไม่ต้องเขียนซ้ำ
-  if(showOpen && g.openW > 0 && g.openH > 0)
-    h += '<div class="t3">≈ ช่องเปิด '+g.ch+' '+esc(openTxt)+' '+nf(Math.round(g.openW*10)/10)+'×'+
-         nf(Math.round(g.openH*10)/10)+' ซม. (ริมใน · <b>ประมาณ</b> ไม่ใช่ขนาดที่ยึด)</div>';
   return h;
 }
 /* สร้างเอกสารพิมพ์ 1 ใบ — โชว์ราคาเดียวตามที่พนักงานเลือก */
