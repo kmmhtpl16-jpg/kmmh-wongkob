@@ -456,7 +456,7 @@ async function doLogin(){
 /* ล้างทุกอย่างที่ค้างบนจอ — กันคนถัดไปเห็นตัวเลขของคนก่อน (เช่น ต้นทุนของเจ้าของ) */
 function wipeScreen(){
   PIN=''; ROLE=''; LK={}; SH={}; AD={}; KS={}; LAST_Q=null; qLoaded=false;
-  SUG=[]; PULLED=[]; JOBS=[]; QPHOTOS=[];
+  SUG=[]; PULLED=[]; JOBS=[]; QPHOTOS=[]; SJOB={};
   ['q_items','q_table','q_stock','q_msg','q_saved','s_cuts','s_outs','s_lefts','s_sug','s_cost','s_msg',
    'k_rows','k_moves','k_recv','k_msg','k_open','j_list','j_msg','s_jobs','q_back','q_photos','ql_rows','ql_msg','r_out','a_wood','a_lab','a_mar','a_msg','phWarn','nav']
    .forEach(id=>{ const e=$(id); if(e) e.innerHTML=''; });
@@ -1578,6 +1578,7 @@ async function pullJobs(){
   if(!sel.length){ say('j_msg','เลือกงานที่ยัง “รอผลิต” อย่างน้อย 1 งาน'); return; }
   PULLED = sel.map((j,idx)=>({job_id:j.id, job_no:idx+1, label:j.job_no+(j.customer_name?' · '+j.customer_name:''),
                               planned_wood:j.planned_wood||{}, items:j.items||[]}));
+  SJOB = {}; sel.forEach((j,idx)=>{ SJOB[j.job_no] = idx+1; });   /* กันเลข "งานที่" ชนกับที่ดึงจากช่องเลือก */
   go('sheet');
   await loadSheet();
   $('s_outs').innerHTML='';
@@ -1627,18 +1628,56 @@ function presetLabel(p){
   const ch   = p.channels ? ' · '+p.channels+' ช่อง' : '';
   return base + (size && base.indexOf(size)<0 ? ' '+size : '') + ch + ' · เคยทำ '+p.times+' ครั้ง';
 }
+/* 📋 รายการจากใบสั่งผลิตที่ยังรอทำ — ดึงมาลงใบตัดได้ทีละรายการ */
+function jobLineOpts(){
+  let h = '';
+  (SH.jobs||[]).forEach((j,ji)=>(j.items||[]).forEach((it,li)=>{
+    const size = (it.width_cm && it.height_cm) ? nf(it.width_cm)+'×'+nf(it.height_cm) : '';
+    const base = (it.descr||'').trim() || ((it.frame_kind==='window'?'วงกบหน้าต่าง':'วงกบประตู')+(size?' '+size:''));
+    const qty  = it.qty ? ' ×'+nf(it.qty)+' วง' : '';
+    h += '<option value="j:'+ji+':'+li+'">'+
+         esc(j.job_no+(j.customer_name?' · '+j.customer_name:'')+' — '+base+qty)+'</option>';
+  }));
+  return h ? '<optgroup label="📋 งานสั่งผลิตที่รอทำ">'+h+'</optgroup>' : '';
+}
 function presetOpts(){
   const ps = SH.presets||[];
-  return '<option value="">— งานใหม่ กรอกเอง —</option>'+
-    ps.map((p,i)=>'<option value="'+i+'">'+esc(presetLabel(p))+'</option>').join('');
+  return '<option value="">— งานใหม่ กรอกเอง —</option>'+ jobLineOpts()+
+    (ps.length ? '<optgroup label="🕘 งานที่เคยผลิต">'+
+       ps.map((p,i)=>'<option value="p:'+i+'">'+esc(presetLabel(p))+'</option>').join('')+'</optgroup>' : '');
 }
 function refreshPresetSelects(){
-  document.querySelectorAll('.o_preset').forEach(s=>{ s.innerHTML = presetOpts(); });
+  document.querySelectorAll('.o_preset').forEach(s=>{ const k=s.value; s.innerHTML = presetOpts(); s.value=k; });
+}
+/* จำว่าใบสั่งผลิตใบไหน = "งานที่" เลขอะไรในใบตัดนี้ (ให้ฝั่งไม้ที่เบิกออกอ้างเลขเดียวกันได้) */
+let SJOB = {};
+function jobSeq(jobNo){
+  if(SJOB[jobNo]) return SJOB[jobNo];
+  const used = Object.keys(SJOB).map(k=>SJOB[k]);
+  let n = 1; while(used.indexOf(n) >= 0) n++;
+  SJOB[jobNo] = n; return n;
 }
 function fillPreset(sel){
-  const p = (SH.presets||[])[Number(sel.value)];
+  const v = String(sel.value||''), b = sel.closest('.itemcard');
+  const note = b.querySelector('.o_from');
+  if(note) note.textContent = '';
+  if(!v) return;
+  let p = null;
+  if(v.charAt(0) === 'j'){
+    const a = v.split(':'), j = (SH.jobs||[])[Number(a[1])];
+    const it = j && (j.items||[])[Number(a[2])];
+    if(!it) return;
+    p = {item_name: it.descr, frame_kind: it.frame_kind, pattern_code: it.pattern_code,
+         channels: it.channels, width_cm: it.width_cm, height_cm: it.height_cm,
+         light_top_count: it.light_top_count, light_side_count: it.light_side_count, qty: it.qty};
+    const seq = jobSeq(j.job_no);
+    b.querySelector('.o_job').value = seq;
+    if(note) note.textContent = '📋 ดึงจาก '+j.job_no+(j.customer_name?' · '+j.customer_name:'')+
+      ' → ลงเป็น “งานที่ '+seq+'” (ฝั่งไม้ที่เบิกออกให้ใส่เลขเดียวกัน)';
+  } else {
+    p = (SH.presets||[])[Number(v.split(':')[1])];
+  }
   if(!p) return;
-  const b = sel.closest('.itemcard');
   b.querySelector('.o_name').value = p.item_name || '';
   b.querySelector('.o_kind').value = p.frame_kind || 'door';
   b.querySelector('.o_pat').value  = p.pattern_code || '';
@@ -1648,6 +1687,7 @@ function fillPreset(sel){
   syncOutLight(b);
   b.querySelector('.o_ltc').value  = p.light_top_count  != null ? p.light_top_count  : '';
   b.querySelector('.o_lsc').value  = p.light_side_count != null ? p.light_side_count : '';
+  if(p.qty != null && p.qty !== '') b.querySelector('.o_qty').value = p.qty;
   b.querySelector('.o_qty').focus();
 }
 function shPatOpts(sel){
@@ -1657,12 +1697,15 @@ function shPatOpts(sel){
 async function loadSheet(){
   say('s_msg',''); $('s_cost').innerHTML='';
   const d = $('s_date').value; if(!d) return;
-  const [r, pr] = await Promise.all([
+  const [r, pr, jb] = await Promise.all([
     rpc('fr_sheet_get',{p_pin:PIN, p_date:d}),
-    rpc('fr_output_presets',{p_pin:PIN})
+    rpc('fr_output_presets',{p_pin:PIN}),
+    rpc('fr_job_list',{p_pin:PIN, p_status:'waiting'})     /* 📋 ใบสั่งผลิตที่ยังรอทำ */
   ]);
   if(!r.ok){ say('s_msg', r.error); return; }
   SH = r; SH.presets = pr.ok ? (pr.rows||[]) : [];
+  SH.jobs = jb.ok ? (jb.rows||[]) : [];
+  if(!PULLED.length) SJOB = {};
   $('s_gs').value = r.exists ? (r.sheet.gs_no||'') : '';
   $('s_gr').value = r.exists ? (r.sheet.gr_no||'') : '';
   $('s_rec').value= r.exists ? (r.sheet.recorder||'') : '';
@@ -1729,8 +1772,9 @@ function addOut(d){
   $('s_outs').insertAdjacentHTML('beforeend',
    '<div class="itemcard in outrow" id="'+i+'">'+
    '<div class="hd"><b style="color:#0b7a44">🔺 งานที่ผลิตได้</b><button class="btn del" onclick="document.getElementById(\''+i+'\').remove()">ลบ</button></div>'+
-   '<div class="row"><div style="flex:2 1 200px"><label>เลือกจากงานที่เคยผลิต</label>'+
-     '<select class="o_preset" onchange="fillPreset(this)">'+presetOpts()+'</select></div></div>'+
+   '<div class="row"><div style="flex:2 1 200px"><label>ดึงรายการจากใบสั่งผลิต / งานที่เคยทำ</label>'+
+     '<select class="o_preset" onchange="fillPreset(this)">'+presetOpts()+'</select>'+
+     '<div class="footnote o_from"></div></div></div>'+
    '<div class="row" style="margin-top:8px"><div style="flex:2 1 200px"><label>รายการ</label>'+
      '<input class="o_name" value="'+esc(d.item_name||'')+'" placeholder="เช่น วงกบประตู 80×200"></div></div>'+
    '<div class="row" style="margin-top:8px">'+
