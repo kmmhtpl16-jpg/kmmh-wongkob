@@ -61,6 +61,16 @@ th{font-size:12px;color:var(--dim);font-weight:600}
 .pill.warn{background:#fff6e5;color:#8a5b00}
 .pill.dim{background:#eef1f4;color:#6b7785}
 .hide{display:none!important}
+.modalwrap{position:fixed;inset:0;background:rgba(15,23,32,.5);z-index:100;
+  display:flex;align-items:center;justify-content:center;padding:16px}
+.modalcard{background:#fff;border-radius:14px;width:100%;max-width:540px;padding:16px;
+  max-height:86vh;overflow:auto;box-shadow:0 14px 44px rgba(0,0,0,.32)}
+.modalfoot{display:flex;flex-direction:column;gap:8px;margin-top:14px}
+.modalfoot .btn{width:100%}
+.mtb{width:100%;border-collapse:collapse;font-size:14px;margin-top:8px}
+.mtb th,.mtb td{border-bottom:1px solid var(--line);padding:6px 4px;text-align:left}
+.mtb th{font-size:12px;color:var(--dim);font-weight:600}
+.mtb td.num{text-align:right;white-space:nowrap}
 .itemcard{border:1px solid var(--line);border-radius:10px;padding:10px;margin-bottom:10px;background:#fbfcfd}
 .itemcard .hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
 .itemcard .hd b{font-size:13px;color:var(--dim)}
@@ -395,6 +405,15 @@ th{font-size:12px;color:var(--dim);font-weight:600}
         <div id="a_msg"></div>
       </div>
     </section>
+  </div>
+</div>
+
+<!-- 🔔 กล่องยืนยันกลาง (ใช้แทน confirm ของเบราว์เซอร์ อ่านง่ายกว่าบนมือถือ) -->
+<div id="modal" class="modalwrap hide">
+  <div class="modalcard">
+    <h2 id="modal_t" style="margin:0 0 10px"></h2>
+    <div id="modal_b"></div>
+    <div id="modal_f" class="modalfoot"></div>
   </div>
 </div>
 
@@ -1865,8 +1884,35 @@ function addLeft(d){
      '<div style="flex:0 1 80px"><label>งานที่</label><input class="l_job" type="number" min="1" value="'+(d.job_no||1)+'"></div>'+
    '</div></div>');
 }
+/* 🔔 กล่องยืนยันกลาง — คืนค่าปุ่มที่กด (Promise) */
+let MODAL_RES = null;
+function modalPick(v){
+  $('modal').classList.add('hide');
+  const f = MODAL_RES; MODAL_RES = null;
+  if(f) f(v);
+}
+function askModal(title, bodyHtml, btns){
+  return new Promise(res=>{
+    MODAL_RES = res;
+    $('modal_t').innerHTML = title;
+    $('modal_b').innerHTML = bodyHtml;
+    $('modal_f').innerHTML = btns.map(b=>
+      '<button class="btn '+(b.cls||'')+'" onclick="modalPick(\''+b.v+'\')">'+b.label+'</button>').join('');
+    $('modal').classList.remove('hide');
+  });
+}
+/* เทียบ "จำนวนที่สั่ง" กับ "จำนวนที่ลงในใบตัดใบนี้" ของแต่ละใบสั่งผลิตที่ดึงมา */
+function pulledSummary(outputs){
+  return PULLED.map(p=>{
+    const ordered = (p.items||[]).reduce((s,it)=>s + (Number(it.qty)||0), 0);
+    const made = outputs.filter(o=>Number(o.job_no)===Number(p.job_no))
+                        .reduce((s,o)=>s + (Number(o.qty)||0), 0);
+    return {label:p.label, ordered:ordered, made:made, full: ordered>0 && made>=ordered};
+  });
+}
 async function saveSheet(){
   say('s_msg','');
+  let kept = 0;
   const payload = {
     work_date:$('s_date').value, gs_no:$('s_gs').value, gr_no:$('s_gr').value,
     recorder:$('s_rec').value, cutter:$('s_cut').value, note:$('s_note').value,
@@ -1891,10 +1937,42 @@ async function saveSheet(){
     jobs: PULLED.map(p=>({job_id:p.job_id, job_no:p.job_no}))
   };
   if(!payload.work_date){ say('s_msg','ยังไม่ได้ใส่วันที่'); return; }
+
+  /* ⚠️ ใบสั่งผลิตที่ดึงมาจะถูกตีเป็น "ผลิตแล้ว" ทั้งใบ — ต้องให้ยืนยันก่อนเสมอ */
+  if(PULLED.length){
+    const sm = pulledSummary(payload.outputs), short = sm.filter(x=>!x.full);
+    const body =
+      '<div class="msg warn" style="margin:0">บันทึกแล้ว ใบสั่งผลิตข้างล่างนี้จะถูกตีเป็น '+
+        '<b>“ผลิตแล้ว” ทั้งใบ</b> และหายจากรายการรอผลิต</div>'+
+      '<table class="mtb"><tr><th>ใบสั่งผลิต</th><th class="num">สั่ง</th><th class="num">ลงในใบนี้</th><th class="num">สถานะ</th></tr>'+
+      sm.map(x=>'<tr><td>'+esc(x.label)+'</td>'+
+        '<td class="num">'+nf(x.ordered)+' วง</td>'+
+        '<td class="num">'+nf(x.made)+' วง</td>'+
+        '<td class="num"><span class="pill '+(x.full?'ok':'bad')+'">'+(x.full?'ครบ':'ยังไม่ครบ')+'</span></td></tr>').join('')+
+      '</table>'+
+      (short.length
+        ? '<div class="msg err" style="margin-top:10px">🔴 มี '+short.length+' ใบที่ยัง<b>ผลิตไม่ครบ</b><br>'+
+          'ถ้ายังต้องทำต่อวันหลัง ให้เลือก <b>“บันทึก แต่คงสถานะรอผลิต”</b> — ใบตัดกับสต๊อกไม้บันทึกปกติ '+
+          'แต่ใบสั่งผลิตยังค้างอยู่ในรายการรอผลิตให้ทำต่อ</div>'
+        : '<div class="footnote" style="margin-top:10px">ทุกใบผลิตครบตามที่สั่งแล้ว</div>');
+    const pick = await askModal('⚠️ ยืนยันก่อนบันทึก', body, [
+      short.length
+        ? {v:'keep', label:'💾 บันทึก แต่คงสถานะ “รอผลิต” (แนะนำ)', cls:''}
+        : {v:'mark', label:'✅ ยืนยัน — ตีเป็น “ผลิตแล้ว”', cls:''},
+      short.length
+        ? {v:'mark', label:'✅ ยืนยัน — ตีเป็น “ผลิตแล้ว” ทั้งใบ', cls:'sec'}
+        : {v:'keep', label:'💾 บันทึก แต่คงสถานะ “รอผลิต”', cls:'sec'},
+      {v:'', label:'↩︎ ยกเลิก กลับไปแก้', cls:'sec'}
+    ]);
+    if(!pick) return;
+    if(pick === 'keep'){ payload.jobs = []; kept = PULLED.length; PULLED = []; }
+  }
+
   const r = await rpc('fr_sheet_save',{p_pin:PIN, p_payload:payload});
   if(!r.ok){ say('s_msg', r.error); return; }
   let msg = 'บันทึกใบวันที่ '+r.work_date+' เรียบร้อย';
   if(PULLED.length) msg += ' · ตีสถานะ “ผลิตแล้ว” ให้ '+PULLED.length+' งาน';
+  else if(kept)     msg += ' · ใบสั่งผลิต '+kept+' ใบยังคงสถานะ “รอผลิต” ไว้ให้ทำต่อ';
   const dif = r.plan_diffs||[];
   if(dif.length){
     say('s_msg','<b>'+esc(msg)+'</b><br>⚠️ ไม้ที่เบิกจริงไม่ตรงกับแผน — เจ้าของควรตรวจ<br>'+
