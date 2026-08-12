@@ -262,18 +262,18 @@ th{font-size:12px;color:var(--dim);font-weight:600}
         <button class="btn sec sm" onclick="addCut()">+ เพิ่มแถว</button>
       </div>
 
-      <div class="card in">
-        <h2>🔺 งานที่ผลิตได้ (รับเข้าสต๊อก)</h2>
-        <div id="s_outs"></div>
-        <button class="btn sec sm" onclick="addOut()">+ เพิ่มแถว</button>
-      </div>
-
       <div class="card">
-        <h2>ไม้เหลือจากงาน</h2>
+        <h2>🪵 ไม้เหลือจากงาน (คิดจากรายการตัดข้างบน)</h2>
         <div class="dim" style="margin-bottom:8px">ระบุให้ครบว่าไม้เหลือแต่ละกองไปอยู่ที่ไหน — ที่กด “เก็บเข้าสต๊อก” จะถูกบวกเข้ากองไม้ แล้วตรวจได้ตอนนับจริง</div>
         <div id="s_sug"></div>
         <div id="s_lefts"></div>
         <button class="btn sec sm" onclick="addLeft()">+ เพิ่มรายการเอง</button>
+      </div>
+
+      <div class="card in">
+        <h2>🔺 งานที่ผลิตได้ (รับเข้าสต๊อก)</h2>
+        <div id="s_outs"></div>
+        <button class="btn sec sm" onclick="addOut()">+ เพิ่มแถว</button>
       </div>
 
       <div class="card">
@@ -1780,6 +1780,8 @@ function cutInfo(box){
 }
 function cutHint(box){
   const c = cutInfo(box);
+  /* โชว์ตัวเลขที่ระบบคิดได้ในช่อง "1 ท่อนได้กี่ชิ้น" ให้เห็นเลย (จางๆ) จะได้ไม่ต้องเดา */
+  box.querySelector('.c_per').placeholder = (c && c.auto>=1) ? 'อัตโนมัติ = '+c.auto : 'อัตโนมัติ';
   box.querySelector('.c_hint').innerHTML = !c ? 'ใส่ความยาวชิ้นที่ตัด แล้วระบบจะคิดไม้เหลือให้เอง' :
     (c.per<1 ? '⚠️ ไม้ท่อนนี้ยาว '+nf(c.wood.length_cm)+' ซม. สั้นกว่าชิ้นที่ต้องการ '+nf(c.cut)+' ซม.'
      : 'ไม้ยาว '+nf(c.wood.length_cm)+' ซม. → ตัดได้ '+c.per+' ชิ้น ชิ้นละ '+nf(c.cut)+' ซม.'+
