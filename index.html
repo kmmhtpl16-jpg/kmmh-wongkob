@@ -284,7 +284,8 @@ th{font-size:12px;color:var(--dim);font-weight:600}
 
       <div class="card">
         <label>หมายเหตุ</label><textarea id="s_note" rows="2"></textarea>
-        <button class="btn" style="width:100%;margin-top:10px" onclick="saveSheet()">บันทึกใบนี้</button>
+        <div id="s_lock"></div>
+        <button class="btn" id="btnSaveSheet" style="width:100%;margin-top:10px" onclick="saveSheet()">บันทึกใบนี้</button>
         <button class="btn sec" id="btnCost" style="width:100%;margin-top:8px" onclick="showCosting()">ดูต้นทุนของใบนี้</button>
         <div id="s_msg"></div>
       </div>
@@ -484,7 +485,7 @@ function wipeScreen(){
   PIN=''; ROLE=''; LK={}; SH={}; AD={}; KS={}; LAST_Q=null; qLoaded=false;
   SUG=[]; PULLED=[]; JOBS=[]; QPHOTOS=[]; SJOB={};
   ['q_items','q_table','q_stock','q_msg','q_saved','s_cuts','s_outs','s_lefts','s_sug','s_cost','s_msg',
-   'k_rows','k_moves','k_recv','k_msg','k_open','j_list','j_msg','s_jobs','q_back','q_photos','ql_rows','ql_msg','r_out','a_wood','a_lab','a_mar','a_msg','phWarn','nav','s_hist','j_delcount','ql_delcount']
+   'k_rows','k_moves','k_recv','k_msg','k_open','j_list','j_msg','s_jobs','q_back','q_photos','ql_rows','ql_msg','r_out','a_wood','a_lab','a_mar','a_msg','phWarn','nav','s_hist','s_lock','j_delcount','ql_delcount']
    .forEach(id=>{ const e=$(id); if(e) e.innerHTML=''; });
   $('q_result').classList.add('hide');
   ['q_cust','s_gs','s_gr','s_rec','s_cut','s_note','a_pin_sales','a_pin_entry'].forEach(id=>{ const e=$(id); if(e) e.value=''; });
@@ -1821,6 +1822,12 @@ function renderPulled(){
 function initSheet(){
   if(!$('s_date').value) $('s_date').value = today();
   $('btnCost').classList.toggle('hide', ROLE!=='owner');
+  /* 🔒 ใบสรุปรายการผลิต = คนลงข้อมูล/เจ้าของเท่านั้น · พนักงานขายเปิดดูได้ แต่บันทึกไม่ได้ */
+  const canSave = (ROLE==='entry' || ROLE==='owner');
+  $('btnSaveSheet').classList.toggle('hide', !canSave);
+  $('s_lock').innerHTML = canSave ? ''
+    : '<div class="msg warn" style="margin:0">🔒 หน้านี้<b>ดูได้อย่างเดียว</b> — ใบสรุปรายการผลิตวงกบ '+
+      'บันทึกได้เฉพาะ <b>คนลงข้อมูล</b> หรือ <b>เจ้าของ</b> (กันไม้ถูกตัดสต๊อกโดยคนที่ไม่ได้ดูของจริง)</div>';
   if(!SH.wood) loadSheet();
 }
 const PURPOSE = {frame:'ทำวงกบ', sale:'ขาย', upk:'ส่งบริษัทในเครือ (UPK)', cut_size:'ตัดตามไซส์'};
