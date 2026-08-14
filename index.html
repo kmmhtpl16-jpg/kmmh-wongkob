@@ -1799,13 +1799,13 @@ async function markJobs(status){
 async function pullJobs(){
   const sel = selectedJobs().filter(j=>j.status==='waiting');
   if(!sel.length){ say('j_msg','เลือกงานที่ยัง “รอผลิต” อย่างน้อย 1 งาน'); return; }
-  PULLED = sel.map((j,idx)=>({job_id:j.id, job_no:idx+1, label:j.job_no+(j.customer_name?' · '+j.customer_name:''),
+  PULLED = sel.map((j,idx)=>({job_id:j.id, job_no:idx+1, job_ref:j.job_no, label:j.job_no+(j.customer_name?' · '+j.customer_name:''),
                               planned_wood:j.planned_wood||{}, items:j.items||[]}));
   SJOB = {}; sel.forEach((j,idx)=>{ SJOB[j.job_no] = idx+1; });   /* กันเลข "งานที่" ชนกับที่ดึงจากช่องเลือก */
   go('sheet');
   await loadSheet();
   $('s_outs').innerHTML='';
-  PULLED.forEach(p=>(p.items||[]).forEach(it=>addOut({id:0,
+  PULLED.forEach(p=>(p.items||[]).forEach(it=>addOut({id:0, from_job:p.job_ref,
     item_name:it.descr, model_id:it.model_id, pattern_code:it.pattern_code, channels:it.channels,
     width_cm:it.width_cm, height_cm:it.height_cm, qty:it.qty, job_no:p.job_no, frame_kind:it.frame_kind,
     light_top_count:it.light_top_count, light_side_count:it.light_side_count})));
@@ -1869,12 +1869,13 @@ function jobLineOpts(){
   }));
   return h ? '<optgroup label="📋 งานสั่งผลิตที่รอทำ">'+h+'</optgroup>' : '';
 }
+/* 🔒 รับงานเข้าสต๊อกได้เฉพาะงานที่มีใบสั่งผลิตแล้วเท่านั้น
+   (บังคับให้เดินตามขั้นตอน: ใบเสนอราคา → ส่งเข้ารายการผลิต → ถึงจะรับเข้าได้) */
 function presetOpts(){
-  const ps = SH.presets||[];
-  return '<option value="">— งานใหม่ กรอกเอง —</option>'+ jobLineOpts()+
-    (ps.length ? '<optgroup label="🕘 งานที่เคยผลิต">'+
-       ps.map((p,i)=>'<option value="p:'+i+'">'+esc(presetLabel(p))+'</option>').join('')+'</optgroup>' : '');
+  const jl = jobLineOpts();
+  return '<option value="">— เลือกงานจากใบสั่งผลิต —</option>' + jl;
 }
+function hasWaitingJobs(){ return ((SH.jobs||[]).some(j=>(j.items||[]).length)); }
 function refreshPresetSelects(){
   document.querySelectorAll('.o_preset').forEach(s=>{ const k=s.value; s.innerHTML = presetOpts(); s.value=k; });
 }
@@ -1900,6 +1901,7 @@ function fillPreset(sel){
          channels: it.channels, width_cm: it.width_cm, height_cm: it.height_cm,
          light_top_count: it.light_top_count, light_side_count: it.light_side_count, qty: it.qty};
     const seq = jobSeq(j.job_no);
+    b.dataset.src = 'job:'+j.job_no;                 /* ✅ ผูกกับใบสั่งผลิตแล้ว */
     b.querySelector('.o_job').value = seq;
     if(note) note.textContent = '📋 ดึงจาก '+j.job_no+(j.customer_name?' · '+j.customer_name:'')+
       ' → ลงเป็น “งานที่ '+seq+'” (ฝั่งไม้ที่เบิกออกให้ใส่เลขเดียวกัน)';
@@ -2164,11 +2166,17 @@ function addOut(d){
   d = (d && typeof d==='object') ? d : {};
   const i='o'+Math.random().toString(36).slice(2,8);
   $('s_outs').insertAdjacentHTML('beforeend',
-   '<div class="itemcard in outrow" id="'+i+'">'+
+   '<div class="itemcard in outrow" id="'+i+'" data-src="'+(d.from_job?('job:'+d.from_job):(d.id?'db':''))+'">'+
    '<div class="hd"><b style="color:#0b7a44">🔺 งานที่ผลิตได้</b><button class="btn del" onclick="document.getElementById(\''+i+'\').remove()">ลบ</button></div>'+
-   '<div class="row"><div style="flex:2 1 200px"><label>ดึงรายการจากใบสั่งผลิต / งานที่เคยทำ</label>'+
+   '<div class="row"><div style="flex:2 1 200px"><label>เลือกงานจากใบสั่งผลิต <b style="color:#c02626">*</b></label>'+
      '<select class="o_preset" onchange="fillPreset(this)">'+presetOpts()+'</select>'+
-     '<div class="footnote o_from"></div></div></div>'+
+     '<div class="footnote o_from"></div>'+
+     (d.id ? '' :
+       (hasWaitingJobs()
+         ? '<div class="footnote" style="color:#c02626">ต้องเลือกงานจากใบสั่งผลิตก่อน ถึงจะรับเข้าสต๊อกได้</div>'
+         : '<div class="msg warn" style="margin-top:6px">ยังไม่มีใบสั่งผลิตที่รอทำ — ให้ทำ '+
+           '<b>ใบเสนอราคา → 📋 ส่งเข้ารายการผลิต</b> ก่อน แล้วค่อยกลับมารับงานเข้าสต๊อก</div>'))+
+     '</div></div>'+
    '<div class="row" style="margin-top:8px"><div style="flex:2 1 200px"><label>รายการ</label>'+
      '<input class="o_name" value="'+esc(d.item_name||'')+'" placeholder="เช่น วงกบประตู 80×200"></div></div>'+
    '<div class="row" style="margin-top:8px">'+
@@ -2312,6 +2320,19 @@ async function saveSheet(){
     jobs: PULLED.map(p=>({job_id:p.job_id, job_no:p.job_no}))
   };
   if(!payload.work_date){ say('s_msg','ยังไม่ได้ใส่วันที่'); return; }
+
+  /* 🔒 งานที่ผลิตได้ต้องมาจากใบสั่งผลิตเสมอ — กันรับของเข้าสต๊อกโดยข้ามขั้นตอน */
+  const orphan = [...document.querySelectorAll('.outrow')].filter(b=>{
+    const q = Number((b.querySelector('.o_qty')||{}).value)||0;
+    return q > 0 && !String(b.dataset.src||'').startsWith('job') && b.dataset.src !== 'db';
+  });
+  if(orphan.length){
+    orphan.forEach(b=> b.style.boxShadow = '0 0 0 2px #d64545');
+    say('s_msg','มี '+orphan.length+' แถวใน “🔺 งานที่ผลิตได้” ที่ยังไม่ได้เลือกงานจากใบสั่งผลิต (กรอบแดง) — '+
+        'ต้องทำใบเสนอราคา → ส่งเข้ารายการผลิต ก่อน แล้วเลือกงานนั้นในช่องด้านบนของแถว');
+    return;
+  }
+  [...document.querySelectorAll('.outrow')].forEach(b=> b.style.boxShadow = '');
 
   /* ⚠️ ใบสั่งผลิตที่ดึงมาจะถูกตีเป็น "ผลิตแล้ว" ทั้งใบ — ต้องให้ยืนยันก่อนเสมอ */
   if(PULLED.length){
