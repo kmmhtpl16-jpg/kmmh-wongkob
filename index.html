@@ -63,15 +63,16 @@ th{font-size:12px;color:var(--dim);font-weight:600}
 .hide{display:none!important}
 .modalwrap{position:fixed;inset:0;background:rgba(15,23,32,.5);z-index:100;
   display:flex;align-items:center;justify-content:center;padding:16px}
-.modalcard{background:#fff;border-radius:14px;width:100%;max-width:540px;padding:16px;
+.modalcard{background:#fff;border-radius:14px;width:100%;max-width:540px;padding:16px 16px 22px;
   max-height:86vh;overflow:auto;box-shadow:0 14px 44px rgba(0,0,0,.32)}
+#modal_b{padding-bottom:6px}
 .modalhd{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;
   position:sticky;top:-16px;background:#fff;padding:16px 0 10px;margin:-16px 0 0;z-index:3}
 .modalx{flex:0 0 auto;width:36px;height:36px;border-radius:10px;border:1px solid var(--line);
   background:#fff;color:var(--dim);font-size:19px;line-height:1;cursor:pointer;padding:0}
 .modalx:active{background:#eef1f4}
 .modalfoot{display:flex;flex-direction:column;gap:8px;margin-top:14px}
-.modalfoot:empty{margin-top:0}
+.modalfoot:empty{margin-top:0;height:6px}
 .modalfoot .btn{width:100%}
 .mtb{width:100%;border-collapse:collapse;font-size:14px;margin-top:8px}
 .mtb th,.mtb td{border-bottom:1px solid var(--line);padding:6px 4px;text-align:left}
@@ -1960,6 +1961,8 @@ async function loadSheetHistory(d){
         ? '<button class="btn sec sm" onclick="printSheet(\''+esc(d)+'\')">🖨️ ดู / พิมพ์ใบวันนี้ (A4 แนวนอน)</button>'
         : '<button class="btn sec sm" disabled style="opacity:.45;cursor:not-allowed" '+
           'title="ยังไม่มีใบผลิตของวันนี้ — กดบันทึกใบก่อน">🖨️ ดู / พิมพ์ใบวันนี้ (ยังไม่มีใบ)</button>')+
+      (SH.exists
+        ? '<button class="btn sec sm" onclick="openSheetDate(\''+esc(d)+'\')">✏️ แก้ไขใบวันนี้</button>' : '')+
       '<button class="btn sec sm" onclick="showAllSheetHistory()">📚 ดูประวัติทุกวัน</button>'+
     '</div>'+
     '</div>';
@@ -2091,7 +2094,8 @@ async function showAllSheetHistory(){
           '<b>ใบวันที่ '+esc(thaiDate(h.doc_ref))+'</b>'+
           '<span class="pill dim">'+esc(A_ST[h.action]||h.action||'')+'</span>'+
           '<span class="dim">'+esc(stamp(h.at))+' · '+esc(roleName(h.actor))+'</span>'+
-          '<button class="btn sec sm" onclick="printSheet(\''+esc(h.doc_ref||'')+'\')">🖨️ ดู / พิมพ์ใบวันนี้</button>'+
+          '<button class="btn sec sm" onclick="printSheet(\''+esc(h.doc_ref||'')+'\')">🖨️ ดู / พิมพ์</button>'+
+          '<button class="btn sec sm" onclick="openSheetDate(\''+esc(h.doc_ref||'')+'\')">✏️ แก้ไขใบวันนี้</button>'+
         '</div>'+
         (h.summary?'<div style="font-size:13px;margin-top:4px">'+esc(h.summary)+'</div>':'')+
         ((h.changes && h.changes.length)
