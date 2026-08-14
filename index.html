@@ -111,7 +111,8 @@ th{font-size:12px;color:var(--dim);font-weight:600}
 <body>
 
 <div id="login">
-  <div class="logo"><img src="icon-192.png" alt="วงกบไม้" width="92" height="92" style="border-radius:20px;box-shadow:0 4px 14px rgba(0,0,0,.16)"></div>
+  <div class="logo"><img src="icon-192.png" alt="" width="92" height="92" style="border-radius:20px;box-shadow:0 4px 14px rgba(0,0,0,.16)"
+       onerror="this.replaceWith(Object.assign(document.createElement('div'),{textContent:'\ud83e\udeb5',style:'width:92px;height:92px;line-height:92px;margin:0 auto;font-size:52px;border-radius:20px;background:#f0e6da;box-shadow:0 4px 14px rgba(0,0,0,.16)'}))"></div>
   <h2 style="margin:6px 0 2px">วงกบไม้</h2>
   <div class="dim">กิจมั่งมีโฮม</div>
   <div class="card">
@@ -155,6 +156,9 @@ th{font-size:12px;color:var(--dim);font-weight:600}
             <div><label>ค้นหา (เลขที่ / ชื่อลูกค้า)</label><input id="ql_q" placeholder="เช่น QF69- หรือ ชื่อร้าน"></div>
             <div style="flex:0 0 auto;align-self:flex-end"><button class="btn" onclick="loadQuoteList()">ค้นหา</button></div>
           </div>
+          <div style="margin-top:6px"><label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:400">
+            <input type="checkbox" id="ql_showdel" onchange="loadQuoteList()" style="width:20px;height:20px">
+            <span>🗑 แสดงเอกสารที่ลบแล้ว<span id="ql_delcount" class="dim"></span></span></label></div>
           <div id="ql_msg"></div>
         </div>
         <div id="ql_rows"></div>
@@ -222,18 +226,20 @@ th{font-size:12px;color:var(--dim);font-weight:600}
           <div><label>ดูสถานะ</label><select id="j_filter" onchange="loadJobs()">
             <option value="">ทั้งหมด</option>
             <option value="waiting" selected>รอผลิต</option>
-            <option value="produced">ผลิตแล้ว</option>
-            <option value="delivered">ส่งมอบแล้ว</option>
+            <option value="produced">ผลิตเสร็จแล้ว</option>
           </select></div>
           <div style="flex:0 0 auto;align-self:flex-end"><button class="btn sec sm" onclick="loadJobs()">รีเฟรช</button></div>
         </div>
-        <div class="footnote">ติ๊กเลือกได้หลายงาน แล้วส่งเข้าใบผลิตพร้อมกัน</div>
+        <div style="margin-top:6px"><label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:400">
+          <input type="checkbox" id="j_showdel" onchange="loadJobs()" style="width:20px;height:20px">
+          <span>🗑 แสดงเอกสารที่ลบแล้ว<span id="j_delcount" class="dim"></span></span></label></div>
+        <div class="footnote">ติ๊กเลือกได้หลายงาน แล้วส่งเข้าใบผลิตพร้อมกัน · งานจบที่สถานะ <b>“ผลิตเสร็จแล้ว”</b> (ไม่มีสถานะส่งมอบแล้ว)</div>
         <div id="j_msg"></div>
       </div>
       <div id="j_list"></div>
       <div class="card noprint">
         <button class="btn" style="width:100%" onclick="pullJobs()">⬇️ ดึงงานที่เลือกเข้าใบสรุปรายการผลิตวงกบ</button>
-        <button class="btn sec" style="width:100%;margin-top:8px" onclick="markJobs('delivered')">✅ ทำเครื่องหมายว่าส่งมอบแล้ว</button>
+        <button class="btn sec" style="width:100%;margin-top:8px" onclick="markProduced()">✅ ทำเครื่องหมายว่าผลิตเสร็จแล้ว (ใส่วันที่)</button>
         <button class="btn sec" style="width:100%;margin-top:8px" onclick="markJobs('waiting')">↩︎ ย้อนกลับเป็นรอผลิต</button>
       </div>
     </section>
@@ -282,6 +288,7 @@ th{font-size:12px;color:var(--dim);font-weight:600}
         <button class="btn sec" id="btnCost" style="width:100%;margin-top:8px" onclick="showCosting()">ดูต้นทุนของใบนี้</button>
         <div id="s_msg"></div>
       </div>
+      <div id="s_hist"></div>
       <div id="s_cost"></div>
     </section>
 
@@ -477,7 +484,7 @@ function wipeScreen(){
   PIN=''; ROLE=''; LK={}; SH={}; AD={}; KS={}; LAST_Q=null; qLoaded=false;
   SUG=[]; PULLED=[]; JOBS=[]; QPHOTOS=[]; SJOB={};
   ['q_items','q_table','q_stock','q_msg','q_saved','s_cuts','s_outs','s_lefts','s_sug','s_cost','s_msg',
-   'k_rows','k_moves','k_recv','k_msg','k_open','j_list','j_msg','s_jobs','q_back','q_photos','ql_rows','ql_msg','r_out','a_wood','a_lab','a_mar','a_msg','phWarn','nav']
+   'k_rows','k_moves','k_recv','k_msg','k_open','j_list','j_msg','s_jobs','q_back','q_photos','ql_rows','ql_msg','r_out','a_wood','a_lab','a_mar','a_msg','phWarn','nav','s_hist','j_delcount','ql_delcount']
    .forEach(id=>{ const e=$(id); if(e) e.innerHTML=''; });
   $('q_result').classList.add('hide');
   ['q_cust','s_gs','s_gr','s_rec','s_cut','s_note','a_pin_sales','a_pin_entry'].forEach(id=>{ const e=$(id); if(e) e.value=''; });
@@ -515,6 +522,7 @@ async function initQuote(){
   const r = await rpc('fr_quote_lookup',{p_pin:PIN});
   if(!r.ok){ say('q_msg', r.error+' — กด “คิดราคา” เพื่อลองใหม่'); return false; }
   LK = r; qLoaded=true;
+  loadRecentSizes();
   if(r.has_placeholder) $('phWarn').innerHTML =
     '<div class="msg warn">⚠️ ราคาไม้ในระบบยังเป็น <b>ราคาสมมุติสำหรับทดสอบ</b> — ราคาที่ได้ยังใช้เสนอลูกค้าจริงไม่ได้ '+
     'ให้คุณหลิงใส่ราคาไม้จริงในหน้า “ตั้งค่า” ก่อน</div>';
@@ -533,16 +541,45 @@ function refreshPatSelects(){
 function patOpts(sel){
   return (LK.patterns||[]).map(p=>'<option value="'+p.code+'"'+(p.code===sel?' selected':'')+'>'+esc(p.label)+'</option>').join('');
 }
+/* ⭐ ขนาดที่เคยขาย — ดึงจากใบเสนอราคาเก่า ไว้กดเติมขนาดให้อัตโนมัติ */
+let RECENT = [];
+async function loadRecentSizes(){
+  const r = await rpc('fr_recent_sizes',{p_pin:PIN, p_limit:40});
+  RECENT = (r && r.ok) ? (r.rows||[]) : [];
+  document.querySelectorAll('#q_items .q_recent').forEach(s=>{ const k=s.value; s.innerHTML=recentOpts(); s.value=k; });
+}
+function recentOpts(){
+  return '<option value="">— ไม่ใช้ กรอกเอง —</option>'+
+    RECENT.map((x,i)=>'<option value="'+i+'">'+esc(x.label||'')+'</option>').join('');
+}
+function fillRecent(sel){
+  const x = RECENT[Number(sel.value)]; if(!x) return;
+  const box = sel.closest('.itemcard');
+  const set = (cls,v)=>{ const e=box.querySelector(cls); if(e && v!=null && v!=='') e.value = v; };
+  const mdl = box.querySelector('.q_model'); if(mdl) mdl.value='';      /* ใช้ขนาดที่เคยขาย = ไม่ใช่แบบมาตรฐาน */
+  set('.q_kind',   x.frame_kind||'door');
+  set('.q_pat',    x.pattern_code||'');
+  set('.q_leaves', x.leaf_count||x.channels||1);
+  set('.q_inst',   x.install_type||'rebate');
+  const b = box.querySelector('.q_basis'); if(b) b.value='inner';       /* เก็บมาเป็นขนาดบาน/ช่องแสงเสมอ */
+  set('.q_lfw',  x.leaf_w_cm);  set('.q_lfh',  x.leaf_h_cm);
+  set('.q_ltc',  x.light_top_count);  set('.q_ltcm', x.light_top_cm);
+  set('.q_lsc',  x.light_side_count); set('.q_lscm', x.light_side_cm);
+  if((Number(x.leaf_count)||1) > 1){ const mid = box.querySelector('.q_mid'); if(mid) mid.value='1'; }
+  syncCard(box);
+}
 let UID=0;
 function addQuoteItem(){
   const i = 'q'+(++UID);
+  const rec = '<div><label>⭐ ขนาดที่เคยขาย</label>'+
+    '<select class="q_recent" onchange="fillRecent(this)">'+recentOpts()+'</select></div>';
   const mdl = (LK.models||[]).length
     ? '<div><label>แบบมาตรฐาน</label><select class="q_model" onchange="fillModel(this)"><option value="">— กรอกขนาดเอง —</option>'+
       LK.models.map(m=>'<option value="'+m.id+'" data-p="'+esc(m.pattern_code||'')+'" data-c="'+(m.channels||1)+'" data-w="'+(m.width_cm||'')+'" data-h="'+(m.height_cm||'')+'" data-k="'+esc(m.frame_kind||'')+'" data-b="'+esc(m.size_basis||'')+'" data-lt="'+(m.light_top_count||'')+'" data-ltcm="'+(m.light_top_cm||'')+'">'+esc(m.name)+'</option>').join('')+
       '</select></div>' : '';
   const html = '<div class="itemcard" id="qi'+i+'">'+
     '<div class="hd"><b>รายการ</b><button class="btn del" onclick="document.getElementById(\'qi'+i+'\').remove()">ลบ</button></div>'+
-    mdl+
+    '<div class="row">'+rec+mdl+'</div>'+
     '<div class="row" style="margin-top:8px">'+
       '<div><label>ชนิดงาน</label><select class="q_kind">'+
         '<option value="door">วงกบประตู (หัววงกบ + ขา 2 ข้าง)</option>'+
@@ -1303,17 +1340,24 @@ function photoStrip(list){
 let QLIST = [];
 async function loadQuoteList(){
   if(!qLoaded) await initQuote();     // ต้องมีกติกาไม้ (LK.rules) ก่อน ไม่งั้นคำนวณขนาดช่องเปิดตอนพิมพ์เพี้ยน
+  const showDel = !!($('ql_showdel') && $('ql_showdel').checked);
   const r = await rpc('fr_quote_list',{p_pin:PIN, p_from:$('ql_from').value||null,
-                                       p_to:$('ql_to').value||null, p_q:$('ql_q').value||null});
+                                       p_to:$('ql_to').value||null, p_q:$('ql_q').value||null,
+                                       p_show_deleted:showDel});
   if(!r.ok){ say('ql_msg', r.error); return; }
   const rows = r.rows||[];
   QLIST = rows;
+  const qdc = Number(r.deleted_count||0);
+  if($('ql_delcount')) $('ql_delcount').textContent = qdc ? ' (มี '+qdc+' ใบ)' : '';
   $('ql_rows').innerHTML = !rows.length ? '<div class="card"><div class="dim">ไม่พบใบเสนอราคาในช่วงนี้</div></div>'
    : rows.map(q=>{
-      const st = q.job_no
+      const qdel = !!q.deleted_at;
+      const st = qdel
+        ? '<span class="pill bad">🗑 ลบแล้ว</span>'
+        : (q.job_no
         ? '<span class="pill '+(J_ST[q.job_status]||['','dim'])[1]+'">'+esc(q.job_no)+' · '+(J_ST[q.job_status]||['—'])[0]+'</span>'
-        : '<span class="pill dim">ยังไม่ส่งผลิต</span>';
-      return '<div class="card">'+
+        : '<span class="pill dim">ยังไม่ส่งผลิต</span>');
+      return '<div class="card"'+(qdel?' style="opacity:.65;border-left:6px solid #c0392b"':'')+'>'+
         '<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">'+
           '<b>'+esc(q.quote_no||'')+'</b><span class="dim">'+esc(q.quote_date||'')+'</span>'+
           (q.customer_name?'<span>· '+esc(q.customer_name)+'</span>':'')+st+'</div>'+
@@ -1323,10 +1367,15 @@ async function loadQuoteList(){
         '<div style="margin-top:6px">รวม ราคา 1 <b>'+nf(q.total_general)+'</b> บาท · ราคา 2 <b>'+nf(q.total_upk)+'</b> บาท'+
           (q.total_cost!=null?' <span class="dim">· ทุน '+nf(q.total_cost)+'</span>':'')+'</div>'+
         photoStrip(q.photos)+
+        (qdel?'<div class="msg err" style="margin-top:6px">🗑 ลบเมื่อ '+esc(stamp(q.deleted_at))+' โดย '+esc(roleName(q.deleted_by))+
+              (q.delete_reason?'<br>เหตุผล: '+esc(q.delete_reason):'')+'</div>':'')+
         '<div class="row noprint" style="margin-top:8px">'+
           '<button class="btn sec sm" onclick="printSaved('+q.id+',1)">🖨️ พิมพ์ ราคา 1</button>'+
           '<button class="btn sec sm" onclick="printSaved('+q.id+',2)">🖨️ พิมพ์ ราคา 2</button>'+
-          (q.job_no?'':'<button class="btn sm" onclick="quoteToJob('+q.id+')">📋 ส่งเข้ารายการผลิต</button>')+
+          ((q.job_no||qdel)?'':'<button class="btn sm" onclick="quoteToJob('+q.id+')">📋 ส่งเข้ารายการผลิต</button>')+
+          '<button class="btn sec sm" onclick="showHistory(\'quote\','+q.id+',\''+esc(q.quote_no||'')+'\')">🕘 ประวัติ</button>'+
+          (qdel?'<button class="btn sec sm" onclick="restoreQuote('+q.id+')">↩︎ กู้คืนเอกสาร</button>'
+               :'<button class="btn del sm" onclick="deleteQuote('+q.id+')">🗑 ลบเอกสาร</button>')+
         '</div>'+
         '</div>';
      }).join('');
@@ -1540,6 +1589,25 @@ function printSaved(id, which){
   openPrintDoc(w, buildQuoteDoc(q, lines, which));
 }
 
+async function deleteQuote(id){
+  const q = (QLIST||[]).find(x=>x.id===id); if(!q) return;
+  const body = '<div class="msg warn" style="margin:0">กำลังลบ <b>'+esc(q.quote_no||'')+'</b>'+
+      (q.customer_name?' · '+esc(q.customer_name):'')+
+      '<br>เอกสารจะถูก<b>ซ่อนจากรายการ</b> แต่ยังเก็บไว้ในระบบ กู้คืนได้ตลอด</div>'+
+    '<div style="margin-top:10px"><label>เหตุผลที่ลบ (ให้คนอื่นเข้าใจตอนย้อนดู)</label>'+
+    '<input id="dq_reason" placeholder="เช่น เสนอผิดขนาด / ลูกค้ายกเลิก"></div>';
+  const pick = await askModal('🗑 ลบใบเสนอราคา', body,
+    [{v:'ok',label:'ยืนยันลบ',cls:'del'},{v:'',label:'ยกเลิก',cls:'sec'}]);
+  if(pick!=='ok') return;
+  const r = await rpc('fr_quote_delete',{p_pin:PIN, p_id:id, p_reason:($('dq_reason')||{}).value||null});
+  say('ql_msg', r.ok?('ลบ '+r.quote_no+' แล้ว (กู้คืนได้จากสวิตช์ “แสดงเอกสารที่ลบแล้ว”)'):r.error, r.ok?'ok':'err');
+  if(r.ok) loadQuoteList();
+}
+async function restoreQuote(id){
+  const r = await rpc('fr_quote_restore',{p_pin:PIN, p_id:id});
+  say('ql_msg', r.ok?('กู้คืน '+r.quote_no+' แล้ว'):r.error, r.ok?'ok':'err');
+  if(r.ok) loadQuoteList();
+}
 async function quoteToJob(id){
   const r = await rpc('fr_quote_to_job',{p_pin:PIN, p_quote_id:id});
   say('ql_msg', r.ok? 'ส่งเข้ารายการผลิตแล้ว เลขงาน '+r.job_no : r.error, r.ok?'ok':'err');
@@ -1548,7 +1616,33 @@ async function quoteToJob(id){
 
 /* ================= คิวงานสั่งผลิต ================= */
 let JOBS = [], PULLED = [];
-const J_ST = {waiting:['รอผลิต','warn'], produced:['ผลิตแล้ว','ok'], delivered:['ส่งมอบแล้ว','dim']};
+const J_ST = {waiting:['รอผลิต','warn'], produced:['ผลิตเสร็จแล้ว','ok'], delivered:['ผลิตเสร็จแล้ว','ok']};
+const A_ST = {create:'สร้างเอกสาร', edit:'แก้ไขเอกสาร', delete:'ลบเอกสาร', restore:'กู้คืนเอกสาร', status:'เปลี่ยนสถานะ'};
+function roleName(r){ return {owner:'เจ้าของ', entry:'คนลงข้อมูล', sales:'พนักงานขาย'}[r] || (r||'—'); }
+/* วัน-เวลาแบบไทย (พ.ศ.) */
+function stamp(iso){
+  if(!iso) return '';
+  const dt = new Date(iso); if(isNaN(dt)) return String(iso);
+  const p = x=>String(x).padStart(2,'0');
+  return p(dt.getDate())+'/'+p(dt.getMonth()+1)+'/'+(dt.getFullYear()+543)+' '+p(dt.getHours())+':'+p(dt.getMinutes());
+}
+/* 🕘 ประวัติเอกสาร — ใช้ร่วมกันทุกหน้า */
+function histHtml(rows){
+  if(!rows || !rows.length) return '<div class="dim">ยังไม่มีประวัติของเอกสารนี้</div>';
+  return rows.map(h=>'<div class="itemcard" style="margin-top:8px">'+
+    '<div><b>'+esc(A_ST[h.action]||h.action||'')+'</b> <span class="dim">'+esc(stamp(h.at))+' · '+esc(roleName(h.actor))+'</span></div>'+
+    (h.summary?'<div style="font-size:13px;margin-top:4px">'+esc(h.summary)+'</div>':'')+
+    ((h.changes && h.changes.length)
+      ? '<table class="mtb" style="margin-top:6px"><tr><th>ช่อง</th><th>เดิม</th><th>ใหม่</th></tr>'+
+        h.changes.map(c=>'<tr><td>'+esc(c.field||'')+'</td><td>'+esc(c.from||'')+'</td><td>'+esc(c.to||'')+'</td></tr>').join('')+
+        '</table>' : '')+
+    '</div>').join('');
+}
+async function showHistory(type, id, label){
+  const r = await rpc('fr_doc_history',{p_pin:PIN, p_type:type, p_id:id, p_ref:null, p_limit:50});
+  await askModal('🕘 ประวัติ '+esc(label||''), r.ok?histHtml(r.rows):'<div class="msg err">'+esc(r.error)+'</div>',
+                 [{v:'',label:'ปิด',cls:'sec'}]);
+}
 async function sendToJobs(){
   if(!LAST_Q){ say('q_saved','กด “คิดราคา” ก่อน'); return; }
   const q = await rpc('fr_quote_save',{p_pin:PIN, p_customer_type:LAST_Q.type,
@@ -1562,24 +1656,105 @@ async function sendToJobs(){
 }
 function initJobs(){ loadJobs(); }
 async function loadJobs(){
-  const r = await rpc('fr_job_list',{p_pin:PIN, p_status:$('j_filter').value||null});
+  const showDel = !!($('j_showdel') && $('j_showdel').checked);
+  const r = await rpc('fr_job_list',{p_pin:PIN, p_status:$('j_filter').value||null, p_show_deleted:showDel});
   if(!r.ok){ say('j_msg', r.error); return; }
   JOBS = r.rows||[];
+  const dc = Number(r.deleted_count||0);
+  if($('j_delcount')) $('j_delcount').textContent = dc ? ' (มี '+dc+' ใบ)' : '';
   $('j_list').innerHTML = !JOBS.length
     ? '<div class="card"><div class="dim">ยังไม่มีงานในสถานะนี้</div></div>'
     : JOBS.map((j,i)=>{
-        const st = J_ST[j.status]||['?','dim'];
+        const del = !!j.deleted_at;
+        const st = del ? ['🗑 ลบแล้ว','bad'] : (J_ST[j.status]||['?','dim']);
         const items = (j.items||[]).map(x=>'• '+esc(x.descr||'วงกบ')+' × '+nf(x.qty)).join('<br>');
-        return '<div class="card" style="padding:12px">'+
+        return '<div class="card" style="padding:12px'+(del?';opacity:.65;border-left:6px solid #c0392b':'')+'">'+
           '<div style="display:flex;align-items:flex-start;gap:10px">'+
-          '<input type="checkbox" class="j_sel" data-i="'+i+'" style="width:22px;height:22px;flex:0 0 auto;margin-top:2px">'+
+          (del ? '<div style="width:22px;flex:0 0 auto"></div>'
+               : '<input type="checkbox" class="j_sel" data-i="'+i+'" style="width:22px;height:22px;flex:0 0 auto;margin-top:2px">')+
           '<div style="flex:1"><div><b>'+esc(j.job_no||'')+'</b> '+
             (j.customer_name?'· '+esc(j.customer_name):'')+' <span class="pill '+st[1]+'">'+st[0]+'</span></div>'+
           '<div style="font-size:13px;margin-top:4px">'+items+'</div>'+
-          (j.sheet_date?'<div class="dim" style="font-size:12px;margin-top:4px">ลงใบผลิตวันที่ '+esc(j.sheet_date)+'</div>':'')+
+          (j.produced_on?'<div class="dim" style="font-size:12px;margin-top:4px">📅 ผลิตเสร็จวันที่ '+esc(thaiDate(j.produced_on))+'</div>':'')+
+          (j.sheet_date?'<div class="dim" style="font-size:12px">ลงใบผลิตวันที่ '+esc(thaiDate(j.sheet_date))+'</div>':'')+
+          (j.updated_at?'<div class="dim" style="font-size:12px">✏️ แก้ล่าสุด '+esc(stamp(j.updated_at))+' โดย '+esc(roleName(j.updated_by))+'</div>':'')+
+          (del?'<div class="msg err" style="margin-top:6px">🗑 ลบเมื่อ '+esc(stamp(j.deleted_at))+' โดย '+esc(roleName(j.deleted_by))+
+               (j.delete_reason?'<br>เหตุผล: '+esc(j.delete_reason):'')+'</div>':'')+
           photoStrip(j.photos)+
+          '<div class="row noprint" style="margin-top:8px">'+
+            (del ? '<button class="btn sec sm" onclick="restoreJob('+j.id+')">↩︎ กู้คืนเอกสาร</button>'
+                 : '<button class="btn sec sm" onclick="editJob('+j.id+')">✏️ แก้ไข</button>')+
+            '<button class="btn sec sm" onclick="showHistory(\'job\','+j.id+',\''+esc(j.job_no||'')+'\')">🕘 ประวัติ</button>'+
+            (del ? '' : '<button class="btn del sm" onclick="deleteJob('+j.id+')">🗑 ลบเอกสาร</button>')+
+          '</div>'+
           '</div></div></div>';
       }).join('');
+}
+/* ✅ ผลิตเสร็จแล้ว — บังคับใส่วันที่ผลิตเสร็จเสมอ */
+async function markProduced(){
+  const sel = selectedJobs();
+  if(!sel.length){ say('j_msg','ยังไม่ได้เลือกงาน'); return; }
+  const body = '<div>เลือกไว้ <b>'+sel.length+' งาน</b> — ใส่ <b>วันที่ผลิตเสร็จ</b> ก่อนถึงจะบันทึกได้</div>'+
+    '<div style="margin-top:8px"><label>วันที่ผลิตเสร็จ</label><input id="mp_date" type="date" value="'+today()+'"></div>'+
+    '<div class="footnote" style="margin-top:6px">งานจบที่สถานะนี้ (ไม่มีสถานะ “ส่งมอบแล้ว” แล้ว) · แก้ไขย้อนหลังได้ ระบบเก็บประวัติให้</div>';
+  const pick = await askModal('✅ ทำเครื่องหมายว่าผลิตเสร็จแล้ว', body,
+    [{v:'ok',label:'ยืนยัน'},{v:'',label:'ยกเลิก',cls:'sec'}]);
+  if(pick!=='ok') return;
+  const d = ($('mp_date')||{}).value;
+  if(!d){ say('j_msg','ยังไม่ได้ใส่วันที่ผลิตเสร็จ'); return; }
+  const r = await rpc('fr_job_mark',{p_pin:PIN, p_ids:sel.map(j=>j.id), p_status:'produced', p_produced_on:d});
+  say('j_msg', r.ok?('อัปเดต '+r.updated+' งานแล้ว · วันที่ผลิตเสร็จ '+thaiDate(d)):r.error, r.ok?'ok':'err');
+  if(r.ok) loadJobs();
+}
+/* ✏️ แก้ไขงานสั่งผลิต — แก้ได้แม้ผลิตเสร็จแล้ว ทุกครั้งเก็บประวัติ */
+async function editJob(id){
+  const j = JOBS.find(x=>x.id===id); if(!j) return;
+  const body =
+    '<div><label>ชื่อลูกค้า / งาน</label><input id="ej_cust" value="'+esc(j.customer_name||'')+'"></div>'+
+    (j.status==='produced'
+      ? '<div style="margin-top:8px"><label>วันที่ผลิตเสร็จ</label><input id="ej_pdate" type="date" value="'+esc(j.produced_on||'')+'"></div>'
+      : '')+
+    '<div style="margin-top:8px"><label>หมายเหตุ</label><textarea id="ej_note" rows="2">'+esc(j.note||'')+'</textarea></div>'+
+    '<div style="margin-top:10px"><b>รายการในเอกสาร</b></div>'+
+    (j.items||[]).map((it,ix)=>'<div class="row" style="margin-top:6px">'+
+      '<div style="flex:2 1 170px"><label>รายละเอียด</label><input class="ej_d" data-seq="'+(ix+1)+'" value="'+esc(it.descr||'')+'"></div>'+
+      '<div style="flex:0 1 90px"><label>จำนวน</label><input class="ej_q" type="number" step="1" value="'+(it.qty!=null?it.qty:'')+'"></div>'+
+      '</div>').join('')+
+    '<div class="footnote" style="margin-top:8px">ทุกการแก้ไขถูกบันทึกไว้ในประวัติ (ใคร · เมื่อไหร่ · แก้อะไร)</div>';
+  const pick = await askModal('✏️ แก้ไขงานสั่งผลิต '+esc(j.job_no||''), body,
+    [{v:'ok',label:'💾 บันทึกการแก้ไข'},{v:'',label:'ยกเลิก',cls:'sec'}]);
+  if(pick!=='ok') return;
+  const ds=[...document.querySelectorAll('#modal_b .ej_d')], qs=[...document.querySelectorAll('#modal_b .ej_q')];
+  const lines = ds.map((e,ix)=>({seq:Number(e.dataset.seq), descr:e.value, qty:(qs[ix]||{}).value}));
+  const r = await rpc('fr_job_update',{p_pin:PIN, p_id:id,
+    p_customer_name:($('ej_cust')||{}).value||null,
+    p_note:($('ej_note')||{}).value||'',
+    p_produced_on:($('ej_pdate')||{}).value||null,
+    p_lines:lines});
+  say('j_msg', r.ok?(r.changed?('บันทึกการแก้ไขแล้ว '+r.changed+' จุด — กด 🕘 ประวัติ เพื่อดูว่าแก้อะไรไป'):'ไม่มีอะไรเปลี่ยน'):r.error, r.ok?'ok':'err');
+  if(r.ok) loadJobs();
+}
+/* 🗑 ลบเอกสาร — ซ่อนจากรายการ แต่เก็บไว้ในระบบ กู้คืนได้ */
+async function deleteJob(id){
+  const j = JOBS.find(x=>x.id===id); if(!j) return;
+  const body = '<div class="msg warn" style="margin:0">กำลังลบ <b>'+esc(j.job_no||'')+'</b>'+
+      (j.customer_name?' · '+esc(j.customer_name):'')+
+      '<br>เอกสารจะถูก<b>ซ่อนจากรายการ</b> แต่ยังเก็บไว้ในระบบ กู้คืนได้ตลอด</div>'+
+    (j.sheet_date?'<div class="msg err" style="margin-top:8px">⚠️ งานนี้เคยลงใบผลิตวันที่ '+esc(thaiDate(j.sheet_date))+
+      ' — ไม้ที่เบิกในใบผลิตวันนั้น<b>ยังตัดสต๊อกอยู่เหมือนเดิม</b> ถ้าต้องการคืนไม้ต้องไปแก้ที่ใบผลิตวันนั้น</div>':'')+
+    '<div style="margin-top:10px"><label>เหตุผลที่ลบ (ให้คนอื่นเข้าใจตอนย้อนดู)</label>'+
+    '<input id="dl_reason" placeholder="เช่น ลูกค้ายกเลิก / คีย์ซ้ำ"></div>';
+  const pick = await askModal('🗑 ลบงานสั่งผลิต', body,
+    [{v:'ok',label:'ยืนยันลบ',cls:'del'},{v:'',label:'ยกเลิก',cls:'sec'}]);
+  if(pick!=='ok') return;
+  const r = await rpc('fr_job_delete',{p_pin:PIN, p_id:id, p_reason:($('dl_reason')||{}).value||null});
+  say('j_msg', r.ok?('ลบ '+r.job_no+' แล้ว (กู้คืนได้จากสวิตช์ “แสดงเอกสารที่ลบแล้ว”)'):r.error, r.ok?'ok':'err');
+  if(r.ok) loadJobs();
+}
+async function restoreJob(id){
+  const r = await rpc('fr_job_restore',{p_pin:PIN, p_id:id});
+  say('j_msg', r.ok?('กู้คืน '+r.job_no+' แล้ว'):r.error, r.ok?'ok':'err');
+  if(r.ok) loadJobs();
 }
 function selectedJobs(){
   return [...document.querySelectorAll('.j_sel:checked')].map(c=>JOBS[Number(c.dataset.i)]).filter(Boolean);
@@ -1587,7 +1762,7 @@ function selectedJobs(){
 async function markJobs(status){
   const sel = selectedJobs();
   if(!sel.length){ say('j_msg','ยังไม่ได้เลือกงาน'); return; }
-  const r = await rpc('fr_job_mark',{p_pin:PIN, p_ids:sel.map(j=>j.id), p_status:status});
+  const r = await rpc('fr_job_mark',{p_pin:PIN, p_ids:sel.map(j=>j.id), p_status:status, p_produced_on:null});
   say('j_msg', r.ok?'อัปเดต '+r.updated+' งานแล้ว':r.error, r.ok?'ok':'err');
   if(r.ok) loadJobs();
 }
@@ -1736,7 +1911,42 @@ async function loadSheet(){
   if(!(r.cuts||[]).length) addCut();
   if(!(r.outputs||[]).length) addOut();
   suggestLeftovers();
-  if(r.exists) say('s_msg','เปิดใบวันที่ '+d+' แล้ว','ok');
+  loadSheetHistory(d);
+  if(r.exists) say('s_msg','เปิดใบวันที่ '+thaiDate(d)+' แล้ว','ok');
+}
+/* 🕘 ประวัติการบันทึกใบผลิต — ให้พนักงานย้อนตรวจว่าที่บันทึกไปถูกไหม */
+async function loadSheetHistory(d){
+  if(!$('s_hist')) return;
+  const r = await rpc('fr_doc_history',{p_pin:PIN, p_type:'sheet', p_id:null, p_ref:d, p_limit:30});
+  $('s_hist').innerHTML = '<div class="card"><h2>🕘 ประวัติการบันทึกใบวันที่ '+esc(thaiDate(d))+'</h2>'+
+    '<div class="dim" style="margin-bottom:6px">ตรวจย้อนได้ว่าใครบันทึก/แก้ เมื่อไหร่ และแก้อะไรไปบ้าง</div>'+
+    (r.ok ? histHtml(r.rows) : '<div class="msg err">'+esc(r.error)+'</div>')+
+    '<button class="btn sec sm" style="margin-top:10px" onclick="showAllSheetHistory()">📚 ดูประวัติทุกวัน + แก้ไขย้อนหลัง</button>'+
+    '</div>';
+}
+async function showAllSheetHistory(){
+  const r = await rpc('fr_doc_history',{p_pin:PIN, p_type:'sheet', p_id:null, p_ref:null, p_limit:60});
+  const rows = r.ok ? (r.rows||[]) : [];
+  const body = !rows.length ? '<div class="dim">ยังไม่มีประวัติการบันทึก</div>'
+    : rows.map(h=>'<div class="itemcard" style="margin-top:8px">'+
+        '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">'+
+          '<b>ใบวันที่ '+esc(thaiDate(h.doc_ref))+'</b>'+
+          '<span class="pill dim">'+esc(A_ST[h.action]||h.action||'')+'</span>'+
+          '<span class="dim">'+esc(stamp(h.at))+' · '+esc(roleName(h.actor))+'</span>'+
+          '<button class="btn sec sm" onclick="openSheetDate(\''+esc(h.doc_ref||'')+'\')">✏️ เปิดแก้ไขใบวันนี้</button>'+
+        '</div>'+
+        (h.summary?'<div style="font-size:13px;margin-top:4px">'+esc(h.summary)+'</div>':'')+
+        ((h.changes && h.changes.length)
+          ? '<table class="mtb" style="margin-top:6px"><tr><th>ช่อง</th><th>เดิม</th><th>ใหม่</th></tr>'+
+            h.changes.map(c=>'<tr><td>'+esc(c.field||'')+'</td><td>'+esc(c.from||'')+'</td><td>'+esc(c.to||'')+'</td></tr>').join('')+
+            '</table>' : '')+
+        '</div>').join('');
+  await askModal('📚 ประวัติการบันทึกใบผลิต (ทุกวัน)', body, [{v:'',label:'ปิด',cls:'sec'}]);
+}
+function openSheetDate(d){
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(String(d||''))) return;   /* กันค่าที่ไม่ใช่วันที่ */
+  modalPick('');
+  $('s_date').value = d; PULLED = []; renderPulled(); loadSheet();
 }
 function addCut(d){
   d = (d && typeof d==='object') ? d : {};
@@ -1945,7 +2155,7 @@ async function saveSheet(){
     const sm = pulledSummary(payload.outputs), short = sm.filter(x=>!x.full);
     const body =
       '<div class="msg warn" style="margin:0">บันทึกแล้ว ใบสั่งผลิตข้างล่างนี้จะถูกตีเป็น '+
-        '<b>“ผลิตแล้ว” ทั้งใบ</b> และหายจากรายการรอผลิต</div>'+
+        '<b>“ผลิตเสร็จแล้ว” ทั้งใบ</b> และหายจากรายการรอผลิต</div>'+
       '<table class="mtb"><tr><th>ใบสั่งผลิต</th><th class="num">สั่ง</th><th class="num">ลงในใบนี้</th><th class="num">สถานะ</th></tr>'+
       sm.map(x=>'<tr><td>'+esc(x.label)+'</td>'+
         '<td class="num">'+nf(x.ordered)+' วง</td>'+
@@ -1960,9 +2170,9 @@ async function saveSheet(){
     const pick = await askModal('⚠️ ยืนยันก่อนบันทึก', body, [
       short.length
         ? {v:'keep', label:'💾 บันทึก แต่คงสถานะ “รอผลิต” (แนะนำ)', cls:''}
-        : {v:'mark', label:'✅ ยืนยัน — ตีเป็น “ผลิตแล้ว”', cls:''},
+        : {v:'mark', label:'✅ ยืนยัน — ตีเป็น “ผลิตเสร็จแล้ว”', cls:''},
       short.length
-        ? {v:'mark', label:'✅ ยืนยัน — ตีเป็น “ผลิตแล้ว” ทั้งใบ', cls:'sec'}
+        ? {v:'mark', label:'✅ ยืนยัน — ตีเป็น “ผลิตเสร็จแล้ว” ทั้งใบ', cls:'sec'}
         : {v:'keep', label:'💾 บันทึก แต่คงสถานะ “รอผลิต”', cls:'sec'},
       {v:'', label:'↩︎ ยกเลิก กลับไปแก้', cls:'sec'}
     ]);
@@ -1972,8 +2182,9 @@ async function saveSheet(){
 
   const r = await rpc('fr_sheet_save',{p_pin:PIN, p_payload:payload});
   if(!r.ok){ say('s_msg', r.error); return; }
-  let msg = 'บันทึกใบวันที่ '+r.work_date+' เรียบร้อย';
-  if(PULLED.length) msg += ' · ตีสถานะ “ผลิตแล้ว” ให้ '+PULLED.length+' งาน';
+  let msg = 'บันทึกใบวันที่ '+thaiDate(r.work_date)+' เรียบร้อย';
+  if(r.saved_kind==='edit') msg += ' (แก้ไขใบเดิม — บันทึกประวัติแล้ว)';
+  if(PULLED.length) msg += ' · ตีสถานะ “ผลิตเสร็จแล้ว” ให้ '+PULLED.length+' งาน';
   else if(kept)     msg += ' · ใบสั่งผลิต '+kept+' ใบยังคงสถานะ “รอผลิต” ไว้ให้ทำต่อ';
   const dif = r.plan_diffs||[];
   if(dif.length){
@@ -1983,6 +2194,7 @@ async function saveSheet(){
     say('s_msg', msg, 'ok');
   }
   PULLED=[]; renderPulled();
+  loadSheetHistory($('s_date').value);
 }
 async function showCosting(){
   const r = await rpc('fr_sheet_costing',{p_pin:PIN, p_date:$('s_date').value});
