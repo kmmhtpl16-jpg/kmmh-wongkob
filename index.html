@@ -2004,12 +2004,22 @@ function buildSheetDoc(d, r){
   const outRows = !outs.length ? '<tr><td colspan="6" class="c dim">— ไม่มีรายการ —</td></tr>'
     : outs.map((o,i)=>{
         const kind = o.frame_kind==='window' ? 'วงกบหน้าต่าง' : o.frame_kind==='door' ? 'วงกบประตู' : '';
-        const size = (o.width_cm&&o.height_cm) ? nf(o.width_cm)+'×'+nf(o.height_cm)+' ซม.' : '';
+        const nm = (o.item_name||'').trim();
+        /* 🔑 width_cm ในใบผลิต = ริมในทั้งวง (รวมเสากั้นกลาง) → ต้องหักเสาก่อนหารเป็น "ช่องละ"
+           และถ้ามีชื่อรายการอยู่แล้ว ไม่ต้องเขียนขนาดซ้ำ (ชื่อรายการบอกครบแล้ว) */
+        const ch = Math.max(1, Math.round(Number(o.channels)||1));
+        const mu = frRules().mu;
+        const w = Number(o.width_cm)||0, h = Number(o.height_cm)||0;
+        const perW = (w>0 && ch>1) ? Math.round(((w-(ch-1)*mu)/ch)*10)/10 : w;
+        const sizeTxt = (w>0&&h>0)
+          ? (ch>1 ? ch+' ช่อง · ช่องละ '+nf(perW)+'×'+nf(h)+' ซม.' : nf(w)+'×'+nf(h)+' ซม.') : '';
         const lt = Number(o.light_top_count)||0, ls = Number(o.light_side_count)||0;
-        const extra = (o.channels?' · '+o.channels+' ช่อง':'')+(lt?' · แสงบน '+lt:'')+(ls?' · แสงข้าง '+ls:'');
+        const lightTxt = (lt?' · ช่องแสงบน '+lt:'')+(ls?' · ช่องแสงข้าง '+ls:'');
+        const main = nm || ((kind||'วงกบ')+(sizeTxt?' '+sizeTxt:''));
+        const sub  = lightTxt.replace(/^ · /,'');      /* เหลือแค่ช่องแสง ไม่เขียนขนาดซ้ำ */
         return '<tr>'+
           '<td class="c">'+(i+1)+'</td>'+
-          '<td>'+esc(o.item_name||kind||'วงกบ')+'<div class="sub">'+esc((kind&&o.item_name?kind+' · ':'')+size+extra)+'</div></td>'+
+          '<td>'+esc(main)+(sub ? '<div class="sub">'+esc(sub)+'</div>' : '')+'</td>'+
           '<td class="r">'+nf(o.qty)+'</td>'+
           '<td class="c">'+(o.job_no||'')+'</td>'+
           '<td class="r">'+(o.manual_labour!=null&&o.manual_labour!==''?nf(o.manual_labour):'—')+'</td>'+
