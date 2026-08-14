@@ -919,7 +919,18 @@ function frameSvg(o){
   const oW = Number(o.outerW)||0, oH = Number(o.outerH)||0;
   let dimS='';
   // 🚪 ขนาดบาน = ช่องเปิดริมใน — ลูกค้าสั่งมาแล้ว ยึดเสมอ
-  if(lW>0) dimS += dimH(mainX0, mainX1, (o.hasTop ? bodyY0 : iy0) + 12, nf(lW)+' FIX', C_FIX, 11);
+  if(lW>0){
+    const dimY = (o.hasTop ? bodyY0 : iy0) + 12;
+    if(o.ch > 1){
+      /* 🔑 ช่องกรอกเป็นความกว้าง "รวมทุกบาน" → บนรูปต้องติดเลขต่อ 1 ช่อง ไม่งั้นอ่านผิดว่าช่องละ 120 */
+      for(let k=0;k<o.ch;k++){
+        const a = mainX0 + k*(cellW+t);
+        dimS += dimH(a, a+cellW, dimY, nf(lW/o.ch)+' FIX', C_FIX, 10);
+      }
+    } else {
+      dimS += dimH(mainX0, mainX1, dimY, nf(lW)+' FIX', C_FIX, 11);
+    }
+  }
   if(lH>0) dimS += dimV(bodyY0, iy1, mainX0 + 12, nf(lH)+' FIX', C_FIX, 11);
   /* ช่องปูน (ริมนอก) — วาดเฉพาะตอนลูกค้าฟิกซ์มาเท่านั้น
      ถ้าเป็นขนาดที่ระบบคิดให้ ไม่ต้องขึ้นบนรูป (เลขนอกกรอบทำให้สับสนกับขนาดที่ต้องยึด) */
@@ -975,7 +986,10 @@ function lightSummary(o){
 function leafSummary(o){
   const inst = o.inst==='slide' ? 'บานเลื่อนสไลด์ — <b>วงกบไม่บังใบ</b>' : 'บังใบใส่บานพับ — วงกบบังใบ';
   const sz = (o.leafW>0 && o.leafH>0)
-    ? 'บาน/ช่องเปิด <b>'+nf(o.leafW)+'×'+nf(o.leafH)+' ซม.</b>'+(o.leaves>1?' (รวม '+o.leaves+' บาน)':'')
+    ? (o.ch>1
+        ? 'ช่องเปิด <b>ช่องละ '+nf(o.leafW/o.ch)+'×'+nf(o.leafH)+' ซม.</b> × '+o.ch+' ช่อง'+
+          ' <span class="dim">(กว้างรวม '+nf(o.leafW)+' ซม.)</span>'
+        : 'บาน/ช่องเปิด <b>'+nf(o.leafW)+'×'+nf(o.leafH)+' ซม.</b>'+(o.leaves>1?' (รวม '+o.leaves+' บาน)':''))
     : '<span style="color:#8a5b00">ยังไม่ได้ระบุขนาดบาน</span>';
   return '<div style="margin-top:3px">🚪 '+sz+' · '+inst+'</div>';
 }
@@ -1446,8 +1460,13 @@ function itemDetailHtml(l){
           (g.leaves>1 && g.ch===1 ? ' <span class="dimb">(ไม่มีเสากั้นกลาง)</span>' : '')+'</div>';
   /* 🚪 บาน = ตัวตั้งต้น ลูกค้าสั่งมาแล้ว ยึดเสมอ */
   if(g.leafW>0 && g.leafH>0)
-    h += '<div class="t2">– บาน / ช่องเปิด <b>'+nf(g.leafW)+'×'+nf(g.leafH)+' ซม.</b>'+
-         (g.leaves>1?' (รวม '+g.leaves+' บาน)':'')+' <span class="fix sm">FIX</span>'+
+    h += '<div class="t2">– '+
+         (g.ch>1
+           ? 'ช่องเปิด <b>ช่องละ '+nf(g.leafW/g.ch)+'×'+nf(g.leafH)+' ซม.</b> × '+g.ch+' ช่อง'+
+             ' <span class="dimb">(กว้างรวม '+nf(g.leafW)+' ซม.)</span>'
+           : 'บาน / ช่องเปิด <b>'+nf(g.leafW)+'×'+nf(g.leafH)+' ซม.</b>'+
+             (g.leaves>1?' (รวม '+g.leaves+' บาน)':''))+
+         ' <span class="fix sm">FIX</span>'+
          (instTxt?'<br><span style="margin-left:10px">'+esc(instTxt)+'</span>':'')+'</div>';
   else if(instTxt) h += '<div class="t2">– '+esc(instTxt)+'</div>';
   if(g.hasTop || g.hasSide){
