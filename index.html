@@ -329,6 +329,17 @@ th{font-size:12px;color:var(--dim);font-weight:600}
     <!-- ============ หน้าเจ้าของ ============ -->
     <section id="pg-admin" class="pg hide">
       <div class="card">
+        <h2>สรุปต้นทุนจริง — ค่าไม้ + ค่าแรง</h2>
+        <div class="row">
+          <div><label>ตั้งแต่เดือน</label><input id="c_from" type="month"></div>
+          <div><label>ถึงเดือน</label><input id="c_to" type="month"></div>
+          <div style="flex:0 0 auto;align-self:flex-end"><button class="btn" onclick="loadCost()">ดู</button></div>
+        </div>
+        <div class="footnote">ต้นทุนจริงจากใบตัด/ผลิต · ค่าไม้คิดทั้งท่อนรวมเศษ · ไม้เหลือมูลค่า 0 (งานหน้าหยิบไปใช้ฟรี)</div>
+      </div>
+      <div id="c_out"></div>
+
+      <div class="card">
         <h2>เทียบค่าแรงที่คำนวณ กับเงินสดย่อย (5211-20)</h2>
         <div class="row">
           <div><label>ตั้งแต่</label><input id="r_from" type="date"></div>
@@ -2210,7 +2221,7 @@ function addOut(d){
      '<div style="flex:0 1 80px"><label>งานที่</label><input class="o_job" type="number" min="1" value="'+(d.job_no||1)+'"></div>'+
    '</div>'+
    '<div class="row" style="margin-top:8px"><div><label>ค่าแรงที่ช่างเขียนบนใบ (เฉพาะงานที่ไม่มีสูตร)</label>'+
-     '<input class="o_man" type="number" step="1" value="'+(d.manual_labour!=null?d.manual_labour:'')+'" placeholder="ว่างไว้ = ใช้สูตร"></div></div>'+
+     '<input class="o_man" type="number" min="0" step="1" value="'+(d.manual_labour!=null?d.manual_labour:'')+'" placeholder="ว่างไว้ = ใช้สูตร"></div></div>'+
    '</div>');
   syncOutLight(document.getElementById(i));
 }
@@ -2343,6 +2354,18 @@ async function saveSheet(){
     return;
   }
   [...document.querySelectorAll('.outrow')].forEach(b=> b.style.boxShadow = '');
+
+  /* 🚫 ค่าแรงติดลบ = สูตรถูกทับด้วยค่าผิด แล้วค่าไม้จะปันลงวงกบไม่ได้ */
+  const negLab = [...document.querySelectorAll('.outrow')].filter(b=>{
+    const v = b.querySelector('.o_man').value;
+    return v !== '' && Number(v) < 0;
+  });
+  if(negLab.length){
+    negLab.forEach(b=> b.style.boxShadow = '0 0 0 2px var(--bad)');
+    say('s_msg','ช่อง “ค่าแรงที่ช่างเขียนบนใบ” ใส่ค่าติดลบไม่ได้ — ถ้างานนี้ใช้สูตรค่าแรงปกติ ให้ '
+        + '<b>เว้นว่างไว้</b> อย่าใส่ -1', 'err', true);
+    return;
+  }
 
   /* ⚠️ ใบสั่งผลิตที่ดึงมาจะถูกตีเป็น "ผลิตแล้ว" ทั้งใบ — ต้องให้ยืนยันก่อนเสมอ */
   if(PULLED.length){
@@ -2568,9 +2591,121 @@ async function ackRecon(d,on){
   if(r.ok) loadRecon();
 }
 
+/* ================= สรุปต้นทุนรายเดือน (หน้าเจ้าของ) ================= */
+const TH_MON = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+function ymText(ym){
+  const y = Number(String(ym).slice(0,4)), m = Number(String(ym).slice(5,7));
+  if(!y || !m) return String(ym||'');
+  return TH_MON[m-1]+' '+(y+543);
+}
+function monthStart(ym){ return ym+'-01'; }
+function monthEnd(ym){
+  const y = Number(ym.slice(0,4)), m = Number(ym.slice(5,7));
+  const last = new Date(Date.UTC(y, m, 0)).getUTCDate();   // วันสุดท้ายของเดือนนั้น
+  return ym+'-'+String(last).padStart(2,'0');
+}
+function initCost(){
+  if($('c_to').value) return;                              // ผู้ใช้เลือกไว้แล้ว ไม่ทับ
+  const t = today().slice(0,7);
+  $('c_to').value = t;
+  const y = Number(t.slice(0,4)), m = Number(t.slice(5,7));
+  const d = new Date(Date.UTC(y, m-6, 1));                 // ย้อนหลัง 6 เดือน
+  $('c_from').value = d.toISOString().slice(0,7);
+  loadCost();
+}
+async function loadCost(){
+  const f = $('c_from').value, t = $('c_to').value;
+  if(!f || !t){ $('c_out').innerHTML = '<div class="card"><div class="msg err">เลือกเดือนให้ครบก่อน</div></div>'; return; }
+  if(f > t){ $('c_out').innerHTML = '<div class="card"><div class="msg err">เดือนเริ่มต้องไม่เกินเดือนสิ้นสุด</div></div>'; return; }
+  $('c_out').innerHTML = '<div class="card"><div class="dim">กำลังคำนวณ…</div></div>';
+  const r = await rpc('fr_cost_summary',{p_pin:PIN, p_from:monthStart(f), p_to:monthEnd(t)});
+  if(!r.ok){ $('c_out').innerHTML = '<div class="card"><div class="msg err">'+esc(r.error)+'</div></div>'; return; }
+  renderCost(r);
+}
+function renderCost(r){
+  const months = r.months||[], items = r.items||[], g = r.grand||{};
+  let h = '<div class="card">';
+
+  if(!months.length){
+    h += '<div class="msg warn">ยังไม่มีใบตัด/ผลิตในช่วงเดือนที่เลือก</div></div>';
+    $('c_out').innerHTML = h; return;
+  }
+
+  if(r.has_placeholder) h += '<div class="msg warn">⚠️ ยังมีราคาไม้ที่เป็นราคาสมมุติ ตัวเลขนี้ยังเชื่อไม่ได้</div>';
+  (r.warnings||[]).forEach(w => h += '<div class="msg err">'+esc(w)+'</div>');
+
+  /* ---- ตารางรายเดือน ---- */
+  h += '<h2>ต้นทุนรายเดือน</h2><div style="overflow-x:auto"><table>'+
+       '<tr><th>เดือน</th><th class="num">ค่าไม้</th><th class="num">ค่าแรง</th>'+
+       '<th class="num">รวม</th><th class="num">จำนวนวง</th><th class="num">ทุนเฉลี่ย/วง</th></tr>';
+  months.forEach(m=>{
+    h += '<tr><td>'+esc(ymText(m.ym))+'<div class="dim" style="font-size:11px">'+nf(m.sheets)+' ใบ</div></td>'+
+         '<td class="num">'+nf(m.wood)+'</td>'+
+         '<td class="num">'+nf(m.labour)+'</td>'+
+         '<td class="num"><b>'+nf(m.total)+'</b></td>'+
+         '<td class="num">'+nf(m.units)+'</td>'+
+         '<td class="num">'+(m.avg_unit==null?'—':nf(m.avg_unit))+'</td></tr>';
+  });
+  if(months.length > 1){
+    h += '<tr style="background:#f7f9fb"><td><b>รวมทุกเดือน</b></td>'+
+         '<td class="num"><b>'+nf(g.wood)+'</b></td>'+
+         '<td class="num"><b>'+nf(g.labour)+'</b></td>'+
+         '<td class="num"><b>'+nf(g.total)+'</b></td>'+
+         '<td class="num"><b>'+nf(g.units)+'</b></td>'+
+         '<td class="num"><b>'+(g.avg_unit==null?'—':nf(g.avg_unit))+'</b></td></tr>';
+  }
+  h += '</table></div>';
+
+  /* ---- สัดส่วนค่าไม้ : ค่าแรง ---- */
+  const tot = Number(g.total)||0;
+  if(tot > 0){
+    const pw = Math.max(0, Math.min(100, Number(g.wood)/tot*100));
+    h += '<div style="margin-top:12px"><div class="dim">สัดส่วนต้นทุน — ค่าไม้ '+nf(Math.round(pw))+'% · ค่าแรง '+nf(Math.round(100-pw))+'%</div>'+
+         '<div style="display:flex;height:14px;border-radius:999px;overflow:hidden;margin-top:5px;border:1px solid var(--line)">'+
+         '<div style="width:'+pw+'%;background:var(--brand)"></div>'+
+         '<div style="flex:1;background:#c9a882"></div></div></div>';
+  }
+
+  /* ---- แยกตามแบบวงกบ ---- */
+  h += '<h2 style="margin-top:16px">ต้นทุนจริงต่อวง — แยกตามแบบวงกบ</h2>';
+  if(!items.length){
+    h += '<div class="dim">ยังไม่มีรายการผลิตที่ปันต้นทุนได้ในช่วงนี้</div>';
+  }else{
+    let curYm = '';
+    h += '<div style="overflow-x:auto"><table>';
+    items.forEach(it=>{
+      if(it.ym !== curYm){
+        curYm = it.ym;
+        h += '<tr style="background:#f7f9fb"><td colspan="6"><b>'+esc(ymText(curYm))+'</b></td></tr>'+
+             '<tr><th>แบบ / ขนาด</th><th class="num">จำนวน</th><th class="num">ค่าไม้</th>'+
+             '<th class="num">ค่าแรง</th><th class="num">รวม</th><th class="num">ทุน/วง</th></tr>';
+      }
+      const size = (it.width_cm && it.height_cm) ? nf(it.width_cm)+'×'+nf(it.height_cm)+' ซม.' : '';
+      const nm = (it.item_name||'').trim() || ('แบบ '+(it.pattern_code||'—'));
+      h += '<tr><td>'+esc(nm)+(size?'<div class="dim" style="font-size:11px">'+esc(size)+'</div>':'')+'</td>'+
+           '<td class="num">'+nf(it.qty)+'</td>'+
+           '<td class="num">'+nf(it.wood)+'</td>'+
+           '<td class="num">'+nf(it.labour)+'</td>'+
+           '<td class="num">'+nf(it.total)+'</td>'+
+           '<td class="num"><b>'+(it.avg_unit==null?'—':nf(it.avg_unit))+'</b></td></tr>';
+    });
+    h += '</table></div>';
+  }
+
+  if(Number(g.unalloc)){
+    h += '<div class="msg warn" style="margin-top:10px">ต้นทุน '+nf(g.unalloc)+
+         ' บาท ยังปันลงวงกบไม่ได้ จึงไม่ปรากฏในตารางแยกตามแบบ — ยอดรวมด้านบนนับไว้ครบแล้ว</div>';
+  }
+  h += '<div class="footnote">ค่าไม้ปันตามสัดส่วนค่าแรงภายใน “งานที่” เดียวกัน (กติกาเดียวกับต้นทุนรายวันในหน้าใบตัด) · '+
+       'ตัวเลขนี้เป็นต้นทุนจริง ยังไม่รวมค่าใช้จ่ายอื่นของร้าน</div>';
+  h += '</div>';
+  $('c_out').innerHTML = h;
+}
+
 /* ================= ตั้งค่า ================= */
 async function initAdmin(){
   initRecon();
+  initCost();
   const r = await rpc('fr_admin_data',{p_pin:PIN});
   if(!r.ok){ say('a_msg', r.error); return; }
   AD = r;
