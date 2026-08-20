@@ -246,6 +246,7 @@ th{font-size:12px;color:var(--dim);font-weight:600}
       <div id="j_list"></div>
       <div class="card noprint">
         <button class="btn" style="width:100%" onclick="pullJobs()">⬇️ ดึงงานที่เลือกเข้าใบสรุปรายการผลิตวงกบ</button>
+        <button class="btn sec" id="btnJobPrint" style="width:100%;margin-top:8px" onclick="printJobOrders()">🖨️ พิมพ์ใบสั่งงานช่าง (งานที่เลือก)</button>
         <button class="btn sec" style="width:100%;margin-top:8px" onclick="markProduced()">✅ ทำเครื่องหมายว่าผลิตเสร็จแล้ว (ใส่วันที่)</button>
         <button class="btn sec" style="width:100%;margin-top:8px" onclick="markJobs('waiting')">↩︎ ย้อนกลับเป็นรอผลิต</button>
       </div>
@@ -1694,7 +1695,10 @@ async function sendToJobs(){
   say('q_saved','บันทึกใบ '+q.quote_no+' และส่งเข้ารายการผลิตแล้ว เลขงาน '+j.job_no,'ok');
   QPHOTOS=[]; renderPhotos();
 }
-function initJobs(){ loadJobs(); }
+function initJobs(){
+  const b = $('btnJobPrint'); if(b) b.classList.toggle('hide', ROLE==='sales');
+  loadJobs();
+}
 async function loadJobs(){
   const showDel = !!($('j_showdel') && $('j_showdel').checked);
   const r = await rpc('fr_job_list',{p_pin:PIN, p_status:$('j_filter').value||null, p_show_deleted:showDel});
@@ -1729,6 +1733,146 @@ async function loadJobs(){
           '</div>'+
           '</div></div></div>';
       }).join('');
+}
+/* ================= 🖨️ ใบสั่งงานช่าง =================
+   กติกาที่เคาะไว้: โชว์ค่าแรงต่อวง + ยอดรวม · ห้ามมีราคาขาย ห้ามมีค่าไม้ · ไม่มีช่องเซ็น
+   หลายงานพร้อมกัน = ใบคุมรวมหน้าแรก + แยกใบตามเลขที่ ใส่ "แผ่นที่ x จาก y" */
+function jobLabourSum(j){
+  var sets=0, baht=0, unknown=false;
+  (j.items||[]).forEach(function(l){
+    var q = Number(l.qty)||0, lab = (l.labour_per_set==null? null : Number(l.labour_per_set));
+    sets += q;
+    if(lab==null) unknown = true; else baht += q*lab;
+  });
+  return {sets:sets, baht:baht, unknown:unknown};
+}
+function jobOrderCss(){
+  return '@page{size:A4;margin:12mm 10mm}'+
+  'body{font-family:"Noto Sans Thai","Sarabun","Segoe UI",system-ui,sans-serif;color:#1f2933;font-size:14px;margin:0}'+
+  '.sheet{page-break-after:always}.sheet:last-child{page-break-after:auto}'+
+  '.hd{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid #8a5a2b;padding-bottom:8px}'+
+  '.hd h1{font-size:22px;margin:0;color:#6d451f}.hd .rt{text-align:right;font-size:13px}'+
+  '.jbbox{border:2.5px solid #6d451f;border-radius:8px;padding:7px 14px;margin-bottom:6px;'+
+    'min-width:230px;text-align:left;background:#fdfaf6}'+
+  '.jblab{font-size:12px;color:#6b7785;margin-bottom:2px}'+
+  '.jbno{font-size:22px;font-weight:700;color:#6d451f;letter-spacing:.5px;white-space:nowrap}'+
+  '.pageno{font-size:13px;font-weight:700;color:#6d451f}'+
+  '.meta{display:flex;gap:20px;flex-wrap:wrap;margin:10px 0 6px;font-size:14px;align-items:center}'+
+  '.tag{display:inline-block;border:1px solid #8a5a2b;color:#6d451f;border-radius:6px;padding:2px 10px;font-weight:600}'+
+  'table{width:100%;border-collapse:collapse;margin-top:8px;table-layout:fixed}'+
+  'th,td{border:1px solid #c9ced6;padding:8px 9px;vertical-align:top}'+
+  'th{background:#f4f0ea;font-size:13px;text-align:center;vertical-align:middle}'+
+  'td.c{text-align:center;vertical-align:middle}'+
+  'td.r{text-align:right;vertical-align:middle;font-variant-numeric:tabular-nums}'+
+  'td.pic{text-align:center;vertical-align:middle}td.pic svg{height:118px;width:auto;max-width:100%}'+
+  'td.nm{font-size:14px;line-height:1.7}'+
+  '.t1{font-weight:700;color:#4a2f14}.t1.sp{margin-top:7px}.t2{padding-left:12px}'+
+  '.t3{padding-left:12px;margin-top:5px;color:#6b7785;font-size:13px}'+
+  '.fix{display:inline-block;border:1.5px solid #d64545;color:#c02626;background:#fff2f2;'+
+    'border-radius:5px;padding:0 7px;font-size:12px;font-weight:700;white-space:nowrap}'+
+  '.fix.sm{font-size:11px;padding:0 6px}'+
+  '.flex{display:inline-block;border:1px dashed #8a5b00;color:#8a5b00;background:#fff8ec;'+
+    'border-radius:5px;padding:0 7px;font-size:11px;font-weight:600;white-space:nowrap}'+
+  '.dimb{font-weight:400;color:#6b7785;font-size:12px}'+
+  'tr.tot td{background:#f4f0ea;font-weight:700;font-size:15px}'+
+  '.qty{font-size:19px;font-weight:700}'+
+  '.note{margin-top:10px;font-size:12px;color:#6b7785}';
+}
+function jobOrderHead(title, sub, boxLab, boxNo, right, pageIdx, pages){
+  return '<div class="hd"><div><h1>'+title+'</h1><div>'+sub+'</div></div>'+
+    '<div class="rt"><div class="jbbox"><div class="jblab">'+boxLab+'</div>'+
+    '<div class="jbno">'+esc(boxNo)+'</div></div>'+right+
+    '<div class="pageno">แผ่นที่ '+pageIdx+' จาก '+pages+'</div></div></div>';
+}
+function buildJobOrderDoc(jobs){
+  var pages = jobs.length + (jobs.length>1 ? 1 : 0);
+  var tot = {sets:0, baht:0, unknown:false};
+  jobs.forEach(function(j){ var s=jobLabourSum(j);
+    tot.sets+=s.sets; tot.baht+=s.baht; if(s.unknown) tot.unknown=true; });
+  var cover = '';
+  if(jobs.length>1){
+    cover = '<div class="sheet">'+
+      jobOrderHead('ใบคุมงานช่าง (สรุปทั้งชุด)','ร้านกิจมั่งมีโฮม · วงกบไม้',
+        'จำนวนใบสั่งงานในชุดนี้', jobs.length+' งาน',
+        '<div>วันที่พิมพ์ '+thaiDate(today())+'</div>', 1, pages)+
+      '<div class="meta"><div><span class="tag">ให้ช่างเก็บใบนี้ไว้หน้าสุด</span></div></div>'+
+      '<table><colgroup><col style="width:36px"><col style="width:150px"><col>'+
+      '<col style="width:96px"><col style="width:118px"><col style="width:78px"></colgroup>'+
+      '<tr><th>#</th><th>เลขที่ใบสั่งงาน</th><th>งาน / ปลายทาง</th><th>จำนวน (วง)</th>'+
+      '<th>ค่าแรงรวม (บาท)</th><th>แผ่นที่</th></tr>'+
+      jobs.map(function(j,i){ var s=jobLabourSum(j);
+        return '<tr><td class="c">'+(i+1)+'</td>'+
+          '<td class="c"><b>'+esc(j.job_no||'')+'</b><div class="dimb">'+
+            esc(thaiDate(j.job_date||(j.created_at||'').slice(0,10)))+'</div></td>'+
+          '<td>'+esc(j.customer_name||'—')+'</td>'+
+          '<td class="c qty">'+nf(s.sets)+'</td>'+
+          '<td class="r">'+(s.unknown?'—':nf(s.baht))+'</td>'+
+          '<td class="c">'+(i+2)+'</td></tr>'; }).join('')+
+      '<tr class="tot"><td class="c" colspan="3">รวมทั้งชุด</td>'+
+      '<td class="c">'+nf(tot.sets)+' วง</td>'+
+      '<td class="r">'+(tot.unknown?'—':nf(tot.baht))+'</td><td></td></tr></table>'+
+      '<div class="note">• ใบนี้มีไว้กันใบสั่งงานหาย — ช่างนับได้ว่าได้รับครบกี่ใบ<br>'+
+      '• ยอดค่าแรงคิดจากจำนวนวงที่สั่ง ถ้าทำไม่ครบ ธุรการจะแก้เป็นจำนวนวงที่ทำได้จริงตอนตั้งเบิก</div>'+
+      '</div>';
+  }
+  var sheets = jobs.map(function(j, ji){
+    var s = jobLabourSum(j);
+    var rows = (j.items||[]).map(function(l,i){
+      var lab = (l.labour_per_set==null? null : Number(l.labour_per_set)), q = Number(l.qty)||0;
+      return '<tr><td class="c">'+(i+1)+'</td>'+
+        '<td class="nm">'+itemDetailHtml(l)+'</td>'+
+        '<td class="pic">'+frameSvg(lineGeom(l))+'</td>'+
+        '<td class="c qty">'+nf(q)+'</td>'+
+        '<td class="r">'+(lab==null?'—':nf(lab))+'</td>'+
+        '<td class="r">'+(lab==null?'—':nf(q*lab))+'</td></tr>';
+    }).join('');
+    return '<div class="sheet">'+
+      jobOrderHead('ใบสั่งงานช่าง','ร้านกิจมั่งมีโฮม · วงกบไม้','เลขที่ใบสั่งงาน', j.job_no||'',
+        '<div>วันที่สั่งผลิต '+esc(thaiDate(j.job_date||(j.created_at||'').slice(0,10)))+'</div>',
+        ji+1+(jobs.length>1?1:0), pages)+
+      '<div class="meta"><div>งาน / ปลายทาง: <b>'+esc(j.customer_name||'—')+'</b></div></div>'+
+      '<table><colgroup><col style="width:30px"><col><col style="width:150px">'+
+      '<col style="width:74px"><col style="width:92px"><col style="width:100px"></colgroup>'+
+      '<tr><th>#</th><th>รายละเอียดวงกบ</th><th>รูป</th><th>จำนวน<br>(วง)</th>'+
+      '<th>ค่าแรง/วง</th><th>รวมค่าแรง</th></tr>'+ rows +
+      '<tr class="tot"><td class="c" colspan="3">รวมใบนี้</td>'+
+      '<td class="c">'+nf(s.sets)+' วง</td><td></td>'+
+      '<td class="r">'+(s.unknown?'—':nf(s.baht))+'</td></tr></table>'+
+      '<div class="note">• <b style="color:#c02626">ตัวเลขที่มีป้าย FIX คือขนาดที่ยึดตอนทำจริง</b> · '+
+      '<b>ริมนอก (ช่องปูน)</b> = ช่องที่ก่อไว้สำหรับวางวงกบทั้งวง · '+
+      '<b>ริมใน</b> = ช่องใส่บานประตู/หน้าต่าง<br>'+
+      '• รูปเป็นภาพประกอบแบบวงกบ ไม่ใช่สัดส่วนจริง<br>'+
+      '• ค่าแรงในใบนี้คิดจากจำนวนวงที่สั่ง — ทำได้ไม่ครบให้แจ้งธุรการ '+
+      'ระบบจะคิดตามจำนวนวงที่ทำได้จริง</div></div>';
+  }).join('');
+  var title = 'ใบสั่งงานช่าง ' + jobs.map(function(j){return j.job_no||'';}).join(' ');
+  return '<!DOCTYPE html><html lang="th"><head><meta charset="utf-8">'+
+    '<title>'+esc(title)+'</title><style>'+jobOrderCss()+'</style></head><body>'+
+    cover+sheets+
+    '<scr'+'ipt>window.onload=function(){setTimeout(function(){window.print()},300)}<\/scr'+'ipt>'+
+    '</body></html>';
+}
+/* 🔑 รูปวงกบต้องรู้ว่าแบบนั้นมีช่องแสงไหม (LK.patterns) — ถ้าเข้าแท็บนี้ตรง ๆ LK ยังว่าง
+   ไม่โหลดก่อน รูปงานที่มีช่องแสงจะวาดออกมาเป็นแบบไม่มีช่องแสงเงียบ ๆ */
+async function ensureLookup(){
+  if(LK && LK.patterns && LK.patterns.length) return true;
+  const r = await rpc('fr_quote_lookup',{p_pin:PIN});
+  if(r && r.ok){ LK = r; return true; }
+  return false;
+}
+async function printJobOrders(){
+  var w = window.open('', '_blank');          /* เปิดหน้าต่างทันทีที่กด (กัน iOS บล็อก) */
+  var sel = selectedJobs().filter(function(j){ return !j.deleted_at; });
+  if(!sel.length){ if(w) w.close(); say('j_msg','ยังไม่ได้เลือกงาน — ติ๊กงานที่จะพิมพ์ก่อน'); return; }
+  if(w) w.document.write('<div style="font-family:sans-serif;padding:40px;font-size:18px">กำลังเตรียมใบสั่งงาน…</div>');
+  if(!(await ensureLookup())){ if(w) w.close();
+    say('j_msg','โหลดข้อมูลแบบวงกบไม่สำเร็จ — เช็คสัญญาณแล้วลองใหม่'); return; }
+  var noItem = sel.filter(function(j){ return !(j.items||[]).length; });
+  if(noItem.length){ if(w) w.close();
+    say('j_msg','งาน '+noItem.map(function(j){return j.job_no;}).join(', ')+' ไม่มีรายการในเอกสาร พิมพ์ไม่ได้'); return; }
+  if(sel.some(function(j){ return jobLabourSum(j).unknown; }))
+    say('j_msg','มีรายการที่ยังไม่มีค่าแรงต่อวง — ช่องค่าแรงในใบจะขึ้นเป็น “—” ให้ตรวจแบบวงกบของรายการนั้น');
+  openPrintDoc(w, buildJobOrderDoc(sel));
 }
 /* ✅ ผลิตเสร็จแล้ว — บังคับใส่วันที่ผลิตเสร็จเสมอ */
 async function markProduced(){
