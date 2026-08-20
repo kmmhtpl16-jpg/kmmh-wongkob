@@ -146,6 +146,7 @@ th{font-size:12px;color:var(--dim);font-weight:600}
 <div class="wrap">
     <nav id="nav"></nav>
     <div id="phWarn"></div>
+    <div id="labWarn"></div>
 
     <!-- ============ เสนอราคา ============ -->
     <section id="pg-quote" class="pg hide">
@@ -347,7 +348,8 @@ th{font-size:12px;color:var(--dim);font-weight:600}
           <div><label>ถึง</label><input id="r_to" type="date"></div>
           <div style="flex:0 0 auto;align-self:flex-end"><button class="btn" onclick="loadRecon()">ดู</button></div>
         </div>
-        <div class="footnote">คนลงข้อมูลกับคนจ่ายทำงานแยกกัน ระบบเทียบทีหลัง — คนจ่ายไม่เห็นยอดที่ระบบคำนวณ</div>
+        <div class="footnote">คนลงข้อมูลกับคนจ่ายทำงานแยกกัน ระบบเทียบทีหลัง — คนจ่ายไม่เห็นยอดที่ระบบคำนวณ<br>
+        ข้างล่างตารางนี้จะมี <b>บิลค่าแรงที่ธุรการจ่ายไม่ครบ พร้อมเหตุผลที่ใส่ไว้</b> ให้ตรวจทีละรายการ</div>
       </div>
       <div id="r_out"></div>
 
@@ -501,13 +503,14 @@ async function doLogin(){
   $('login').classList.add('hide'); $('app').classList.remove('hide');
   $('whoami').textContent = {owner:'เจ้าของ',entry:'คนลงข้อมูล',sales:'พนักงานขาย'}[ROLE]||'';
   buildNav();
+  if(ROLE==='owner') checkLabourShort();   /* เฟส 3: เตือนบิลค่าแรงที่จ่ายไม่ครบ */
 }
 /* ล้างทุกอย่างที่ค้างบนจอ — กันคนถัดไปเห็นตัวเลขของคนก่อน (เช่น ต้นทุนของเจ้าของ) */
 function wipeScreen(){
   PIN=''; ROLE=''; LK={}; SH={}; AD={}; KS={}; LAST_Q=null; qLoaded=false;
   SUG=[]; PULLED=[]; JOBS=[]; QPHOTOS=[]; SJOB={};
   ['q_items','q_table','q_stock','q_msg','q_saved','s_cuts','s_outs','s_lefts','s_sug','s_cost','s_msg',
-   'k_rows','k_moves','k_recv','k_msg','k_open','j_list','j_msg','s_jobs','q_back','q_photos','ql_rows','ql_msg','r_out','a_wood','a_lab','a_mar','a_msg','phWarn','nav','s_hist','s_lock','j_delcount','ql_delcount']
+   'k_rows','k_moves','k_recv','k_msg','k_open','j_list','j_msg','s_jobs','q_back','q_photos','ql_rows','ql_msg','r_out','a_wood','a_lab','a_mar','a_msg','phWarn','nav','s_hist','s_lock','j_delcount','ql_delcount','labWarn']
    .forEach(id=>{ const e=$(id); if(e) e.innerHTML=''; });
   $('q_result').classList.add('hide');
   ['q_cust','s_gs','s_gr','s_rec','s_cut','s_note','a_pin_sales','a_pin_entry'].forEach(id=>{ const e=$(id); if(e) e.value=''; });
@@ -2722,6 +2725,7 @@ async function loadRecon(){
            '<button class="btn sm sec" onclick="ackRecon(\''+x.work_date+'\','+(x.acked?'false':'true')+')">'+(x.acked?'ยกเลิก':'ตรวจแล้ว')+'</button>')+'</td></tr>';
   });
   h += '</table></div></div>';
+  h += shortHtml(r.short_pays||[], Number(r.short_unacked)||0);
   $('r_out').innerHTML = h;
 }
 async function ackRecon(d,on){
@@ -2733,6 +2737,70 @@ async function ackRecon(d,on){
   }
   const r = await rpc('fr_recon_ack_set',{p_pin:PIN, p_date:d, p_note:note, p_on:on});
   if(r.ok) loadRecon();
+}
+
+/* ===== เฟส 3: บิลค่าแรงที่ธุรการจ่ายไม่ครบ + เหตุผล (เจ้าของเท่านั้น) ===== */
+async function checkLabourShort(){
+  const box = $('labWarn'); if(!box) return;
+  const r = await rpc('fr_labour_short_count',{p_pin:PIN});
+  if(!r || !r.ok || !Number(r.n)){ box.innerHTML=''; return; }
+  box.innerHTML = '<div class="msg warn">🪚 มีบิลค่าแรงช่างที่ธุรการ<b>จ่ายไม่ครบ '+nf(r.n)+' รายการ</b> ยังไม่ได้ตรวจ'+
+    (Number(r.amount)>0 ? ' — ยอดที่ยังไม่ได้จ่ายรวม <b>'+nf(r.amount)+'</b> บาท' : '')+
+    ' <button class="btn sm sec noprint" style="margin-left:8px" onclick="gotoShort()">ดูรายละเอียด</button></div>';
+}
+function gotoShort(){
+  go('admin');
+  setTimeout(function(){ const e=$('r_out'); if(e) e.scrollIntoView({behavior:'smooth',block:'start'}); }, 500);
+}
+function shortHtml(rows, nUnack){
+  let h = '<div class="card"><h2>🪚 บิลค่าแรงที่จ่ายไม่ครบ — เหตุผลที่ธุรการใส่</h2>';
+  if(!rows.length) return h + '<div class="msg ok">ไม่มีบิลที่จ่ายไม่ครบในช่วงนี้</div></div>';
+  h += nUnack ? '<div class="msg warn">มี '+nf(nUnack)+' รายการที่ยังไม่ได้ตรวจ</div>'
+              : '<div class="msg ok">ตรวจครบทุกรายการแล้ว</div>';
+  h += '<div style="overflow-x:auto"><table>'+
+       '<tr><th>บิล / งาน</th><th>วันจ่าย</th><th class="num">วง สั่ง → จ่าย</th>'+
+       '<th class="num">ยอดตั้ง</th><th class="num">จ่ายแล้ว</th><th class="num">ยังไม่ได้จ่าย</th>'+
+       '<th>สถานะบิล</th><th class="noprint"></th></tr>';
+  rows.forEach(function(x){
+    const dim = x.acked ? ' style="opacity:.55"' : '';
+    const st  = (x.bill_status==='closed')
+      ? '<span class="pill bad">ปิดบิลแล้ว</span>'
+      : '<span class="pill warn">ยังเปิด รอจ่ายต่อ</span>';
+    h += '<tr'+dim+'>'+
+      '<td><b>'+esc(x.bill_no)+'</b><div class="dim">'+esc(x.job_no||'—')+
+        (x.customer_name?' · '+esc(x.customer_name):'')+'</div></td>'+
+      '<td>'+esc(x.pay_date)+'<div class="dim">'+esc(x.by_name||'')+'</div></td>'+
+      '<td class="num">'+nf(x.sets_ordered)+' → '+nf(x.bill_sets_paid)+
+        '<div class="dim">ขาด '+nf(x.short_sets)+' วง</div></td>'+
+      '<td class="num">'+nf(x.amount_expected)+'</td>'+
+      '<td class="num">'+nf(x.bill_paid)+'</td>'+
+      '<td class="num" style="color:var(--bad);font-weight:600">'+nf(x.short_amount)+'</td>'+
+      '<td>'+st+(x.acked?' <span class="pill dim">ตรวจแล้ว</span>':'')+'</td>'+
+      '<td class="noprint"><button class="btn sm sec" onclick="ackShort('+Number(x.pay_id)+','+(x.acked?'false':'true')+')">'+
+        (x.acked?'ยกเลิก':'ตรวจแล้ว')+'</button></td></tr>';
+    h += '<tr'+dim+'><td colspan="8" style="padding-top:0;border-top:0">'+
+      '<div class="dim">💬 เหตุผลที่ธุรการใส่: <b>'+esc(x.reason||'—')+'</b></div>'+
+      ((x.acked&&x.ack_note)?'<div class="dim">✅ บันทึกของเจ้าของ: '+esc(x.ack_note)+
+        (x.ack_at?' ('+esc(x.ack_at)+')':'')+'</div>':'')+
+      '</td></tr>';
+  });
+  h += '</table></div>';
+  h += '<div class="footnote">รายการขึ้นเมื่อธุรการกรอกจำนวนวงที่ทำได้จริง <b>น้อยกว่า</b> ที่เหลือในบิล — ระบบบังคับให้ใส่เหตุผลทุกครั้ง · '+
+       '“ยังเปิด รอจ่ายต่อ” = ยอดที่เหลือยังจ่ายรอบหน้าได้ · “ปิดบิลแล้ว” = ส่วนต่างจริงที่จะไม่ถูกจ่ายอีก · '+
+       '<b>รายการที่ยังไม่ได้ตรวจจะขึ้นเสมอ ไม่ว่าเลือกช่วงวันที่ไหน</b></div></div>';
+  return h;
+}
+async function ackShort(id,on){
+  let note = '';
+  if(on){
+    const ans = prompt('บันทึกสั้นๆ ว่าตรวจแล้วรับได้เพราะอะไร (เว้นว่างได้)');
+    if(ans===null) return;                 /* กดยกเลิก = ไม่ปิดเคส */
+    note = ans;
+  }
+  const r = await rpc('fr_labour_short_ack',{p_pin:PIN, p_pay_id:Number(id), p_note:note, p_on:on});
+  if(!r || !r.ok){ alert((r&&r.error)||'บันทึกไม่สำเร็จ'); return; }
+  loadRecon();
+  checkLabourShort();
 }
 
 /* ================= สรุปต้นทุนรายเดือน (หน้าเจ้าของ) ================= */
